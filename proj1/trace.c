@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
       char fname[80];                  /* name of savefile to read packet data from */
       const u_char *packet;		      /* The actual packet */
       struct pcap_pkthdr *pkt_header;  /* Packet header */
-      struct ethernetHeader *ethernet; /* The ethernet header */
+      struct ethernetHeader *ethernet = (struct ethernetHeader*) malloc(sizeof(struct ethernetHeader)); /* The ethernet header */
       int nextResult;
 
       if (argc != 2) {
@@ -51,10 +51,13 @@ int main(int argc, char **argv) {
          if (nextResult == 0) {        /* Timeout check */
             continue;
          }
-         ethernet = (struct ethernetHeader*) packet;
+         memcpy(ethernet->dest, packet, MAC_LENGTH);
+         memcpy(ethernet->source, packet[MAC_LENGTH], MAC_LENGTH);
+         memcpy(ethernet->type, packet[MAC_LENGTH * 2], 2);
+
          printEthernet(ethernet);
 
-         break;                        /* TEMP CODE - only working on ethernet for the moment */
+         break;                        /* TEMP CODE - for testing*/
       }
 
       if (nextResult == PCAP_ERROR) {  /* Check for error instead of finish */
@@ -62,6 +65,7 @@ int main(int argc, char **argv) {
          return -1;
       }
 
+      free(ethernet);                  /* Free dynamic memory */
       pcap_close(pcap);                /* Close the descriptor */
 		return 0;
 }
