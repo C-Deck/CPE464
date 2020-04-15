@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
          return -1;                    /* Bad call */
       }
 
-      strcpy(fname, argv[2]);          /* Get the filename to use */
+      strcpy(fname, argv[1]);          /* Get the filename to use */
 
       if (!(pcap = pcap_open_offline(fname, errbuf))) {
          return -1;                    /* Could not open the file */
@@ -57,7 +57,6 @@ int main(int argc, char **argv) {
          memcpy(ethernet->type, packet[MAC_LENGTH * 2], 2);
 
          printEthernet(ethernet);
-
          break;                        /* TEMP CODE - for testing*/
       }
 
