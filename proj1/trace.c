@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
          }
          memcpy(ethernet->dest, packet, MAC_LENGTH);
          memcpy(ethernet->source, packet + MAC_LENGTH, MAC_LENGTH);
-         ethernet->type = *(packet + MAC_LENGTH * 2);
+         ethernet->type = *((u_short *) (packet + MAC_LENGTH * 2));
          printf("\nPacket number: %d  Frame Len: %d\n", packetCount++, pkt_header->len);
 
          printEthernet(ethernet);
