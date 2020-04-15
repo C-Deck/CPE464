@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <pcap.h>
+#include <arpa/inet.h>
 
 #define MAC_LENGTH 6
 
@@ -33,7 +34,7 @@ int main(int argc, char **argv) {
       char fname[80];                  /* name of savefile to read packet data from */
       const u_char *packet;		      /* The actual packet */
       struct pcap_pkthdr *pkt_header;  /* Packet header */
-      const struct ethernetHeader *ethernet; /* The ethernet header */
+      struct ethernetHeader *ethernet; /* The ethernet header */
       int nextResult;
 
       if (argc != 2) {
@@ -85,6 +86,8 @@ int getType(u_short type) {
       return ARP_TYPE;
    } else if (ntohs(type) == IP_TYPE_HEX) {
       return IP_TYPE;
+   } else {
+      return -1;
    }
 }
 
