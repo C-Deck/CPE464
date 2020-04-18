@@ -80,6 +80,55 @@ void printEthernet(struct ethernetHeader *ethernet) {
    printType(ethernet->type);
 }
 
+void printIP() {
+   printf("\n\tIP Header\n");
+	printf("\t\tHeader Len: %d (bytes)\n". headerLen);
+	printf("\t\tTOS: %d\n", tos);
+	printf("\t\tTTL: %d\n", ttl);
+	printf("\t\tIP PDU Len: %d (bytes)\n", pduLength);
+	printf("\t\tProtocol: ");
+   printProtocol();
+	printf("\t\tChecksum: %s (%x)\n", goodCheck ? "Correct" : "Incorrect", checkSumVal);
+	printf("\t\tSender IP: %s\n", senderIP);
+	printf("\t\tDest IP: %s\n", destIP);
+}
+
+void printTCP() {
+   printf("\n\tTCP Header\n");
+	printf("\t\tSource Port: : %d\n", sourcePort);
+	printf("\t\tDest Port: : %d\n", destPort);
+	printf("\t\tSequence Number: %d\n", seqNum);
+	printf("\t\tACK Number: %d\n", ackNum);
+	printf("\t\tACK Flag: %s\n", ackFlag ? "Yes" : "No");
+	printf("\t\tSYN Flag: %s\n", synFlag ? "Yes" : "No");
+	printf("\t\tRST Flag: %s\n", rstFlag ? "Yes" : "No");
+	printf("\t\tFIN Flag: %s\n", finFlag ? "Yes" : "No");
+	printf("\t\tWindow Size: %d\n", windowSize);
+	printf("\t\tChecksum: %s (%x)\n", goodCheck ? "Correct" : "Incorrect", checkSumVal);
+}
+
+void printUDP() {
+   printf("\n\tUDP Header\n");
+	printf("\t\tSource Port: : %d\n", sourcePort);
+	printf("\t\tDest Port: : %d\n", destPort);
+}
+
+void printICMP() {
+   printf("\n\tICMP Header\n");
+	printf("\t\tType: Request\n");
+}
+
+void printARP() {
+   printf("\n\tARP header\n");
+	printf("\t\tOpcode: Reply");
+	printf("\t\tSender MAC: ");
+   printMAC(senderMac);
+	printf("\t\tSender IP: %s\n", senderIP);
+	printf("\t\tTarget MAC: ");
+   printMAC(targetMac);
+	printf("\t\tTarget IP: %s\n", targetIP);
+}
+
 void printType(u_short typeHex) {
    int type = getType(typeHex);
    printf("%s", type == ARP_TYPE ? "ARP\n" : "IP\n");
@@ -98,3 +147,5 @@ int getType(u_short type) {
 void printMAC(u_char *mac) {
    printf("%x:%x:%x:%x:%x:%x\n", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 }
+
+void print
