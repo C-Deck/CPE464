@@ -1,0 +1,41 @@
+./trace ArpTest.pcap > myOut
+echo Arp diff:
+diff -w -B myOut ArpTest.pcap.out
+echo
+
+./trace IP_bad_checksum.pcap > myOut
+echo IP_BAD diff:
+diff -w -B myOut IP_bad_checksum.pcap.out
+echo
+
+./trace largeMix.pcap > myOut
+echo L1 diff:
+diff -w -B myOut largeMix.pcap.out
+echo
+
+./trace largeMix2.pcap > myOut
+echo L2 diff:
+diff -w -B myOut largeMix2.pcap.out
+echo
+
+./trace PingTest.pcap > myOut
+echo Ping diff:
+diff -w -B myOut PingTest.pcap.out
+echo
+
+./trace smallTCP.pcap > myOut
+echo Small TCP diff:
+diff -w -B myOut smallTCP.pcap.out
+echo
+
+./trace TCP_bad_checksum.pcap > myOut
+echo TCP_BAD diff:
+diff -w -B myOut TCP_bad_checksum.pcap.out
+echo
+
+./trace UDPfile.pcap > myOut
+echo UDP diff:
+diff -w -B myOut UDPfile.pcap.out
+echo
+
+rm -rf myOut

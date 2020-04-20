@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
          }
          memcpy(ethernet->dest, packet, MAC_LENGTH);
          memcpy(ethernet->source, packet + MAC_LENGTH, MAC_LENGTH);
-         ethernet->type = *((u_short *) (packet + MAC_LENGTH * 2));
+         ethernet->type = *((uint16_t *) (packet + MAC_LENGTH * 2));
          printf("\nPacket number: %d  Frame Len: %d\n", packetCount++, pkt_header->len);
 
          printEthernet(ethernet);
@@ -93,8 +93,4 @@ int getType(u_short type) {
    } else {
       return -1;
    }
-}
-
-void printMAC(u_char *mac) {
-   printf("%x:%x:%x:%x:%x:%x\n", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 }
