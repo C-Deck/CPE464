@@ -1,5 +1,6 @@
 #include <arp.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -36,8 +37,9 @@ void getARP(uint8_t *packetData, int packetLength) {
 }
 
 void printARP(struct arpHeader *header) {
-   in_addr senderIP = *(struct in_addr *) &(header->SPA);
-   in_addr targetIP = *(struct in_addr *) &(header->TPA);
+   struct in_addr senderIP = *(struct in_addr *) &(header->SPA);
+   struct in_addr targetIP = *(struct in_addr *) &(header->TPA);
+
    printf("\n\tARP header\n");
 	printf("\t\tOpcode: %s\n", arp_opcodes[header->OP]);
 	printf("\t\tSender MAC: ");

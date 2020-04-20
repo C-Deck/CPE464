@@ -1,10 +1,13 @@
 #include <arpa/inet.h>
 
+#define ICMP_PROTOCOL 1
+#define TCP_PROTOCOL 6
+#define UDP_PROTOCOL 17
+
 struct ipHeader {
 	uint8_t HDR : 4;
 	uint8_t VERSION : 4;
-	uint8_t ECN : 2;
-	uint8_t DSC : 6;
+	uint8_t TOS;
 	uint16_t TL;
 	uint16_t ID;
 	uint16_t FLAGS;

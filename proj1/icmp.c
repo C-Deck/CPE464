@@ -1,6 +1,6 @@
 #include "icmp.h"
 
-void icmp() {
+void icmp(uint8_t *packetData, int packetLength) {
    //
 }
 

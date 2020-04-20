@@ -57,6 +57,8 @@ int main(int argc, char **argv) {
          printEthernet(ethernet);
          if (getType(ethernet->type) == ARP_TYPE) {
             getARP(packet + ETHERNET_FRAME_SIZE, pkt_header->len - (ETHERNET_FRAME_SIZE + ETHERNET_TRAILER_OFFSET));
+         } else if (getType(ethernet->type) == IP_TYPE) {
+            getIP(packet + ETHERNET_FRAME_SIZE, pkt_header->len - (ETHERNET_FRAME_SIZE + ETHERNET_TRAILER_OFFSET));
          }
       }
 
