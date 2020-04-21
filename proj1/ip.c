@@ -45,7 +45,7 @@ void getIP(const uint8_t *packetData, int packetLength) {
    byteAdjustment++;
 
    /* PROTOCOL */
-   header->PROTOCOL = *(packetData + byteAdjustment);
+   header->HEADER_CHECKSUM = *(packetData + byteAdjustment);
    byteAdjustment++;
 
    /* SENDER IP */
