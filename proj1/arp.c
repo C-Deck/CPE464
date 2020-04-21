@@ -8,7 +8,7 @@
 
 void getARP(const uint8_t *packetData, int packetLength) {
    /* START ADJUSTMENT BY 8 BYTES FOR HDR, PRO, HLN, PLN */
-   int byteAdjustment = 8;
+   int byteAdjustment = 6;
    struct arpHeader *header = (struct arpHeader*) malloc(sizeof(struct arpHeader));
 
    /* OPCODE */
