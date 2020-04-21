@@ -58,7 +58,7 @@ void getIP(uint8_t *packetData, int packetLength) {
 
    checksum = in_cksum((u_int16_t *)packetData, header->TL * WORD_SIZE);
    
-   printIP(header, checksum, packetLength * WORD_SIZE);
+   printIP(header, checksum);
 
    switch (header->PROTOCOL) {
       case ICMP_PROTOCOL:

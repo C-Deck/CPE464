@@ -3,6 +3,7 @@
 
 #include <arpa/inet.h>
 #define MAC_LENGTH 6
+#define IP_LENGTH 4
 
 struct arpHeader {
    uint16_t HRD;                        /* Hardware type           - 2 bytes ---- UNUSED */
