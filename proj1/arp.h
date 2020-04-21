@@ -5,6 +5,20 @@
 #define MAC_LENGTH 6
 #define IP_LENGTH 4
 
+#define ARP_REQUEST_OP 1
+#define ARP_REPLY_OP 2
+#define ARP_REV_REQUEST_OP 3
+#define ARP_REV_REPLY_OP 4
+#define ARP_INV_REQUEST_OP 8
+#define ARP_INV_REPLY_OP 9
+
+#define ARP_REQUEST "Request"
+#define ARP_REPLY "Reply"
+#define ARP_REV_REQUEST "Rev Request"
+#define ARP_REV_REPLY "Rev Reply"
+#define ARP_INV_REQUEST "INV Request"
+#define ARP_INV_REPLY "INV Reply"
+
 struct arpHeader {
    uint16_t HRD;                        /* Hardware type           - 2 bytes ---- UNUSED */
 	uint16_t PRO;                       /* Protocol Type           - 2 bytes ---- UNUSED */
