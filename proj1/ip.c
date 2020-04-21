@@ -17,7 +17,7 @@ void getIP(const uint8_t *packetData, int packetLength) {
    uint16_t checksum;
 
    /* TYPE OF SERVICE */
-   header->HDR = ntohs(*(packetData + byteAdjustment)) & 0x0f;
+   header->HDR = ntohs(*(packetData + byteAdjustment));
    byteAdjustment++;
 
    /* TYPE OF SERVICE */
