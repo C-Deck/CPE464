@@ -5,12 +5,12 @@
 #define MAC_LENGTH 6
 #define IP_LENGTH 4
 
-#define ARP_REQUEST_OP 0x01
-#define ARP_REPLY_OP 0x02
-#define ARP_REV_REQUEST_OP 0x03
-#define ARP_REV_REPLY_OP 0x04
-#define ARP_INV_REQUEST_OP 0x08
-#define ARP_INV_REPLY_OP 0x09
+#define ARP_REQUEST_OP 0x0001
+#define ARP_REPLY_OP 0x0002
+#define ARP_REV_REQUEST_OP 0x0003
+#define ARP_REV_REPLY_OP 0x0004
+#define ARP_INV_REQUEST_OP 0x0008
+#define ARP_INV_REPLY_OP 0x0009
 
 #define ARP_REQUEST "Request"
 #define ARP_REPLY "Reply"
