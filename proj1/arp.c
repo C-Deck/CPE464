@@ -12,7 +12,7 @@ void getARP(const uint8_t *packetData, int packetLength) {
    struct arpHeader *header = (struct arpHeader*) malloc(sizeof(struct arpHeader));
 
    /* OPCODE */
-   header->OP = *((uint16_t *) (packetData + byteAdjustment));
+   header->OP = ntohs(*((uint16_t *) (packetData + byteAdjustment)));
    byteAdjustment = byteAdjustment + 2;
 
    /* SENDER MAC */
