@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-void getICMP(uint8_t *packetData, int packetLength) {
+void getICMP(const uint8_t *packetData, int packetLength) {
    struct icmpHeader *header = (struct icmpHeader*) malloc(sizeof(struct icmpHeader));
 
    header->type = *(packetData);

@@ -23,7 +23,7 @@ struct ipHeader {
 	uint32_t DEST_ADDR;					/* Destination IP Address	- 4 bytes */
 } __attribute__((packed));
 
-void getIP(uint8_t *packetData, int packetLength);
+void getIP(const uint8_t *packetData, int packetLength);
 int pseudoHeader(uint8_t *pseudoHeader, struct ipHeader *header);
 void printIP(struct ipHeader *header, u_int16_t checksum);
 char *printProtocol(struct ipHeader *header);

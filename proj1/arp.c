@@ -1,13 +1,14 @@
 #include "arp.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
 const char *arp_opcodes[10] = {"Unknown", "Request", "Reply", "Rev Request", "Rev Reply", "Unknown", "Unknown", "Unknown", "INV Request", "INV Reply"};
 
-void getARP(uint8_t *packetData, int packetLength) {
+void getARP(const uint8_t *packetData, int packetLength) {
    /* START ADJUSTMENT BY 8 BYTES FOR HDR, PRO, HLN, PLN */
    int byteAdjustment = 8;
    struct arpHeader *header = (struct arpHeader*) malloc(sizeof(struct arpHeader));

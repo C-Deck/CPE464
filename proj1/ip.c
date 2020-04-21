@@ -10,7 +10,7 @@
 #include <netinet/in.h>
 
 
-void getIP(uint8_t *packetData, int packetLength) {
+void getIP(const uint8_t *packetData, int packetLength) {
    struct ipHeader *header = (struct ipHeader*) malloc(sizeof(struct ipHeader));
    uint8_t pseudo_header[1500];
    int tcp_size = 0, byteAdjustment = 0;
@@ -84,7 +84,7 @@ int pseudoHeader(uint8_t *pseudoHeader, struct ipHeader *header) {
    memcpy(pseudoHeader, &(header->SOURCE_ADDR), IP_LENGTH);
    memcpy(pseudoHeader + IP_LENGTH, &(header->DEST_ADDR), IP_LENGTH);
    pseudoHeader[9] = header->PROTOCOL;
-   memcpy(pseudoHeader + 9, header->TL, 2);
+   memcpy(pseudoHeader + 9, &(header->TL), 2);
 
    return tcp_size;
 }

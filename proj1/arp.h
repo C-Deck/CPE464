@@ -18,7 +18,7 @@ struct arpHeader {
 } __attribute__((packed));
 
 void printARP(struct arpHeader *header);
-void getARP(uint8_t *packetData, int packetLength);
+void getARP(const uint8_t *packetData, int packetLength);
 void printMAC(uint8_t *mac);
 
 #endif
