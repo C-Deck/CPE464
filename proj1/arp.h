@@ -2,7 +2,7 @@
 #define ARP_H
 
 #include <arpa/inet.h>
-#include "globalHelper.h"
+#define MAC_LENGTH 6
 
 struct arpHeader {
    uint16_t HRD;                        /* Hardware type           - 2 bytes ---- UNUSED */
@@ -18,5 +18,6 @@ struct arpHeader {
 
 void printARP(struct arpHeader *header);
 void getARP(uint8_t *packetData, int packetLength);
+void printMAC(uint8_t *mac);
 
 #endif
