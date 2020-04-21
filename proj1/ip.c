@@ -45,8 +45,8 @@ void getIP(const uint8_t *packetData, int packetLength) {
    byteAdjustment++;
 
    /* PROTOCOL */
-   header->HEADER_CHECKSUM = *(packetData + byteAdjustment);
-   byteAdjustment++;
+   header->HEADER_CHECKSUM = *((uint16_t *) (packetData + byteAdjustment));
+   byteAdjustment = byteAdjustment + 2;
 
    /* SENDER IP */
    header->SOURCE_ADDR = *((uint32_t *) (packetData + byteAdjustment));
@@ -98,7 +98,7 @@ void printIP(struct ipHeader *header, u_int16_t checksum) {
 	printf("\t\tTOS: 0x%x\n", header->TOS);
 	printf("\t\tTTL: %d\n", header->TTL);
 	printf("\t\tIP PDU Len: %d (bytes)\n", ntohs(header->TL));
-	printf("\t\tProtocol: %d %s\n", header->PROTOCOL, printProtocol(header));
+	printf("\t\tProtocol: %s\n", printProtocol(header));
 	printf("\t\tChecksum: %s (0x%x04)\n", checksum ? "Correct" : "Incorrect", header->HEADER_CHECKSUM);
 	printf("\t\tSender IP: %s\n", inet_ntoa(senderIP));
 	printf("\t\tDest IP: %s\n", inet_ntoa(destIP));
