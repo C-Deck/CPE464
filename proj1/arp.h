@@ -1,8 +1,11 @@
+#ifndef ARP_H
+#define ARP_H
+
 #include <arpa/inet.h>
 #include "globalHelper.h"
 
 struct arpHeader {
-   uint16_t HRD;                       /* Hardware type           - 2 bytes ---- UNUSED */
+   uint16_t HRD;                        /* Hardware type           - 2 bytes ---- UNUSED */
 	uint16_t PRO;                       /* Protocol Type           - 2 bytes ---- UNUSED */
 	uint8_t HLN;                        /* Hardware Address Length - 1 byte  ---- UNUSED */
 	uint8_t PLN;                        /* Protocol Address Length - 1 byte  ---- UNUSED */
@@ -12,3 +15,8 @@ struct arpHeader {
 	uint8_t THA[MAC_LENGTH];            /* Target Hardware Address - 6 bytes */
 	uint32_t TPA;                       /* Target Protocol Address - 4 bytes */
 } __attribute__((packed));
+
+void printARP(struct arpHeader *header);
+void getARP(uint8_t *packetData, int packetLength);
+
+#endif

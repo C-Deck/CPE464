@@ -1,3 +1,6 @@
+#ifndef TCP_H
+#define TCP_H
+
 #include <arpa/inet.h>
 
 struct tcpHeader{
@@ -19,3 +22,8 @@ struct tcpHeader{
 	uint16_t WINDOW;                    /* 16 bit window field specifies how many bytes the receiver is willing to receive. */
 	uint16_t CHECKSUM;                  /* 16 bits are used for a checksum to check if the TCP header is OK or not */
 } __attribute__((packed));
+
+void printTCP(struct tcpHeader *header, uint16_t checksum);
+void getTCP(uint8_t *packetData, int tcp_size, uint8_t *psuedoHeader);
+
+#endif

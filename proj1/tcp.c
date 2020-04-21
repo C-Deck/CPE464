@@ -1,6 +1,6 @@
 #include "tcp.h"
 
-void tcp() {
+void getTCP(uint8_t *packetData, int tcp_size, uint8_t *psuedoHeader) {
    //
 }
 

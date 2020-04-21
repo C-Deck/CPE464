@@ -1,26 +1,74 @@
 #include "ip.h"
+#include "checksum.h"
+#include "udp.h"
+#include "icmp.h"
+#include "tcp.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <arpa/inet.h>
 
-void ip(uint8_t *packetData, int packetLength) {
+
+void getIP(uint8_t *packetData, int packetLength) {
    struct ipHeader *header = (struct ipHeader*) malloc(sizeof(struct ipHeader));
    uint8_t pseudo_header[1500];
-   int tcp_size = 0;
+   int tcp_size = 0, byteAdjustment = 0;
+   uint16_t checksum;
+
+   /* TYPE OF SERVICE */
+   header->HDR = ntohs(*(packetData + byteAdjustment)) & 0x0f;
+   byteAdjustment++;
+
+   /* TYPE OF SERVICE */
+   header->TOS = *(packetData + byteAdjustment);
+   byteAdjustment++;
+
+   /* TOTAL LENGTH */
+   header->TL = *((uint16_t *) (packetData + byteAdjustment));
+   byteAdjustment = byteAdjustment + 2;
+
+   /* IDENTIFICATION */
+   header->ID = *((uint16_t *) (packetData + byteAdjustment));
+   byteAdjustment = byteAdjustment + 2;
+
+   /* FLAGS */
+   header->FLAGS = *((uint16_t *) (packetData + byteAdjustment));
+   byteAdjustment = byteAdjustment + 2;
+
+   /* TIME TO LIVE */
+   header->TTL = *(packetData + byteAdjustment);
+   byteAdjustment++;
+
+   /* PROTOCOL */
+   header->PROTOCOL = *(packetData + byteAdjustment);
+   byteAdjustment++;
+
+   /* PROTOCOL */
+   header->PROTOCOL = *(packetData + byteAdjustment);
+   byteAdjustment++;
+
+   /* SENDER IP */
+   header->SOURCE_ADDR = *((uint32_t *) (packetData + byteAdjustment));
+   byteAdjustment = byteAdjustment + IP_LENGTH;
+
+   /* DEST IP */
+   header->DEST_ADDR = *((uint32_t *) (packetData + byteAdjustment));
+   byteAdjustment = byteAdjustment + IP_LENGTH;
+
+   checksum = in_cksum((u_int16_t *)packetData, header->TL * WORD_SIZE);
    
-   printIP(header);
+   printIP(header, checksum, packetLength * WORD_SIZE);
 
    switch (header->PROTOCOL) {
       case ICMP_PROTOCOL:
-         //
+         getICMP(packetData + byteAdjustment, packetLength - byteAdjustment);
          break;
       case TCP_PROTOCOL:
-         //
+         tcp_size = pseudoHeader(pseudo_header, header);
+         getTCP(packetData + byteAdjustment, tcp_size, pseudo_header);
          break;
       case UDP_PROTOCOL:
-         //
+         getUDP(packetData + byteAdjustment, packetLength - byteAdjustment);
          break;
       default:
          break;
@@ -29,22 +77,33 @@ void ip(uint8_t *packetData, int packetLength) {
    free(header);
 }
 
-void printIP(struct ipHeader *header) {
+int pseudoHeader(uint8_t *pseudoHeader, struct ipHeader *header) {
+   uint16_t tcp_size = ntohs(header->TL) - (header->HDR * 4);
+
+   memcpy(pseudoHeader, &(header->SOURCE_ADDR), IP_LENGTH);
+   memcpy(pseudoHeader + IP_LENGTH, &(header->DEST_ADDR), IP_LENGTH);
+   pseudoHeader[9] = header->PROTOCOL;
+   memcpy(pseudoHeader + 9, header->TL, 2);
+
+   return tcp_size;
+}
+
+void printIP(struct ipHeader *header, u_int16_t checksum) {
    struct in_addr senderIP = *(struct in_addr *) &(header->SOURCE_ADDR);
    struct in_addr destIP = *(struct in_addr *) &(header->DEST_ADDR);
 
    printf("\n\tIP Header\n");
-	printf("\t\tHeader Len: %d (bytes)\n", header->TL * 4);
+	printf("\t\tHeader Len: %d (bytes)\n", header->HDR * WORD_SIZE);
 	printf("\t\tTOS: %x\n", header->TOS);
 	printf("\t\tTTL: %d\n", header->TTL);
-	printf("\t\tIP PDU Len: %d (bytes)\n", pduLength);
+	printf("\t\tIP PDU Len: %d (bytes)\n", ntohs(header->TL));
 	printf("\t\tProtocol: %s\n", printProtocol(header));
-	printf("\t\tChecksum: %s (%x04)\n", goodCheck ? "Correct" : "Incorrect", header->HEADER_CHECKSUM);
+	printf("\t\tChecksum: %s (%x04)\n", checksum ? "Correct" : "Incorrect", header->HEADER_CHECKSUM);
 	printf("\t\tSender IP: %s\n", inet_ntoa(senderIP));
 	printf("\t\tDest IP: %s\n", inet_ntoa(destIP));
 }
 
-char *printProtocol(struct ipHeader *header){
+char *printProtocol(struct ipHeader *header) {
    switch (header->PROTOCOL) {
       case ICMP_PROTOCOL:
          return "ICMP";

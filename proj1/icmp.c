@@ -1,7 +1,14 @@
 #include "icmp.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 void icmp(uint8_t *packetData, int packetLength) {
-   //
+   struct icmpHeader *header = (struct icmpHeader*) malloc(sizeof(struct icmpHeader));
+
+   header->type = *(packetData);
+
+   printICMP(header);
+   free(header);
 }
 
 void printICMP(struct icmpHeader *header) {
