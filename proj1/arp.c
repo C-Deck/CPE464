@@ -62,7 +62,7 @@ char *getARPCode(uint16_t op) {
       case ARP_REV_REQUEST_OP:
          return ARP_REV_REQUEST;
       case ARP_REV_REPLY_OP:
-         return ARP_REV_REPLY
+         return ARP_REV_REPLY;
       case ARP_INV_REQUEST_OP:
          return ARP_INV_REQUEST;
       case ARP_INV_REPLY_OP:

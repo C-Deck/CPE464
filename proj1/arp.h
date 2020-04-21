@@ -34,5 +34,6 @@ struct arpHeader {
 void printARP(struct arpHeader *header);
 void getARP(const uint8_t *packetData, int packetLength);
 void printMAC(uint8_t *mac);
+char *getARPCode(uint16_t op);
 
 #endif
