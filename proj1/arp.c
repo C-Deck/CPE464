@@ -40,11 +40,7 @@ void printARP(struct arpHeader *header) {
    struct in_addr targetIP = *(struct in_addr *) &(header->TPA);
 
    printf("\n\tARP header\n");
-<<<<<<< HEAD
 	printf("\t\tOpcode: %s\n", getARPCode(header->OP));
-=======
-	printf("\t\tOpcode: %s\n", arp_opcodes[((int)header->OP)]);
->>>>>>> f32d8f52ae15440a711f671196276fc39985b50a
 	printf("\t\tSender MAC: ");
    printMAC(header->SHA);
 	printf("\t\tSender IP: %s\n", inet_ntoa(senderIP));
@@ -56,7 +52,6 @@ void printARP(struct arpHeader *header) {
 void printMAC(uint8_t *mac) {
    printf("%x:%x:%x:%x:%x:%x\n", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 }
-<<<<<<< HEAD
 
 char *getARPCode(uint16_t op) {
    switch (op) {
@@ -76,5 +71,3 @@ char *getARPCode(uint16_t op) {
          return "Unknown";
    }
 }
-=======
->>>>>>> f32d8f52ae15440a711f671196276fc39985b50a
