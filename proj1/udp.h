@@ -9,6 +9,6 @@ struct udpHeader{
 } __attribute__((packed));
 
 void getUDP(uint8_t *packetData, int packetLength);
-void printUDP(struct udpHeader *header)
+void printUDP(struct udpHeader *header);
 
 #endif
