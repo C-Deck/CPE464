@@ -42,7 +42,7 @@ void printARP(struct arpHeader *header) {
    struct in_addr targetIP = *(struct in_addr *) &(header->TPA);
 
    printf("\n\tARP header\n");
-	printf("\t\tOpcode: %s\n", arp_opcodes[header->OP]);
+	printf("\t\tOpcode: %s\n", arp_opcodes[((int)header->OP)]);
 	printf("\t\tSender MAC: ");
    printMAC(header->SHA);
 	printf("\t\tSender IP: %s\n", inet_ntoa(senderIP));
