@@ -10,7 +10,7 @@ struct icmpHeader {
 	uint8_t type;
 } __attribute__((packed));
 
-void icmp(uint8_t *packetData, int packetLength);
+void getICMP(uint8_t *packetData, int packetLength);
 void printICMP(struct icmpHeader *header);
 
 #endif
