@@ -16,7 +16,7 @@ void getARP(const uint8_t *packetData, int packetLength) {
    byteAdjustment = byteAdjustment + 2;
 
    /* SENDER MAC */
-   memcpy(header->SHA, packetData, MAC_LENGTH);
+   memcpy(header->SHA, packetData + byteAdjustment, MAC_LENGTH);
    byteAdjustment = byteAdjustment + MAC_LENGTH;
 
    /* SENDER IP */
@@ -24,7 +24,7 @@ void getARP(const uint8_t *packetData, int packetLength) {
    byteAdjustment = byteAdjustment + IP_LENGTH;
 
    /* TARGET MAC */ 
-   memcpy(header->THA, packetData, MAC_LENGTH);
+   memcpy(header->THA, packetData + byteAdjustment, MAC_LENGTH);
    byteAdjustment = byteAdjustment + MAC_LENGTH;
 
    /* TARGET IP */
