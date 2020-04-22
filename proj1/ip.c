@@ -105,7 +105,7 @@ void seudoHeader(struct PseudoHeader *pseudoHeader, struct ipHeader *header) {
    pseudoHeader->DEST_ADDR = header->DEST_ADDR;
    pseudoHeader->ZERO = 0;
    pseudoHeader->PROTOCOL = header->PROTOCOL;
-   pseudoHeader->TCP_SIZE = htons(tcp_size);
+   pseudoHeader->TCP_SIZE = tcp_size;
 }
 
 void printIP(struct ipHeader *header, u_int16_t checksum) {
