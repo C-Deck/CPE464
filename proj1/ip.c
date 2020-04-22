@@ -57,6 +57,7 @@ void getIP(const uint8_t *packetData, int packetLength) {
    byteAdjustment = byteAdjustment + IP_LENGTH;
 
    checksum = in_cksum((uint16_t *) packetData, header->HDR * 4);
+   byteAdjustment = header->HDR * 4;
    
    printIP(header, checksum);
 
