@@ -86,7 +86,7 @@ int pseudoHeader(uint8_t *pseudoHeader, struct ipHeader *header) {
    memcpy(pseudoHeader + IP_LENGTH, &(header->DEST_ADDR), IP_LENGTH);
    pseudoHeader[8] = 0;
    pseudoHeader[9] = header->PROTOCOL;
-   *((uint16_t *) &(pseudoHeader[10]) = tcp_size;
+   *((uint16_t *) &(pseudoHeader[10])) = tcp_size;
    //memcpy(&(pseudoHeader[10]), &tcp_size, 2);
    //pseudoHeader[10] = ((tcp_size & 0xff00) >> 8);
    //pseudoHeader[11] = tcp_size & 0x00ff;
