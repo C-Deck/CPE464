@@ -23,7 +23,7 @@
 
 #define DEBUG_FLAG 1
 
-void recvFromClient(int clientSocket);
+int recvFromClient(int clientSocket);
 int checkArgs(int argc, char *argv[]);
 
 int main(int argc, char *argv[])
@@ -37,48 +37,54 @@ int main(int argc, char *argv[])
 	//create the server socket
 	serverSocket = tcpServerSetup(portNumber);
 
-	// wait for client to connect
-	clientSocket = tcpAccept(serverSocket, DEBUG_FLAG);
+	while (1) {
+		// wait for client to connect
+		clientSocket = tcpAccept(serverSocket, DEBUG_FLAG);
 
-	recvFromClient(clientSocket);
-	
-	/* close the sockets */
-	close(clientSocket);
+		if (recvFromClient(clientSocket) == -1) {
+			/* close the socket */
+			close(clientSocket);
+		};
+	}
+
 	close(serverSocket);
 
 	
 	return 0;
 }
 
-void recvFromClient(int clientSocket)
+int recvFromClient(int clientSocket)
 {
 	char buf[MAXBUF];
 	uint8_t lenBuf[2];
 	int messageLen = 0;
 	
-	// Use a time value of 1 second (so time is not null)
-	while (selectCall(clientSocket, 1, 0, TIME_IS_NOT_NULL) == 0)
-	{
-		printf("Select timed out waiting for client to send data\n");
-	}
+	do {
+		// Use a time value of 1 second (so time is not null)
+		while (selectCall(clientSocket, 1, 0, TIME_IS_NOT_NULL) == 0)
+		{
+			printf("Select timed out waiting for client to send data\n");
+		}
 	
-	//now get the data from the client_socket (message includes null)
-	if ((messageLen = recv(clientSocket, lenBuf, 2, 0)) < 0)
-	{
-		perror("recv call");
-		exit(-1);
-	}
 
-	printf("Message length sized %d\n", *((uint16_t *) lenBuf));
+		//now get the data from the client_socket (message includes null)
+		if ((messageLen = recv(clientSocket, lenBuf, 2, 0)) < 0)
+		{
+			perror("recv call");
+			exit(-1);
+		}
 
-	//now get the data from the client_socket (message includes null)
-	if ((messageLen = recv(clientSocket, buf, *((uint16_t *) lenBuf), 0)) < 0)
-	{
-		perror("recv call");
-		exit(-1);
-	}
+		//now get the data from the client_socket (message includes null)
+		if ((messageLen = recv(clientSocket, buf, *((uint16_t *) lenBuf), 0)) < 0)
+		{
+			perror("recv call");
+			exit(-1);
+		}
 
-	printf("Message received, length: %d Data: %s\n", messageLen, buf);
+		printf("Rec Len: %d, Header Len: %d Message: %s\n", messageLen, *((uint16_t *) lenBuf), buf);
+	} while (messageLen != 0);
+
+	return -1;
 }
 
 int checkArgs(int argc, char *argv[])

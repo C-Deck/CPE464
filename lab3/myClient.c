@@ -4,6 +4,7 @@
 *****************************************************************************/
 
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -47,34 +48,40 @@ void sendToServer(int socketNum)
 	char aChar = 0;
 	uint16_t sendLen = 2;        //amount of data to send
 	int sent = 0;            	//actual amount of data sent/* get the data and send it   */
-			
-	// Important you don't input more characters than you have space 
-	printf("Enter data: ");
-	while (sendLen < (MAXBUF - 1) && aChar != '\n')
-	{
-		aChar = getchar();
-		if (aChar != '\n')
+
+	while (1) {
+		// Important you don't input more characters than you have space 
+		printf("Enter data: ");
+		while (sendLen < (MAXBUF - 1) && aChar != '\n')
 		{
-			sendBuf[sendLen] = aChar;
-			sendLen++;
+			aChar = getchar();
+			if (aChar != '\n')
+			{
+				sendBuf[sendLen] = aChar;
+				sendLen++;
+			}
 		}
-	}
 
-	sendBuf[sendLen] = '\0';
-	sendLen++;  //we are going to send the null
+		if (strcmp(sendBuf, "exit")) {
+			break;
+		}
 
-	*((uint16_t *) sendBuf) = sendLen;
+		sendBuf[sendLen] = '\0';
+		sendLen++;  //we are going to send the null
 
-	printf("read: %s string len: %d (including null)\n", sendBuf, sendLen);
+		*((uint16_t *) sendBuf) = sendLen;
+
+		printf("read: %s string len: %d (including null)\n", sendBuf, sendLen);
 	
-	sent =  send(socketNum, sendBuf, sendLen, 0);
-	if (sent < 0)
-	{
-		perror("send call");
-		exit(-1);
-	}
+		sent =  send(socketNum, sendBuf, sendLen, 0);
+		if (sent < 0)
+		{
+			perror("send call");
+			exit(-1);
+		}
 
-	printf("Amount of data sent is: %d\n", sent);
+		printf("Amount of data sent is: %d\n", sent);
+	}
 }
 
 void checkArgs(int argc, char * argv[])
