@@ -26,6 +26,7 @@ struct PseudoHeader {
 	uint8_t ZERO;
 	uint8_t PROTOCOL;
 	uint16_t TCP_SIZE;
+	uint8_t DATA[1500];
 } __attribute__((packed));
 
 void printTCP(struct tcpHeader *header, uint16_t checksum);
