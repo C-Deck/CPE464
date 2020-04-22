@@ -21,11 +21,11 @@ void getTCP(const uint8_t *packetData, int tcp_size, uint8_t *psuedoHeader) {
 	byteAdjustment = byteAdjustment + 2;
 
 	/* Sequence Number */
-    header->SEQ_NUM = ntohs(*((uint32_t *) (packetData + byteAdjustment)));
+    header->SEQ_NUM = ntohl(*((uint32_t *) (packetData + byteAdjustment)));
     byteAdjustment = byteAdjustment + 4;
 
     /* Acknowledgement Number */
-    header->ACK_NUM = ntohs(*((uint32_t *) (packetData + byteAdjustment)));
+    header->ACK_NUM = ntohl(*((uint32_t *) (packetData + byteAdjustment)));
     byteAdjustment = byteAdjustment + 4 + 1; /* Add one more for offset to get to flags */
 
 	/* Flags byte */
