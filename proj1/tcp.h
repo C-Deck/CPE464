@@ -8,6 +8,8 @@
 #define RST_MASK 0x7
 #define FIN_MASK 0x8
 
+#define HTTP 80
+
 struct tcpHeader{
 	uint16_t SOURCE_PORT;               /* 16 bit field that specifies the port number of the sender */
 	uint16_t DEST_PORT;                 /* 16 bit field that specifies the port number of the receiver. */

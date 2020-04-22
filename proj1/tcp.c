@@ -47,11 +47,19 @@ void getTCP(const uint8_t *packetData, int tcp_size, uint8_t *psuedoHeader) {
 }
 
 void printTCP(struct tcpHeader *header, uint16_t checksum) {
-   printf("\n\tTCP Header\n");
-	printf("\t\tSource Port: : %d\n", header->SOURCE_PORT);
-	printf("\t\tDest Port: : %d\n", header->DEST_PORT);
-	printf("\t\tSequence Number: %d\n", header->SEQ_NUM);
-	printf("\t\tACK Number: %d\n", header->ACK_NUM);
+    printf("\n\tTCP Header\n");
+	if (header->SOURCE_PORT == HTTP) {
+		printf("\t\tSource Port:  HTTP\n");
+	} else {
+		printf("\t\tSource Port: : %d\n", header->SOURCE_PORT);
+	}
+	if (header->SOURCE_PORT == HTTP) {
+		printf("\t\tSource Port:  HTTP\n");
+	} else {
+		printf("\t\tDest Port: : %d\n", header->DEST_PORT);
+	}
+	printf("\t\tSequence Number: %u\n", header->SEQ_NUM);
+	printf("\t\tACK Number: %u\n", header->ACK_NUM);
 	printf("\t\tACK Flag: %s\n", (header->FLAGS & ACK_MASK) ? "Yes" : "No");
 	printf("\t\tSYN Flag: %s\n", (header->FLAGS & SYN_MASK) ? "Yes" : "No");
 	printf("\t\tRST Flag: %s\n", (header->FLAGS & RST_MASK) ? "Yes" : "No");
