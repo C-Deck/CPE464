@@ -11,7 +11,7 @@
 #define WORD_SIZE 4
 
 struct ipHeader {
-	uint8_t HDR;						/* Hardware length          - 4 bits */
+	uint8_t HDR;						/* Hardware length          - 1 byte */
 	uint8_t TOS;			  			/* Type of Service 			- 2 bytes */
 	uint16_t TL;						/* Total length				- 2 bytes */
 	uint16_t ID;						/* Identification			- 2 bytes */
