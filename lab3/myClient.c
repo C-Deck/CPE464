@@ -45,7 +45,7 @@ void sendToServer(int socketNum)
 {
 	char sendBuf[MAXBUF];   //data buffer
 	char aChar = 0;
-	unit16_t sendLen = 0;        //amount of data to send
+	uint16_t sendLen = 0;        //amount of data to send
 	int sent = 0;            	//actual amount of data sent/* get the data and send it   */
 			
 	// Important you don't input more characters than you have space 
