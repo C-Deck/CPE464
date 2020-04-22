@@ -48,47 +48,6 @@ void getTCP(const uint8_t *packetData, int tcp_size, uint8_t *psuedoHeader) {
 	free(header);
 }
 
-void getTCP2(const uint8_t *packetData, struct PseudoHeader *pseudoHeader) {
-	struct tcpHeader *header = (struct tcpHeader*) malloc(sizeof(struct tcpHeader));
-    uint16_t checksum;
-	int byteAdjustment = 0;
-
-	/* SOURCE PORT*/
-	header->SOURCE_PORT = ntohs(*((uint16_t *) packetData));
-	byteAdjustment = byteAdjustment + 2;
-
-	/* DESTINATION PORT*/
-    header->DEST_PORT = ntohs(*((uint16_t *) (packetData + byteAdjustment)));
-	byteAdjustment = byteAdjustment + 2;
-
-	/* Sequence Number */
-    header->SEQ_NUM = ntohl(*((uint32_t *) (packetData + byteAdjustment)));
-    byteAdjustment = byteAdjustment + 4;
-
-    /* Acknowledgement Number */
-    header->ACK_NUM = ntohl(*((uint32_t *) (packetData + byteAdjustment)));
-    byteAdjustment = byteAdjustment + 4 + 1; /* Add one more for offset to get to flags */
-
-	/* Flags byte */
-	header->FLAGS = *(packetData + byteAdjustment);
-	byteAdjustment++;
-
-	/* Window */
-    header->WINDOW = ntohs(*((uint16_t *) (packetData + byteAdjustment)));
-    byteAdjustment = byteAdjustment + 2;
-
-	/* CHECKSUM */
-    header->CHECKSUM = ntohs(*((uint16_t *) (packetData + byteAdjustment)));
-    byteAdjustment = byteAdjustment + 2;
-
-	memcpy(((uint8_t *)pseudoHeader) + 12, packetData, pseudoHeader->TCP_SIZE);
-
-	checksum = in_cksum((uint16_t *) pseudoHeader, pseudoHeader->TCP_SIZE + 12);
-
-	printTCP(header, checksum);
-	free(header);
-}
-
 void printTCP(struct tcpHeader *header, uint16_t checksum) {
     printf("\n\tTCP Header\n");
 

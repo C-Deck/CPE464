@@ -68,9 +68,7 @@ void getIP(const uint8_t *packetData, int packetLength) {
          break;
       case TCP_PROTOCOL:
          tcp_size = pseudoHeader(pseudo_header, header);
-         //seudoHeader(pseudo, header);
          getTCP(packetData + byteAdjustment, tcp_size, pseudo_header);
-         //getTCP2(packetData + byteAdjustment, pseudo);
          break;
       case UDP_PROTOCOL:
          getUDP(packetData + byteAdjustment, packetLength - byteAdjustment);
@@ -91,28 +89,10 @@ int pseudoHeader(uint8_t *pseudoHeader, struct ipHeader *header) {
    memcpy(pseudoHeader + IP_LENGTH, &(header->DEST_ADDR), IP_LENGTH);
    pseudoHeader[8] = 0;
    pseudoHeader[9] = header->PROTOCOL;
-   //*((uint16_t *) (pseudoHeader + 10)) = (uint8_t *) &tcp_size;
-   //memcpy(pseudoHeader + 10, &tcp_size, 2);
    pseudoHeader[10] = *(ptr + 1);
    pseudoHeader[11] = *ptr;
-   //pseudoHeader[10] = ((tcp_size & 0xff00) >> 8);
-
-   //pseudoHeader[11] = tcp_size & 0x00ff;
-   //printf("\nTCP SIZE %x04\n", tcp_size);
-   //printf("\n Value wanted -- %x and %x ----- Got: %x  --- and -- %x\n", ((tcp_size & 0xff00) >> 8), tcp_size & 0x00ff, *ptr, *(ptr + 1));
-   //printf("Final value wanted: %x04\n", *((uint16_t *)(pseudoHeader + 10)));
 
    return tcp_size;
-}
-
-void seudoHeader(struct PseudoHeader *pseudoHeader, struct ipHeader *header) {
-   uint16_t tcp_size = ntohs(header->TL) - (header->HDR * 4);
-
-   pseudoHeader->SOURCE_ADDR = header->SOURCE_ADDR;
-   pseudoHeader->DEST_ADDR = header->DEST_ADDR;
-   pseudoHeader->ZERO = 0;
-   pseudoHeader->PROTOCOL = header->PROTOCOL;
-   pseudoHeader->TCP_SIZE = htons(tcp_size);
 }
 
 void printIP(struct ipHeader *header, u_int16_t checksum) {
