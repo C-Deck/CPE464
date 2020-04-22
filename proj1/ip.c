@@ -80,6 +80,7 @@ void getIP(const uint8_t *packetData, int packetLength) {
    }
 
    free(header);
+   free(pseudo);
 }
 
 int pseudoHeader(uint8_t *pseudoHeader, struct ipHeader *header) {
