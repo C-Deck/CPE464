@@ -48,22 +48,30 @@ void getTCP(const uint8_t *packetData, int tcp_size, uint8_t *psuedoHeader) {
 
 void printTCP(struct tcpHeader *header, uint16_t checksum) {
     printf("\n\tTCP Header\n");
+
 	if (header->SOURCE_PORT == HTTP) {
 		printf("\t\tSource Port:  HTTP\n");
 	} else {
 		printf("\t\tSource Port: : %d\n", header->SOURCE_PORT);
 	}
+
 	if (header->DEST_PORT == HTTP) {
 		printf("\t\tDest Port:  HTTP\n");
 	} else {
 		printf("\t\tDest Port: : %d\n", header->DEST_PORT);
 	}
+
 	printf("\t\tSequence Number: %u\n", header->SEQ_NUM);
-	printf("\t\tACK Number: %u\n", header->ACK_NUM);
-	printf("\t\tACK Flag: %s\n", (header->FLAGS & ACK_MASK) ? "Yes" : "No");
-	printf("\t\tSYN Flag: %s\n", (header->FLAGS & SYN_MASK) ? "Yes" : "No");
-	printf("\t\tRST Flag: %s\n", (header->FLAGS & RST_MASK) ? "Yes" : "No");
-	printf("\t\tFIN Flag: %s\n", (header->FLAGS & FIN_MASK) ? "Yes" : "No");
+	if (header->FLAGS & ACK_MASK) == ACK_MASK) {
+		printf("\t\tACK Number: %u\n", header->ACK_NUM);
+	} else {
+		printf("\t\tACK Number: <not valid>\n");
+	}
+	
+	printf("\t\tACK Flag: %s\n", ((header->FLAGS & ACK_MASK) == ACK_MASK) ? "Yes" : "No");
+	printf("\t\tSYN Flag: %s\n", ((header->FLAGS & SYN_MASK) == SYN_MASK) ? "Yes" : "No");
+	printf("\t\tRST Flag: %s\n", ((header->FLAGS & RST_MASK == RST_MASK) ? "Yes" : "No");
+	printf("\t\tFIN Flag: %s\n", ((header->FLAGS & FIN_MASK == FIN_MASK) ? "Yes" : "No");
 	printf("\t\tWindow Size: %d\n", header->WINDOW);
 	printf("\t\tChecksum: %s (0x%x)\n", checksum ? "Correct" : "Incorrect", header->CHECKSUM);
 }
