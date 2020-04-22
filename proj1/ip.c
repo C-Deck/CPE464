@@ -12,7 +12,7 @@
 
 void getIP(const uint8_t *packetData, int packetLength) {
    struct ipHeader *header = (struct ipHeader*) malloc(sizeof(struct ipHeader));
-   struct PseudoHeader pseudo = (struct PseudoHeader*) malloc(sizeof(struct PseudoHeader));
+   struct PseudoHeader *pseudo = (struct PseudoHeader*) malloc(sizeof(struct PseudoHeader));
    uint8_t pseudo_header[1500];
    int tcp_size = 0, byteAdjustment = 0;
    uint16_t checksum;
