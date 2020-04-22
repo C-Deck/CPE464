@@ -17,6 +17,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <arpa/inet.h>
 
 #include "networks.h"
 
@@ -52,6 +53,7 @@ int main(int argc, char *argv[])
 void recvFromClient(int clientSocket)
 {
 	char buf[MAXBUF];
+	uint8_t lenBuf[2];
 	int messageLen = 0;
 	
 	// Use a time value of 1 second (so time is not null)
@@ -61,7 +63,14 @@ void recvFromClient(int clientSocket)
 	}
 	
 	//now get the data from the client_socket (message includes null)
-	if ((messageLen = recv(clientSocket, buf, MAXBUF, 0)) < 0)
+	if ((messageLen = recv(clientSocket, lenBuf, 2, 0)) < 0)
+	{
+		perror("recv call");
+		exit(-1);
+	}
+
+	//now get the data from the client_socket (message includes null)
+	if ((messageLen = recv(clientSocket, buf, *((uint16_t *) lenBuf), 0)) < 0)
 	{
 		perror("recv call");
 		exit(-1);

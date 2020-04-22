@@ -16,11 +16,12 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <arpa/inet.h>
 
 #include "networks.h"
 
 #define DEBUG_FLAG 1
-#
+
 void sendToServer(int socketNum);
 void checkArgs(int argc, char * argv[]);
 
@@ -44,8 +45,8 @@ void sendToServer(int socketNum)
 {
 	char sendBuf[MAXBUF];   //data buffer
 	char aChar = 0;
-	int sendLen = 0;        //amount of data to send
-	int sent = 0;            //actual amount of data sent/* get the data and send it   */
+	unit16_t sendLen = 0;        //amount of data to send
+	int sent = 0;            	//actual amount of data sent/* get the data and send it   */
 			
 	// Important you don't input more characters than you have space 
 	printf("Enter data: ");
@@ -61,10 +62,12 @@ void sendToServer(int socketNum)
 
 	sendBuf[sendLen] = '\0';
 	sendLen++;  //we are going to send the null
-	
+
+	*((uint16_t *) sendBuf) = sendLen;
+
 	printf("read: %s string len: %d (including null)\n", sendBuf, sendLen);
-		
-	sent =  send(socketNum, sendBuf, sendLen, 0);
+	
+	sent =  send(socketNum, sendBuf, sendLen + 2, 0);
 	if (sent < 0)
 	{
 		perror("send call");
