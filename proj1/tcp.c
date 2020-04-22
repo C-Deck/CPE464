@@ -29,7 +29,7 @@ void getTCP(const uint8_t *packetData, int tcp_size, uint8_t *psuedoHeader) {
     byteAdjustment = byteAdjustment + 4 + 1; /* Add one more for offset to get to flags */
 
 	/* Flags byte */
-	header->FLAGS = ntohs(*(packetData + byteAdjustment));
+	header->FLAGS = *(packetData + byteAdjustment);
 	byteAdjustment++;
 
 	/* Window */
