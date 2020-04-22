@@ -1,3 +1,9 @@
+make clean
+
+git pull
+
+make
+
 ./trace ArpTest.pcap > myOut
 echo Arp diff:
 diff -w -B myOut ArpTest.pcap.out

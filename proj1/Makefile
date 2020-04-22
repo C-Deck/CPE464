@@ -9,7 +9,7 @@ CFLAGS = -g -Wall
 all:  trace
 
 trace: trace.c
-	$(CC) $(CFLAGS) -o trace trace.c checksum.c  -lpcap 
+	$(CC) $(CFLAGS) -o trace trace.c ip.c icmp.c arp.c tcp.c udp.c checksum.c  -lpcap 
 
 clean:
 	rm -f trace

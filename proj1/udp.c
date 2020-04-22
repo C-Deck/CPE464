@@ -5,11 +5,12 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-void udp(uint8_t *packetData, int packetLength) {
+void getUDP(const uint8_t *packetData, int packetLength) {
    struct udpHeader *header = (struct udpHeader*) malloc(sizeof(struct udpHeader));
 
-   header->SOURCE_PORT = ntohs(((u_int16_t *)packetData)[0]);
-   header->DEST_PORT = ntohs(((u_int16_t *)packetData)[1]);
+   header->SOURCE_PORT = ntohs(*((uint16_t *) packetData));
+   
+   header->DEST_PORT = ntohs(*((uint16_t *) (packetData + 2)));
 
    printUDP(header);
    free(header);

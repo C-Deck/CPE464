@@ -1,10 +1,11 @@
+#include "arp.h"
+#include "ip.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h> 
 #include <pcap.h>
 #include <arpa/inet.h>
-
-#define MAC_LENGTH 6
 
 #define ARP_TYPE 1
 #define IP_TYPE 2
@@ -23,7 +24,6 @@ struct ethernetHeader {
 
 void printEthernet(struct ethernetHeader *ethernet);
 void printType(u_short typeHex);
-void printMAC(u_char *mac);
 int getType(u_short type);
 
 int main(int argc, char **argv) {
