@@ -81,9 +81,9 @@ void getTCP2(const uint8_t *packetData, struct PseudoHeader *pseudoHeader) {
     header->CHECKSUM = ntohs(*((uint16_t *) (packetData + byteAdjustment)));
     byteAdjustment = byteAdjustment + 2;
 
-	memcpy(((uint8_t *)psuedoHeader) + 12, packetData, pseudoHeader->TCP_SIZE);
+	memcpy(((uint8_t *)pseudoHeader) + 12, packetData, pseudoHeader->TCP_SIZE);
 
-	checksum = in_cksum((uint16_t *) psuedoHeader, tcp_size + 12);
+	checksum = in_cksum((uint16_t *) pseudoHeader, pseudoHeader->TCP_SIZE + 12);
 
 	printTCP(header, checksum);
 	free(header);
