@@ -56,7 +56,7 @@ void getIP(const uint8_t *packetData, int packetLength) {
    header->DEST_ADDR = *((uint32_t *) (packetData + byteAdjustment));
    byteAdjustment = byteAdjustment + IP_LENGTH;
 
-   checksum = in_cksum(packetData, header->HDR * 4);
+   checksum = in_cksum((uint16_t *) packetData, header->HDR * 4);
    byteAdjustment = header->HDR * 4;
    
    printIP(header, checksum);
@@ -66,7 +66,7 @@ void getIP(const uint8_t *packetData, int packetLength) {
          getICMP(packetData + byteAdjustment, packetLength - byteAdjustment);
          break;
       case TCP_PROTOCOL:
-         tcp_size = pseudoHeader((uint16_t *) pseudo_header, header);
+         tcp_size = pseudoHeader(pseudo_header, header);
          getTCP(packetData + byteAdjustment, tcp_size, pseudo_header);
          break;
       case UDP_PROTOCOL:
