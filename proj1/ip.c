@@ -79,18 +79,7 @@ void getIP(const uint8_t *packetData, int packetLength) {
    free(header);
 }
 
-int pseudoHeader(uint16_t *pseudoHeader, struct ipHeader *header) {
-   uint16_t tcp_size = ntohs(header->TL) - (header->HDR * 4);
-
-   memcpy(pseudoHeader, &(header->SOURCE_ADDR), IP_LENGTH);
-   memcpy(pseudoHeader + 2, &(header->DEST_ADDR), IP_LENGTH);
-   memcpy(pseudoHeader + 5, &(header->PROTOCOL), 1);
-   *(pseudoHeader + 6) = tcp_size;
-
-   return tcp_size;
-}
-
-/* int pseudoHeader(uint8_t *pseudoHeader, struct ipHeader *header) {
+int pseudoHeader(uint8_t *pseudoHeader, struct ipHeader *header) {
    uint16_t tcp_size = ntohs(header->TL) - (header->HDR * 4);
 
    memcpy(pseudoHeader, &(header->SOURCE_ADDR), IP_LENGTH);
@@ -98,12 +87,12 @@ int pseudoHeader(uint16_t *pseudoHeader, struct ipHeader *header) {
    pseudoHeader[8] = 0;
    pseudoHeader[9] = header->PROTOCOL;
    //((uint16_t *) pseudoHeader)[5] = tcp_size;
-   //memcpy(&(pseudoHeader[10]), &tcp_size, 2);
-   pseudoHeader[10] = ((tcp_size & 0xff00) >> 8);
-   pseudoHeader[11] = tcp_size & 0x00ff;
+   memcpy(pseudoHeader + 10, &tcp_size, 2);
+   //pseudoHeader[10] = ((tcp_size & 0xff00) >> 8);
+   //pseudoHeader[11] = tcp_size & 0x00ff;
 
    return tcp_size;
-} */
+}
 
 void printIP(struct ipHeader *header, u_int16_t checksum) {
    struct in_addr senderIP = *(struct in_addr *) &(header->SOURCE_ADDR);

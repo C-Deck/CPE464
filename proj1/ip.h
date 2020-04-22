@@ -24,7 +24,7 @@ struct ipHeader {
 } __attribute__((packed));
 
 void getIP(const uint8_t *packetData, int packetLength);
-int pseudoHeader(uint16_t *pseudoHeader, struct ipHeader *header);
+int pseudoHeader(uint8_t *pseudoHeader, struct ipHeader *header);
 void printIP(struct ipHeader *header, u_int16_t checksum);
 char *printProtocol(struct ipHeader *header);
 
