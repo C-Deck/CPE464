@@ -67,10 +67,10 @@ void getIP(const uint8_t *packetData, int packetLength) {
          getICMP(packetData + byteAdjustment, packetLength - byteAdjustment);
          break;
       case TCP_PROTOCOL:
-         //tcp_size = pseudoHeader(pseudo_header, header);
-         seudoHeader(pseudo, header);
-         //getTCP(packetData + byteAdjustment, tcp_size, pseudo_header);
-         getTCP2(packetData + byteAdjustment, pseudo);
+         tcp_size = pseudoHeader(pseudo_header, header);
+         //seudoHeader(pseudo, header);
+         getTCP(packetData + byteAdjustment, tcp_size, pseudo_header);
+         //getTCP2(packetData + byteAdjustment, pseudo);
          break;
       case UDP_PROTOCOL:
          getUDP(packetData + byteAdjustment, packetLength - byteAdjustment);
