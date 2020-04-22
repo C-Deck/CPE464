@@ -45,7 +45,7 @@ void sendToServer(int socketNum)
 {
 	char sendBuf[MAXBUF];   //data buffer
 	char aChar = 0;
-	uint16_t sendLen = 0;        //amount of data to send
+	uint16_t sendLen = 2;        //amount of data to send
 	int sent = 0;            	//actual amount of data sent/* get the data and send it   */
 			
 	// Important you don't input more characters than you have space 
@@ -67,7 +67,7 @@ void sendToServer(int socketNum)
 
 	printf("read: %s string len: %d (including null)\n", sendBuf, sendLen);
 	
-	sent =  send(socketNum, sendBuf, sendLen + 2, 0);
+	sent =  send(socketNum, sendBuf, sendLen, 0);
 	if (sent < 0)
 	{
 		perror("send call");
