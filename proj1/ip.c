@@ -93,14 +93,14 @@ int pseudoHeader(uint8_t *pseudoHeader, struct ipHeader *header) {
    pseudoHeader[9] = header->PROTOCOL;
    //*((uint16_t *) (pseudoHeader + 10)) = (uint8_t *) &tcp_size;
    //memcpy(pseudoHeader + 10, &tcp_size, 2);
-   //pseudoHeader[10] = (uint8_t) *((uint8_t *) ptr);
-   //pseudoHeader[11] = *(ptr + 1);
-   pseudoHeader[10] = ((tcp_size & 0xff00) >> 8);
+   pseudoHeader[10] = *(ptr + 1);
+   pseudoHeader[11] = *ptr;
+   //pseudoHeader[10] = ((tcp_size & 0xff00) >> 8);
 
-   pseudoHeader[11] = tcp_size & 0x00ff;
-   printf("\nTCP SIZE %x04\n", tcp_size);
-   printf("\n Value wanted -- %x and %x ----- Got: %x  --- and -- %x\n", ((tcp_size & 0xff00) >> 8), tcp_size & 0x00ff, *ptr, *(ptr + 1));
-   printf("Final value wanted: %x04\n", *((uint16_t *)(pseudoHeader + 10)));
+   //pseudoHeader[11] = tcp_size & 0x00ff;
+   //printf("\nTCP SIZE %x04\n", tcp_size);
+   //printf("\n Value wanted -- %x and %x ----- Got: %x  --- and -- %x\n", ((tcp_size & 0xff00) >> 8), tcp_size & 0x00ff, *ptr, *(ptr + 1));
+   //printf("Final value wanted: %x04\n", *((uint16_t *)(pseudoHeader + 10)));
 
    return tcp_size;
 }
