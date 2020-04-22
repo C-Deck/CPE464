@@ -13,5 +13,5 @@ void getICMP(const uint8_t *packetData, int packetLength) {
 
 void printICMP(struct icmpHeader *header) {
    printf("\n\tICMP Header\n");
-	printf("\t\tType: %s\n", header->type == ICMP_REPLY ? "Reply" : header->type == ICMP_REQUEST ? "Request" : "Unknown");
+	printf("\t\tType: %s\n", header->type == ICMP_REPLY ? "Reply" : (header->type == ICMP_REQUEST ? "Request" : "Unknown"));
 }
