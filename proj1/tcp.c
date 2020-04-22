@@ -42,7 +42,7 @@ void getTCP(const uint8_t *packetData, int tcp_size, uint8_t *psuedoHeader) {
 
 	memcpy(psuedoHeader + 12, packetData, tcp_size);
 
-	checksum = in_cksum((uint16_t *) (psuedoHeader + 12), tcp_size);
+	checksum = in_cksum((uint16_t *) psuedoHeader, tcp_size + 12);
 
 	printTCP(header, checksum);
 	free(header);
