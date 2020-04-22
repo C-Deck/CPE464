@@ -17,7 +17,7 @@ void getTCP(const uint8_t *packetData, int tcp_size, uint8_t *psuedoHeader) {
 	byteAdjustment = byteAdjustment + 2;
 
 	/* DESTINATION PORT*/
-    header->DEST_PORT = ntohs(*((uint16_t *) packetData + byteAdjustment));
+    header->DEST_PORT = ntohs(*((uint16_t *) (packetData + byteAdjustment)));
 	byteAdjustment = byteAdjustment + 2;
 
 	/* Sequence Number */
@@ -40,7 +40,7 @@ void getTCP(const uint8_t *packetData, int tcp_size, uint8_t *psuedoHeader) {
     header->CHECKSUM = ntohs(*((uint16_t *) (packetData + byteAdjustment)));
     byteAdjustment = byteAdjustment + 2;
 
-	checksum = in_cksum((u_int16_t *) psuedoHeader + 12, tcp_size + 12);
+	checksum = in_cksum((uint16_t *) (psuedoHeader + 12), tcp_size + 12);
 
 	printTCP(header, checksum);
 	free(header);

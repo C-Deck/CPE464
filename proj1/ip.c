@@ -56,7 +56,7 @@ void getIP(const uint8_t *packetData, int packetLength) {
    header->DEST_ADDR = *((uint32_t *) (packetData + byteAdjustment));
    byteAdjustment = byteAdjustment + IP_LENGTH;
 
-   checksum = in_cksum((u_int16_t *)packetData + byteAdjustment, header->TL);
+   checksum = in_cksum((uint16_t *)packetData + byteAdjustment, header->TL);
    
    printIP(header, checksum);
 
