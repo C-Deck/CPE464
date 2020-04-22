@@ -10,7 +10,7 @@
 
 #define HTTP 80
 
-struct tcpHeader{
+struct tcpHeader {
 	uint16_t SOURCE_PORT;               /* 16 bit field that specifies the port number of the sender */
 	uint16_t DEST_PORT;                 /* 16 bit field that specifies the port number of the receiver. */
 	uint32_t SEQ_NUM;                   /* 32 bit field that indicates how much data is sent during the TCP session. */
@@ -18,6 +18,14 @@ struct tcpHeader{
 	uint8_t FLAGS;						/* 8 bit field used for the flags */
 	uint16_t WINDOW;                    /* 16 bit window field specifies how many bytes the receiver is willing to receive. */
 	uint16_t CHECKSUM;                  /* 16 bits are used for a checksum to check if the TCP header is OK or not */
+} __attribute__((packed));
+
+struct PseudoHeader {
+	uint32_t SOURCE_ADDR;
+	uint32_t DEST_ADDR;
+	uint8_t ZERO;
+	uint8_t PROTOCOL;
+	uint16_t TCP_SIZE;
 } __attribute__((packed));
 
 void printTCP(struct tcpHeader *header, uint16_t checksum);
