@@ -98,8 +98,8 @@ int pseudoHeader(uint8_t *pseudoHeader, struct ipHeader *header) {
    //pseudoHeader[10] = ((tcp_size & 0xff00) >> 8);
 
    //pseudoHeader[11] = tcp_size & 0x00ff;
-   printf("\nTCP SIZE %x\n", tcp_size);
-   printf("\n Value wanted -- %d ----- Got: %d\n", ((tcp_size & 0xff00) >> 8), (uint8_t) *((uint8_t *) ptr));
+   printf("\nTCP SIZE %x04\n", tcp_size);
+   printf("\n Value wanted -- %x ----- Got: %x  --- and -- %x\n", ((tcp_size & 0xff00) >> 8), *ptr, *(ptr + 1));
 
    return tcp_size;
 }
