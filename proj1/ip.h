@@ -2,6 +2,7 @@
 #define IP_H
 
 #include <arpa/inet.h>
+#include "tcp.h"
 
 #define ICMP_PROTOCOL 1
 #define TCP_PROTOCOL 6
@@ -25,7 +26,7 @@ struct ipHeader {
 
 void getIP(const uint8_t *packetData, int packetLength);
 int pseudoHeader(uint8_t *pseudoHeader, struct ipHeader *header);
-void seudoHeader(struct PseudoHeader *pseudoHeader, struct ipHeader *header)
+void seudoHeader(struct PseudoHeader *pseudoHeader, struct ipHeader *header);
 void printIP(struct ipHeader *header, u_int16_t checksum);
 char *printProtocol(struct ipHeader *header);
 

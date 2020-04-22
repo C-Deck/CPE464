@@ -30,5 +30,6 @@ struct PseudoHeader {
 
 void printTCP(struct tcpHeader *header, uint16_t checksum);
 void getTCP(const uint8_t *packetData, int tcp_size, uint8_t *psuedoHeader);
+void getTCP2(const uint8_t *packetData, struct PseudoHeader *pseudoHeader);
 
 #endif

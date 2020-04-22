@@ -100,8 +100,8 @@ int pseudoHeader(uint8_t *pseudoHeader, struct ipHeader *header) {
 void seudoHeader(struct PseudoHeader *pseudoHeader, struct ipHeader *header) {
    uint16_t tcp_size = ntohs(header->TL) - (header->HDR * 4);
 
-   pseudoHeader->SOURCE_ADDR = header->SOURCE_ADDR
-   pseudoHeader->DEST_ADDR = header->DEST_ADDR
+   pseudoHeader->SOURCE_ADDR = header->SOURCE_ADDR;
+   pseudoHeader->DEST_ADDR = header->DEST_ADDR;
    pseudoHeader->ZERO = 0;
    pseudoHeader->PROTOCOL = header->PROTOCOL;
    pseudoHeader->TCP_SIZE = tcp_size;
