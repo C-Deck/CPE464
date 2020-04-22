@@ -53,8 +53,8 @@ void printTCP(struct tcpHeader *header, uint16_t checksum) {
 	} else {
 		printf("\t\tSource Port: : %d\n", header->SOURCE_PORT);
 	}
-	if (header->SOURCE_PORT == HTTP) {
-		printf("\t\tSource Port:  HTTP\n");
+	if (header->DEST_PORT == HTTP) {
+		printf("\t\tDest Port:  HTTP\n");
 	} else {
 		printf("\t\tDest Port: : %d\n", header->DEST_PORT);
 	}

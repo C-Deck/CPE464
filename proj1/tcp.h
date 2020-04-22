@@ -3,10 +3,10 @@
 
 #include <arpa/inet.h>
 
-#define ACK_MASK 0x4
-#define SYN_MASK 0x6
-#define RST_MASK 0x7
-#define FIN_MASK 0x8
+#define ACK_MASK 0x10
+#define SYN_MASK 0x02
+#define RST_MASK 0x04
+#define FIN_MASK 0x01
 
 #define HTTP 80
 
