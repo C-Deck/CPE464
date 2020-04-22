@@ -69,6 +69,8 @@ void recvFromClient(int clientSocket)
 		exit(-1);
 	}
 
+	printf("Message length sized %d\n", *((uint16_t *) lenBuf));
+
 	//now get the data from the client_socket (message includes null)
 	if ((messageLen = recv(clientSocket, buf, *((uint16_t *) lenBuf), 0)) < 0)
 	{
