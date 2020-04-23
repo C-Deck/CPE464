@@ -62,14 +62,14 @@ void sendToServer(int socketNum)
 			}
 		}
 
-		if (strcmp(sendBuf, "exit") == 0) {
+		if (strcmp(sendBuf + 2, "exit") == 0) {
 			break;
 		}
 
 		sendBuf[sendLen] = '\0';
 		sendLen++;  //we are going to send the null
 
-		*((uint16_t *) sendBuf) = sendLen;
+		*((uint16_t *) sendBuf) = sendLen - 2;
 
 		printf("read: %s string len: %d (including null)\n", sendBuf + 2, sendLen);
 	

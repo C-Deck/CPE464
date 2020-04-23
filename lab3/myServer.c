@@ -84,7 +84,9 @@ int recvFromClient(int clientSocket)
 			exit(-1);
 		}
 
-		printf("Rec Len: %d, Header Len: %d Message: %s\n", messageLen, headerNum, buf);
+		if (messageLen > 0) {
+			printf("Rec Len: %d, Header Len: %d Message: %s\n", messageLen, headerNum, buf);
+		}
 	} while (messageLen != 0);
 
 	return -1;
