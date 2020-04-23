@@ -80,9 +80,9 @@ void sendToServer(int socketNum)
 			exit(-1);
 		}
 
-		sentLen = 2;
+		sendLen = 2;
 		sent = 0;
-		char aChar = 0;
+		aChar = 0;
 
 		printf("Amount of data sent is: %d\n", sent);
 	}
