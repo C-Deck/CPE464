@@ -62,7 +62,7 @@ void sendToServer(int socketNum)
 			}
 		}
 
-		if (strcmp(sendBuf, "exit")) {
+		if (strcmp(sendBuf, "exit") == 0) {
 			break;
 		}
 
@@ -79,6 +79,10 @@ void sendToServer(int socketNum)
 			perror("send call");
 			exit(-1);
 		}
+
+		sentLen = 2;
+		sent = 0;
+		char aChar = 0;
 
 		printf("Amount of data sent is: %d\n", sent);
 	}
