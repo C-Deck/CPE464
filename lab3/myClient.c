@@ -71,7 +71,7 @@ void sendToServer(int socketNum)
 
 		*((uint16_t *) sendBuf) = sendLen;
 
-		printf("read: %s string len: %d (including null)\n", sendBuf, sendLen);
+		printf("read: %s string len: %d (including null)\n", sendBuf + 2, sendLen);
 	
 		sent =  send(socketNum, sendBuf, sendLen, 0);
 		if (sent < 0)
@@ -80,11 +80,11 @@ void sendToServer(int socketNum)
 			exit(-1);
 		}
 
+		printf("Amount of data sent is: %d\n", sent);
+
 		sendLen = 2;
 		sent = 0;
 		aChar = 0;
-
-		printf("Amount of data sent is: %d\n", sent);
 	}
 }
 

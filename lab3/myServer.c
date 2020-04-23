@@ -57,6 +57,7 @@ int recvFromClient(int clientSocket)
 {
 	char buf[MAXBUF];
 	uint8_t lenBuf[2];
+	uint16_t headerNum;
 	int messageLen = 0;
 	
 	do {
@@ -74,14 +75,16 @@ int recvFromClient(int clientSocket)
 			exit(-1);
 		}
 
+		headerNum = *((uint16_t *) lenBuf);
+
 		//now get the data from the client_socket (message includes null)
-		if ((messageLen = recv(clientSocket, buf, *((uint16_t *) lenBuf), 0)) < 0)
+		if ((messageLen = recv(clientSocket, buf, headerNum, 0)) < 0)
 		{
 			perror("recv call");
 			exit(-1);
 		}
 
-		printf("Rec Len: %d, Header Len: %d Message: %s\n", messageLen, *((uint16_t *) lenBuf), buf);
+		printf("Rec Len: %d, Header Len: %d Message: %s\n", messageLen, headerNum, buf);
 	} while (messageLen != 0);
 
 	return -1;
