@@ -64,7 +64,7 @@ int recvFromClient(int clientSocket)
 		// Use a time value of 1 second (so time is not null)
 		while (selectCall(clientSocket, 1, 0, TIME_IS_NOT_NULL) == 0)
 		{
-			printf("Select timed out waiting for client to send data\n");
+			//printf("Select timed out waiting for client to send data\n");
 		}
 	
 
