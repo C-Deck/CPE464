@@ -18,6 +18,7 @@
 
 #include "networks.h"
 #include "gethostbyname6.h"
+#include "safeSystemUtil.h"
 
 // This function creates the server socket.  The function 
 // returns the server socket number and prints the port 
@@ -30,24 +31,15 @@ int tcpServerSetup(int portNumber)
 	socklen_t len= sizeof(server);  /* length of local address        */
 
 	/* create the tcp socket  */
-	server_socket = socket(AF_INET6, SOCK_STREAM, 0);
-	if(server_socket < 0)
-	{
-		perror("socket call");
-		exit(1);
-	}
+	server_socket = safeSocket(AF_INET6, SOCK_STREAM, 0);
 
 	// setup the information to name the socket
-	server.sin6_family= AF_INET6;         		
+	server.sin6_family= AF_INET;         		
 	server.sin6_addr = in6addr_any;   //wild card machine address
 	server.sin6_port= htons(portNumber);         
 
 	// bind the name to the socket  (name the socket)
-	if (bind(server_socket, (struct sockaddr *) &server, sizeof(server)) < 0)
-	{
-		perror("bind call");
-		exit(-1);
-	}
+	safeBind(server_socket, (struct sockaddr *) &server, sizeof(server);
 	
 	//get the port number and print it out
 	if (getsockname(server_socket, (struct sockaddr*)&server, &len) < 0)
@@ -56,11 +48,7 @@ int tcpServerSetup(int portNumber)
 		exit(-1);
 	}
 
-	if (listen(server_socket, BACKLOG) < 0)
-	{
-		perror("listen call");
-		exit(-1);
-	}
+	safeListen(server_socket, BACKLOG);
 	
 	printf("Server Port Number %d \n", ntohs(server.sin6_port));
 	
@@ -76,18 +64,13 @@ int tcpAccept(int server_socket, int debugFlag)
 	int clientInfoSize = sizeof(clientInfo);
 	int client_socket= 0;
 
-	if ((client_socket = accept(server_socket, (struct sockaddr*) &clientInfo, (socklen_t *) &clientInfoSize)) < 0)
-	{
-		perror("accept call error");
-		exit(-1);
-	}
+	client_socket = safeAccept(server_socket, (struct sockaddr*) &clientInfo, (socklen_t *) &clientInfoSize);
 	
 	if (debugFlag)
 	{
 		printf("Client accepted.  Client IP: %s Client Port Number: %d\n",  
 				getIPAddressString(clientInfo.sin6_addr.s6_addr), ntohs(clientInfo.sin6_port));
 	}
-	
 
 	return(client_socket);
 }
@@ -101,11 +84,7 @@ int tcpClientSetup(char * serverName, char * port, int debugFlag)
 	struct sockaddr_in6 server;      
 	
 	// create the socket
-	if ((socket_num = socket(AF_INET6, SOCK_STREAM, 0)) < 0)
-	{
-		perror("socket call");
-		exit(-1);
-	}
+	socket_num = safeSocket(AF_INET6, SOCK_STREAM, 0);
 	
 	if (debugFlag)
 	{
@@ -123,11 +102,7 @@ int tcpClientSetup(char * serverName, char * port, int debugFlag)
 	}
 
 	printf("server ip address: %s\n", getIPAddressString(ipAddress));
-	if(connect(socket_num, (struct sockaddr*)&server, sizeof(server)) < 0)
-	{
-		perror("connect call");
-		exit(-1);
-	}
+	safeConnect(socket_num, (struct sockaddr*)&server, sizeof(server);
 
 	if (debugFlag)
 	{
@@ -162,11 +137,7 @@ int selectCall(int socketNumber, int seconds, int microseconds, int timeIsNotNul
 		timeoutPtr = NULL;  /* block forever - until input */
     }
 
-	if ((numReady = select(socketNumber + 1, &fileDescriptorSet, NULL, NULL, timeoutPtr)) < 0)
-	{
-		perror("select");
-		exit(-1);
-    }
+	numReady = safeSelect(socketNumber + 1, &fileDescriptorSet, NULL, NULL, timeoutPtr);
   
 	// Will be either 0 (socket not ready) or 1 (socket is ready for read)
     return numReady;

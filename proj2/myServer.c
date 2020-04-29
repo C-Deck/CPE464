@@ -19,6 +19,7 @@
 #include <netdb.h>
 
 #include "networks.h"
+#include "safeSystemUtil.h"
 
 #define DEBUG_FLAG 1
 
@@ -42,8 +43,8 @@ int main(int argc, char *argv[])
 	recvFromClient(clientSocket);
 	
 	/* close the sockets */
-	close(clientSocket);
-	close(serverSocket);
+	safeClose(clientSocket);
+	safeClose(serverSocket);
 
 	
 	return 0;
@@ -61,11 +62,7 @@ void recvFromClient(int clientSocket)
 	}
 	
 	//now get the data from the client_socket (message includes null)
-	if ((messageLen = recv(clientSocket, buf, MAXBUF, 0)) < 0)
-	{
-		perror("recv call");
-		exit(-1);
-	}
+	messageLen = safeRecv(clientSocket, buf, MAXBUF, 0);
 
 	printf("Message received, length: %d Data: %s\n", messageLen, buf);
 }

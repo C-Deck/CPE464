@@ -18,6 +18,7 @@
 #include <netdb.h>
 
 #include "networks.h"
+#include "safeSystemUtil.h"
 
 #define DEBUG_FLAG 1
 
@@ -35,7 +36,7 @@ int main(int argc, char * argv[])
 	
 	sendToServer(socketNum);
 	
-	close(socketNum);
+	safeClose(socketNum);
 	
 	return 0;
 }
@@ -64,12 +65,7 @@ void sendToServer(int socketNum)
 	
 	printf("read: %s string len: %d (including null)\n", sendBuf, sendLen);
 		
-	sent =  send(socketNum, sendBuf, sendLen, 0);
-	if (sent < 0)
-	{
-		perror("send call");
-		exit(-1);
-	}
+	sent =  safeSend(socketNum, sendBuf, sendLen, 0);
 
 	printf("Amount of data sent is: %d\n", sent);
 }
