@@ -20,7 +20,7 @@
 #include "networks.h"
 
 #define DEBUG_FLAG 1
-#
+
 void sendToServer(int socketNum);
 void checkArgs(int argc, char * argv[]);
 
