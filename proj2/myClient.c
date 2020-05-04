@@ -70,7 +70,7 @@ int initClient(ClientInfo *client, int socketNum, char *handle)
 	memset(client->handle, '\0', MAX_HANDLE_LENGHTH);
 
 	// Check handle length
-    if ((handleLen = strlen(handle)) >  MAX_HANDLE_LENGTH) {
+    if ((handleLen = strlen(handle)) > MAX_HANDLE_LENGTH) {
     	handleTooLong(handle);
     	return -1;
     }
