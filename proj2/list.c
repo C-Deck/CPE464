@@ -16,14 +16,55 @@ struct Client *getClient(struct ClientList *list, char *handle)
 	return client;
 }
 
+void doOnEachClient(struct ClientList *list, void (*f)(int, char *, uint8_t), int senderSocketNum)
+{
+	struct Client *client = list->head;
+	while (client != NULL) {
+		(*f)(senderSocketNum, client->handle, client->handleLength);
+
+		client = client->nextClient;
+	}
+}
+
+int checkHandleExists(struct ClientList *list, char *handle)
+{
+	struct Client *client = list->head;
+	while (client != NULL) {
+		if (client->handle && (strcmp(handle, client->handle) == 0)) {
+			return -1;
+			break;
+		}
+
+		client = client->nextClient;
+	}
+
+	return 0;
+}
+
+void setClientHandle(struct ClientList *list, int socketNum, char *handle, uint8_t handleSize)
+{
+	struct Client *client = list->head;
+	while (client != NULL) {
+		if (client->socket == socketNum) {
+			strncpy(client->handle, handle, handleSize);
+			(client->handle)[handleSize] = '\0';
+			client->handleLength = handleSize;
+			break;
+		}
+
+		client = client->nextClient;
+	}
+}
+
 void printClient(struct Client *client)
 {
 	printf("Node:\n\tName: %s\n\tSocket: %d\n", client->handle, client->socket);
 }
 
-struct Client *addClient(struct ClientList *list)
+void *addClient(struct ClientList *list, int socketNum)
 {
 	struct Client *newClient = safeCalloc(1, sizeof(struct Client));
+	newClient->socket = socketNum;
 
 	if (list->head == NULL) {
 		list->head = newClient;
@@ -41,7 +82,7 @@ struct Client *addClient(struct ClientList *list)
 void removeClient(struct ClientList *list, struct Client *client)
 {
 	struct Client *temp = list->head;
-   struct Client *trail = list->head;
+    struct Client *trail = list->head;
 
 	if (temp == client) {
 		list->head = client->nextClient;

@@ -11,5 +11,6 @@ void safeSend(int sockfd, const void *msg, int len, int flags);
 void safeClose(int sockfd);
 void * safeRealloc(void *ptr, size_t size);
 void * safeCalloc(size_t nmemb, size_t size);
+void * safeMalloc(size_t size);
 
 #endif

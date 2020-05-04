@@ -142,3 +142,9 @@ int selectCall(int socketNumber, int seconds, int microseconds, int timeIsNotNul
 	// Will be either 0 (socket not ready) or 1 (socket is ready for read)
     return numReady;
 }
+
+void setChatHeader(char *packet, uint16_t packetLength, uint8_t flag)
+{
+	((uint16_t *) packet)[0] = htons(packetSize);
+	packet[2] = NUM_HANDLES_FLAG;
+}

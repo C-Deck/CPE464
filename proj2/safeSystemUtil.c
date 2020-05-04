@@ -116,3 +116,14 @@ void * safeCalloc(size_t nmemb, size_t size)
 	}
 	return returnValue;
 }
+
+void * safeMalloc(size_t size)
+{
+	void * returnValue = NULL;
+	if ((returnValue = malloc(size)) == NULL)
+	{
+		perror("malloc");
+		exit(-1);
+	}
+	return returnValue;
+}
