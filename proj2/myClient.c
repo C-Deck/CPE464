@@ -19,6 +19,7 @@
 #include <ctype.h>
 
 #include "networks.h"
+#include "error.h"
 #include "safeSystemUtil.h"
 
 #define DEBUG_FLAG 1
@@ -33,6 +34,8 @@ void sendToServer(int socketNum);
 void checkArgs(int argc, char * argv[]);
 int getFromStdin(char * sendBuf, char * prompt);
 int initClient(ClientInfo *client, int socketNum, char *handle);
+int initialPacketCheck(ClientInfo *client, int socketNum);
+int getInitPacketResponse(ClientInfo *client, int socketNum);
 int parseInput(char *inputBuf, uint16_t *sendLen, uint8_t *packet, ClientInfo *client);
 void parseBroadcast(char *inputBuf, uint16_t *sendLen, uint8_t *packet, ClientInfo *client);
 void parseNumHandles(char *inputBuf, uint16_t *sendLen, uint8_t *packet, ClientInfo *client);
@@ -40,7 +43,7 @@ void parseHandles(char *inputBuf, uint16_t *sendLen, uint8_t *packet, uint8_t nu
 void setSender(uint8_t *packet, ClientInfo *client);
 void addMessage(char *inputBuf, uint16_t *sendLen, uint8_t *packet);
 
-// TODO CHECK INCREMENTING ON PACKET AND INPUT
+// TODO CHECK INCREMENTING ON PACKET AND INPUT - Break messages into multiple packets
 int main(int argc, char * argv[])
 {
 	int socketNum = 0;         //socket descriptor
@@ -52,7 +55,7 @@ int main(int argc, char * argv[])
 	socketNum = tcpClientSetup(argv[1], argv[2], DEBUG_FLAG);
 	
 	if (initClient(&client, socketNum, argv[2]) == 0) {
-		if (initialPacketCheck(&client) == 0) {
+		if (initialPacketCheck(&client, socketNum) == 0) {
 			sendToServer(socketNum);
 		}
 	}
@@ -82,7 +85,8 @@ int initClient(ClientInfo *client, int socketNum, char *handle)
 	return 0;
 }
 
-void initialPacketCheck(ClientInfo *client) {
+int initialPacketCheck(ClientInfo *client, int socketNum)
+{
 	int sent = 0;            //actual amount of data sent/* get the data and send it   */
 	uint8_t packet[MAXBUF];
 	uint16_t packetSize = 3;
@@ -93,7 +97,28 @@ void initialPacketCheck(ClientInfo *client) {
 	setChatHeader(packet, packetSize, CONNECT_FLAG);
 
 	//TODO Receive from the server the ACK
-	sent = safeSend(client->socket, packet, packetSize, 0);
+	safeSend(client->socket, packet, packetSize, 0);
+
+	return getInitPacketResponse(socketNum);
+}
+
+int getInitPacketResponse(ClientInfo *client, int socketNum)
+{
+	char buf[CHAT_HEADER_SIZE];
+
+	safeRecv(socketNum, buf, CHAT_HEADER_SIZE, 0);
+
+	if (buf[2] == ACK_GOOD_FLAG) {
+		printf("Confirmation packet recieved\n");
+		return 0;
+	} else if (buf[2] == ACK_BAD_FLAG) {
+		handleInUse(client->handle);
+		return -1;
+	} else {
+		printf("Unknown error\n");
+	}
+
+	return -1;
 }
 
 void sendToServer(int socketNum, ClientInfo *client)
@@ -256,6 +281,36 @@ void setSender(uint8_t *packet, ClientInfo *client)
 	packet[0] = client->handleLength;
 
 	memcpy(packet + 1, client->handle, client->handleLength);
+}
+
+void receiveHandleNumbers(uint8_t *packet, int socketNum)
+{
+	uint32_t numberHandles = 0;
+	uint8_t flag = packet[2];
+
+	numberHandles = ntohl(*((uint32_t *) &(packet[3])));
+	if (flag == NUM_HANDLES_FLAG) {
+		receiveHandles(socketNum);
+	} else {
+		printf("Did not receive the number of handles flag\n");
+	}
+}
+
+void receiveHandles(int socketNum, uint32_t numberHandles)
+{
+	int handleCount = 0;
+	uint8_t handleLength = 0;
+	uint8_t flag = 0;
+	char header[CHAT_HEADER_SIZE + 1];
+	char handle[MAX_HANDLE_LENGHTH];
+
+	while (handleCount < numberHandles) {
+		safeRecv(socketNum, header, CHAT_HEADER_SIZE + 1, 0);
+
+		
+		safeRecv(socketNum, handle, handleLength, 0);
+	}
+	safeRecv(socketNum, buf, receiveSize, 0);
 }
 
 int getFromStdin(char * sendBuf, char * prompt)

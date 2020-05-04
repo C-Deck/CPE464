@@ -16,11 +16,11 @@ struct Client *getClient(struct ClientList *list, char *handle)
 	return client;
 }
 
-void forEachWithPacket(struct ClientList *list, void (*f)(int, char *, uint16_t), char *packet, uint16_t packetSize)
+void forEachWithPacket(struct ClientList *list, void (*f)(int, char *, uint16_t), char *packet, uint16_t packetSize, int senderSocket)
 {
 	struct Client *client = list->head;
 	while (client != NULL) {
-		if (client->handleSet == 1) {
+		if (client->handleSet == 1 && client->socket != senderSocket) {
 			(*f)(client->socket, packet, packetSize);
 		}
 

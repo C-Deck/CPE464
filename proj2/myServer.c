@@ -140,7 +140,7 @@ void doCommand(int socketNum, char *packet, uint16_t packetSize, uint8_t flag)
 			sendMessage(packet, socketNum, packetSize);
 			break;
 		case BROADCAST_FLAG:
-			forEachWithPacket(clientList, broadcastToClient, packet, packetSize);
+			forEachWithPacket(clientList, broadcastToClient, packet, packetSize, socketNum);
 			break;
 		case GET_HANDLES_FLAG:
 			sendAllHandles(socketNum);
