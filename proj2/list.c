@@ -16,11 +16,25 @@ struct Client *getClient(struct ClientList *list, char *handle)
 	return client;
 }
 
-void doOnEachClient(struct ClientList *list, void (*f)(int, char *, uint8_t), int senderSocketNum)
+void forEachWithPacket(struct ClientList *list, void (*f)(int, char *, uint16_t), char *packet, uint16_t packetSize)
 {
 	struct Client *client = list->head;
 	while (client != NULL) {
-		(*f)(senderSocketNum, client->handle, client->handleLength);
+		if (client->handleSet == 1) {
+			(*f)(client->socket, packet, packetSize);
+		}
+
+		client = client->nextClient;
+	}
+}
+
+void forEachWithSender(struct ClientList *list, void (*f)(int, char *, uint8_t), int senderSocketNum)
+{
+	struct Client *client = list->head;
+	while (client != NULL) {
+		if (client->handleSet == 1) {
+			(*f)(senderSocketNum, client->handle, client->handleLength);
+		}
 
 		client = client->nextClient;
 	}
@@ -49,11 +63,15 @@ void setClientHandle(struct ClientList *list, int socketNum, char *handle, uint8
 			strncpy(client->handle, handle, handleSize);
 			(client->handle)[handleSize] = '\0';
 			client->handleLength = handleSize;
+			client->handleSet = 1;
 			break;
 		}
 
 		client = client->nextClient;
 	}
+
+	// Only increment after handle is set
+	list->numClients = list->numClients + 1;
 }
 
 void printClient(struct Client *client)
@@ -73,25 +91,26 @@ void *addClient(struct ClientList *list, int socketNum)
 	else {
 		list->tail->nextClient = newClient;
 		list->tail = newClient;
-      list->numClients = list->numClients + 1;
 	}
+
+	newClient->handleSet = 0;
 
 	return newClient;
 }
 
-void removeClient(struct ClientList *list, struct Client *client)
+void removeClientFromList(struct ClientList *list, int socketNum)
 {
 	struct Client *temp = list->head;
     struct Client *trail = list->head;
 
-	if (temp == client) {
+	if (temp->socket == socketNum) {
 		list->head = client->nextClient;
 		temp = NULL;
 	}
 
 	else {
 		while (temp != NULL) {
-			if (temp == client) {
+			if (temp->socket == socketNum) {
             trail->nextClient = client->nextClient;
 				break;
 			}
@@ -104,6 +123,7 @@ void removeClient(struct ClientList *list, struct Client *client)
 		list->tail = trail;
 	}
 
-	close(client->socket);
+	list->numClients--;
+
 	free(client);
 }

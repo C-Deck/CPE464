@@ -7,6 +7,8 @@
 #ifndef __NETWORKS_H__
 #define __NETWORKS_H__
 
+#include <stdint.h>
+
 #define BACKLOG 10
 #define MAXBUF 1024
 #define TIME_IS_NULL 1

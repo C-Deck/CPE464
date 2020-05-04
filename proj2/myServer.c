@@ -33,6 +33,14 @@ void parseHeader(int clientSocket, char *packet);
 void doCommand(int socketNum, char *packet, uint16_t packetSize, uint8_t flag);
 void addNewClient(int mainServerSocket);
 void removeClient(int clientSocket);
+void sendMessage(char *packet, int senderSocket, uint16_t packetSize);
+void attemptSendMessage(uint8_t handleLength, char *handle, char *packet, int senderSocket, uint16_t packetSize);
+void broadcastToClient(int socketNum, char *packet, uint16_t packetSize);
+void sendAllHandles(int socketNum);
+void sendHandleFlag(int socketNum, char *handle, uint8_t handleLength);
+void sendHandlePacket(int socketNum, char *handle, uint8_t handleLength, uint8_t flag);
+void sendHandleListFinished(int socketNum);
+void exitClient(int socketNum);
 
 ClientList *clientList;
 
@@ -47,9 +55,6 @@ int main(int argc, char *argv[])
 	
 	//create the server socket
 	serverSocket = tcpServerSetup(portNumber);
-
-	// wait for client to connect - select version
-	// clientSocket = tcpAccept(serverSocket, DEBUG_FLAG);
 
 	// Main control process (clients and accept())
 	processSockets(serverSocket);
@@ -132,13 +137,13 @@ void doCommand(int socketNum, char *packet, uint16_t packetSize, uint8_t flag)
 			setHandle(socketNum, packet + CHAT_HEADER_SIZE);
 			break;
 		case MESSAGE_FLAG:
-			sendMessage(packet);
+			sendMessage(packet, socketNum, packetSize);
 			break;
 		case BROADCAST_FLAG:
-			sendBroadcast(packet);
+			forEachWithPacket(clientList, broadcastToClient, packet, packetSize);
 			break;
 		case GET_HANDLES_FLAG:
-			sendHandleLength(socketNum);
+			sendAllHandles(socketNum);
 			break;
 		case EXIT_FLAG:
 			exitClient(socketNum);
@@ -146,6 +151,45 @@ void doCommand(int socketNum, char *packet, uint16_t packetSize, uint8_t flag)
 		default:
 			printf("\nInvalid flag in header");
 			break;
+	}
+}
+
+void sendMessage(char *packet, int senderSocket, uint16_t packetSize)
+{
+	uint8_t numClients = 0, currentHandleLength = 0, offset = CHAT_HEADER_SIZE, idx = 0;
+	char handle[MAX_HANDLE_LENGHTH];
+
+	currentHandleLength = *(packet + CHAT_HEADER_SIZE);
+	offset = currentHandleLength + 1;
+
+	numClients = *(packet + offset);
+	offset++;
+
+	while (idx < numClients) {
+		memset(inputBuf, '\0', MAX_HANDLE_LENGHTH);
+
+		currentHandleLength = *(packet + offset);
+		offset++;
+
+		memcpy(handle, packet + offset, currentHandleLength);
+		handle[currentHandleLength] = '\0';
+		offset = offset + currentHandleLength;
+
+		attemptSendMessage(currentHandleLength, handle, packet, senderSocket, packetSize);
+	
+		idx++;
+	}
+}
+
+void attemptSendMessage(uint8_t handleLength, char *handle, char *packet, int senderSocket, uint16_t packetSize)
+{
+	Client *client = getClient(clientList, handle);
+
+	if (client != NULL) {
+		// Send the packet
+		safeSend(socketNum, packet, packetSize, 0);
+	} else {
+		sendHandlePacket(senderSocket, handleLength, handle, BAD_DEST_FLAG);
 	}
 }
 
@@ -159,41 +203,61 @@ void setHandle(int socketNum, char *packet)
 	handleBuf[handleSize] = '\0';
 
 	if (checkHandleExists(clientList, handleBuf) == 0) {
-		setChatHeader(sendPacket, 3, ACK_GOOD_FLAG);
+		setChatHeader(sendPacket, CHAT_HEADER_SIZE, ACK_GOOD_FLAG);
+
 		// Send the packet
+		safeSend(socketNum, packet, CHAT_HEADER_SIZE, 0);
 	} else {
-		setChatHeader(sendPacket, 3, ACK_BAD_FLAG);
+		setChatHeader(sendPacket, CHAT_HEADER_SIZE, ACK_BAD_FLAG);
+
 		// Send the packet
+		safeSend(socketNum, packet, CHAT_HEADER_SIZE, 0);
 	}
 }
 
-void sendHandleLength(int socketNum)
+void broadcastToClient(int socketNum, char *packet, uint16_t packetSize) // Can be replaced with just a send
+{
+	// Send the packet
+	safeSend(socketNum, packet, packetSize, 0);
+}
+
+void sendAllHandles(int socketNum)
 {
 	char packet[7];
-	uint16_t packetLength = 7;
+	uint16_t packetLength = CHAT_HEADER_SIZE + 4;
 	uint32_t numHandles = 0;
 
 	setChatHeader(packet, packetLength, NUM_HANDLES_FLAG);
 	numHandles = clientList->numClients;
-	*((uint32_t *) (packet + CHAT_HEADER_SIZE)) = numHandles;
+	*((uint32_t *) (packet + CHAT_HEADER_SIZE)) = htonl(numHandles);
 
 	// Send the packet
+	safeSend(socketNum, packet, CHAT_HEADER_SIZE + 4, 0);
 
+	forEachWithSender(clientList, sendHandleFlag, socketNum);
 
 	sendAllHandles(socketNum);
 }
 
-void sendHandlePacket(int socketNum, char *handle, uint8_t handleLength)
+// Use sendHandlePacket with flag preset -
+void sendHandleFlag(int socketNum, char *handle, uint8_t handleLength)
 {
-	char packet[MAX_HANDLE_LENGHTH + 4];
+	sendHandlePacket(socketNum, handle, handleLength, HANDLE_FLAG);
+}
+
+// Used for both flags 7 and 12
+void sendHandlePacket(int socketNum, char *handle, uint8_t handleLength, uint8_t flag)
+{
+	char packet[MAX_HANDLE_LENGHTH + CHAT_HEADER_SIZE + 1];
 	int packetSize = CHAT_HEADER_SIZE + handleLength + 1;
 
-	setChatHeader(packet, packetSize, HANDLE_FLAG);
+	setChatHeader(packet, packetSize, flag);
 	packet[CHAT_HEADER_SIZE] = handleLength;
 
 	memcpy(packet + CHAT_HEADER_SIZE + 1, handle, handleLength);
 
 	// Send the packet
+	safeSend(socketNum, packet, packetSize, 0);
 }
 
 void sendHandleListFinished(int socketNum)
@@ -201,13 +265,28 @@ void sendHandleListFinished(int socketNum)
 	char packet[3];
 
 	setChatHeader(packet, 3, HANDLES_END_FLAG);
+
 	// Send the packet
-	
+	safeSend(socketNum, packet, CHAT_HEADER_SIZE, 0);
 }
 
+void exitClient(int socketNum)
+{
+	char packet[3];
+
+	setChatHeader(packet, 3, ACK_EXIT_FLAG);
+
+	// Send the packet
+	safeSend(socketNum, packet, CHAT_HEADER_SIZE, 0);
+	
+	removeClient(socketNum);
+}
+
+// TODO CHECK IF HANDLE IS BAD AND REMOVE THE CONNECTION???
 void addNewClient(int mainServerSocket)
 {
 	int newClientSocket = tcpAccept(mainServerSocket, DEBUG_FLAG);
+	addClient(clientList, newClientSocket);
 
 	addToPollSet(newClientSocket);
 }
@@ -215,6 +294,7 @@ void addNewClient(int mainServerSocket)
 void removeClient(int clientSocket)
 {
 	printf("Client on socket %d terminted\n", clientSocket);
+	removeClientFromList(clientList, clientSocket);
 	removeFromPollSet(clientSocket);
 	safeClose(clientSocket);
 }
