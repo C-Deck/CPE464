@@ -62,9 +62,9 @@ int main(int argc, char * argv[])
 	checkArgs(argc, argv);
 
 	/* set up the TCP Client socket  */
-	socketNum = tcpClientSetup(argv[1], argv[2], DEBUG_FLAG);
+	socketNum = tcpClientSetup(argv[2], argv[3], DEBUG_FLAG);
 
-	if (initClient(&client, socketNum, argv[2]) == 0) {
+	if (initClient(&client, socketNum, argv[1]) == 0) {
 		if (initialPacketCheck(&client, socketNum) == 0) {
 			addToPollSet(socketNum);
 			sendToServer(socketNum, &client);
@@ -526,9 +526,9 @@ int getFromStdin(char * sendBuf, char * prompt)
 void checkArgs(int argc, char * argv[])
 {
 	/* check command line arguments  */
-	if (argc != 3)
+	if (argc != 4)
 	{
-		printf("usage: %s host-name port-number \n", argv[0]);
+		printf("usage: %s handle host-name port-number \n", argv[0]);
 		exit(1);
 	}
 }
