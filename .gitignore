@@ -1,2 +1,6 @@
 proj1/.vscode
 *.o
+proj2/myClient
+proj2/myServer
+lab3/myServer
+lab3/myClient
