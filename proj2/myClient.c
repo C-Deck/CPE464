@@ -71,7 +71,8 @@ int main(int argc, char * argv[])
 		}
 	}
 	
-	safeClose(socketNum);
+	//safeClose(socketNum);
+	close(socketNum);
 	
 	return 0;
 }
@@ -107,7 +108,12 @@ int initialPacketCheck(struct ClientInfo *client, int socketNum)
 	setSender(packet + CHAT_HEADER_SIZE, client);
 
 	//TODO Receive from the server the ACK
-	safeSend(client->socket, packet, packetSize, 0);
+	//safeSend(client->socket, packet, packetSize, 0);
+	if ((send(socketNum, packet, packetSize, 0)) < 0)
+	{
+		perror("send call");
+		exit(-1);
+	}
 
 	return getInitPacketResponse(client, socketNum);
 }
@@ -116,7 +122,12 @@ int getInitPacketResponse(struct ClientInfo *client, int socketNum)
 {
 	char buf[CHAT_HEADER_SIZE];
 
-	safeRecv(socketNum, buf, CHAT_HEADER_SIZE, 0);
+	//safeRecv(socketNum, buf, CHAT_HEADER_SIZE, 0);
+	if (recv(socketNum, buf, CHAT_HEADER_SIZE, 0) < 0)
+	{
+		perror("recv call");
+		exit(-1);
+	}
 
 	if (buf[2] == ACK_GOOD_FLAG) {
 		printf("Confirmation packet recieved\n");
@@ -157,7 +168,12 @@ void sendToServer(int socketNum, struct ClientInfo *client)
 			printf("read: %s string len: %d (including null)\n", inputBuf, sendLen);
 		
 			setChatHeader(packet, sendLen, flag);
-			sent = safeSend(socketNum, packet, sendLen, 0);
+			//sent = safeSend(socketNum, packet, sendLen, 0);
+			if ((sent = send(socketNum, packet, sendLen, 0)) < 0)
+			{
+				perror("send call");
+				exit(-1);
+			}
 
 			if (flag == GET_HANDLES_FLAG) {
 				receiveHandleNumbers(socketNum);
@@ -180,12 +196,22 @@ void recvServer(int socketNum)
 	uint16_t packetLength = 0;
 	uint8_t flag = 0;
 
-	safeRecv(socketNum, header, CHAT_HEADER_SIZE, 0);
+	//safeRecv(socketNum, header, CHAT_HEADER_SIZE, 0);
+	if (recv(socketNum, header, CHAT_HEADER_SIZE, 0) < 0)
+	{
+		perror("recv call");
+		exit(-1);
+	}
 
 	packetLength = ntohs(*((uint16_t *) header));
 	flag = header[2];
 
-	safeRecv(socketNum, header, packetLength - CHAT_HEADER_SIZE, 0);
+	//safeRecv(socketNum, packet, packetLength - CHAT_HEADER_SIZE, 0);
+	if (recv(socketNum, packet, packetLength - CHAT_HEADER_SIZE, 0) < 0)
+	{
+		perror("recv call");
+		exit(-1);
+	}
 
 	parsePacket(packet, packetLength, flag);
 }
@@ -399,7 +425,12 @@ void receiveHandleNumbers(int socketNum)
 	uint32_t numberHandles = 0;
 	uint8_t flag = 0;
 
-	safeRecv(socketNum, packet, CHAT_HEADER_SIZE + 4, 0);
+	//safeRecv(socketNum, packet, CHAT_HEADER_SIZE + 4, 0);
+	if (recv(socketNum, packet, CHAT_HEADER_SIZE + 4, 0) < 0)
+	{
+		perror("recv call");
+		exit(-1);
+	}
 	flag = packet[2];
 	numberHandles = ntohl(*((uint32_t *) &(packet[3])));
 
@@ -419,7 +450,12 @@ void receiveHandles(int socketNum, uint32_t numberHandles)
 	char handle[MAX_HANDLE_LENGTH];
 
 	while (handleCount < numberHandles) {
-		safeRecv(socketNum, header, CHAT_HEADER_SIZE + 1, 0);
+		//safeRecv(socketNum, header, CHAT_HEADER_SIZE + 1, 0);
+		if (recv(socketNum, header, CHAT_HEADER_SIZE + 1, 0) < 0)
+		{
+			perror("recv call");
+			exit(-1);
+		}
 		flag = header[2];
 		handleLength = header[3];
 		
@@ -427,7 +463,12 @@ void receiveHandles(int socketNum, uint32_t numberHandles)
 			printf("Invalid Flag for handle packet");
 		}
 
-		safeRecv(socketNum, handle, handleLength, 0);
+		//safeRecv(socketNum, handle, handleLength, 0);
+		if (recv(socketNum, handle, handleLength, 0) < 0)
+		{
+			perror("recv call");
+			exit(-1);
+		}
 		printf("\n\t%d: %s", handleCount, handle);
 
 		handleCount++;
@@ -441,7 +482,12 @@ void allHandlesReceived(int socketNum)
 	uint8_t flag = 0;
 	char header[CHAT_HEADER_SIZE];
 
-	safeRecv(socketNum, header, CHAT_HEADER_SIZE, 0);
+	//safeRecv(socketNum, header, CHAT_HEADER_SIZE, 0);
+	if (recv(socketNum, header, CHAT_HEADER_SIZE, 0) < 0)
+	{
+		perror("recv call");
+		exit(-1);
+	}
 	flag = header[2];
 
 	if (flag != HANDLES_END_FLAG) {

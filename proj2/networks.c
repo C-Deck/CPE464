@@ -32,7 +32,13 @@ int tcpServerSetup(int portNumber)
 	socklen_t len= sizeof(server);  /* length of local address        */
 
 	/* create the tcp socket  */
-	server_socket = safeSocket(AF_INET6, SOCK_STREAM, 0);
+	//server_socket = safeSocket(AF_INET6, SOCK_STREAM, 0);
+	server_socket = socket(AF_INET6, SOCK_STREAM, 0);
+	if(server_socket < 0)
+	{
+		perror("socket call");
+		exit(1);
+	}
 
 	// setup the information to name the socket
 	server.sin6_family= AF_INET6;
@@ -40,7 +46,13 @@ int tcpServerSetup(int portNumber)
 	server.sin6_port= htons(portNumber);
 
 	// bind the name to the socket  (name the socket)
-	safeBind(server_socket, (struct sockaddr *) &server, sizeof(server));
+	//safeBind(server_socket, (struct sockaddr *) &server, sizeof(server));
+	// bind the name to the socket  (name the socket)
+	if (bind(server_socket, (struct sockaddr *) &server, sizeof(server)) < 0)
+	{
+		perror("bind call");
+		exit(-1);
+	}
 	
 	//get the port number and print it out
 	if (getsockname(server_socket, (struct sockaddr*)&server, &len) < 0)
@@ -49,7 +61,12 @@ int tcpServerSetup(int portNumber)
 		exit(-1);
 	}
 
-	safeListen(server_socket, BACKLOG);
+	//safeListen(server_socket, BACKLOG);
+	if (listen(server_socket, BACKLOG) < 0)
+	{
+		perror("listen call");
+		exit(-1);
+	}
 	
 	printf("Server Port Number %d \n", ntohs(server.sin6_port));
 	
@@ -65,8 +82,13 @@ int tcpAccept(int server_socket, int debugFlag)
 	int clientInfoSize = sizeof(clientInfo);
 	int client_socket= 0;
 
-	client_socket = safeAccept(server_socket, (struct sockaddr*) &clientInfo, (socklen_t *) &clientInfoSize);
-	
+	//client_socket = safeAccept(server_socket, (struct sockaddr*) &clientInfo, (socklen_t *) &clientInfoSize);
+	if ((client_socket = accept(server_socket, (struct sockaddr*) &clientInfo, (socklen_t *) &clientInfoSize)) < 0)
+	{
+		perror("accept call error");
+		exit(-1);
+	}
+
 	if (debugFlag)
 	{
 		printf("Client accepted.  Client IP: %s Client Port Number: %d\n",  
@@ -85,8 +107,13 @@ int tcpClientSetup(char * serverName, char * port, int debugFlag)
 	struct sockaddr_in6 server;      
 	
 	// create the socket
-	socket_num = safeSocket(AF_INET6, SOCK_STREAM, 0);
-	
+	//socket_num = safeSocket(AF_INET6, SOCK_STREAM, 0);
+	if ((socket_num = socket(AF_INET6, SOCK_STREAM, 0)) < 0)
+	{
+		perror("socket call");
+		exit(-1);
+	}
+
 	if (debugFlag)
 	{
 		printf("Connecting to server on port number %s\n", port);
@@ -103,7 +130,12 @@ int tcpClientSetup(char * serverName, char * port, int debugFlag)
 	}
 
 	printf("server ip address: %s\n", getIPAddressString(ipAddress));
-	safeConnect(socket_num, (struct sockaddr*)&server, sizeof(server));
+	//safeConnect(socket_num, (struct sockaddr*)&server, sizeof(server));
+	if(connect(socket_num, (struct sockaddr*)&server, sizeof(server)) < 0)
+	{
+		perror("connect call");
+		exit(-1);
+	}
 
 	if (debugFlag)
 	{

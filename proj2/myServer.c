@@ -107,7 +107,12 @@ void recvFromClient(int clientSocket)
 	int messageLen = 0;
 	
 	//now get the data from the client_socket (message includes null)
-	messageLen = safeRecv(clientSocket, buf, MAXBUF, 0);
+	//messageLen = safeRecv(clientSocket, buf, MAXBUF, 0);
+	if ((messageLen = recv(clientSocket, buf, MAXBUF, 0)) < 0)
+	{
+		perror("recv call");
+		exit(-1);
+	}
 
 	if (messageLen == 0) {
 		// recv() 0 bytes so client is gone
@@ -181,7 +186,12 @@ void attemptSendMessage(uint8_t handleLength, char *handle, char *packet, int se
 
 	if (client != NULL) {
 		// Send the packet
-		safeSend(client->socket, packet, packetSize, 0);
+		//safeSend(client->socket, packet, packetSize, 0);
+		if ((send(client->socket, packet, packetSize, 0)) < 0)
+		{
+			perror("send call");
+			exit(-1);
+		}
 	} else {
 		sendHandlePacket(senderSocket, handle, handleLength, BAD_DEST_FLAG);
 	}
@@ -200,19 +210,34 @@ void setHandle(int socketNum, char *packet)
 		setChatHeader(sendPacket, CHAT_HEADER_SIZE, ACK_GOOD_FLAG);
 
 		// Send the packet
-		safeSend(socketNum, packet, CHAT_HEADER_SIZE, 0);
+		//safeSend(socketNum, packet, CHAT_HEADER_SIZE, 0);
+		if ((send(socketNum, packet, CHAT_HEADER_SIZE, 0)) < 0)
+		{
+			perror("send call");
+			exit(-1);
+		}
 	} else {
 		setChatHeader(sendPacket, CHAT_HEADER_SIZE, ACK_BAD_FLAG);
 
 		// Send the packet
-		safeSend(socketNum, packet, CHAT_HEADER_SIZE, 0);
+		//safeSend(socketNum, packet, CHAT_HEADER_SIZE, 0);
+		if ((send(socketNum, packet, CHAT_HEADER_SIZE, 0)) < 0)
+		{
+			perror("send call");
+			exit(-1);
+		}
 	}
 }
 
 void broadcastToClient(int socketNum, char *packet, uint16_t packetSize) // Can be replaced with just a send
 {
 	// Send the packet
-	safeSend(socketNum, packet, packetSize, 0);
+	//safeSend(socketNum, packet, packetSize, 0);
+	if ((send(socketNum, packet, packetSize, 0)) < 0)
+	{
+		perror("send call");
+		exit(-1);
+	}
 }
 
 void sendAllHandles(int socketNum)
@@ -228,7 +253,12 @@ void sendAllHandles(int socketNum)
 	*((uint32_t *) (packet + CHAT_HEADER_SIZE)) = htonl(numHandles);
 
 	// Send the packet
-	safeSend(socketNum, packet, CHAT_HEADER_SIZE + 4, 0);
+	//safeSend(socketNum, packet, CHAT_HEADER_SIZE + 4, 0);
+	if ((send(socketNum, packet, CHAT_HEADER_SIZE + 4, 0)) < 0)
+	{
+		perror("send call");
+		exit(-1);
+	}
 
 	forEachWithSender(clientList, sendHandleFlag, socketNum);
 
@@ -255,7 +285,12 @@ void sendHandlePacket(int socketNum, char *handle, uint8_t handleLength, uint8_t
 	memcpy(packet + CHAT_HEADER_SIZE + 1, handle, handleLength);
 
 	// Send the packet
-	safeSend(socketNum, packet, packetSize, 0);
+	//safeSend(socketNum, packet, packetSize, 0);
+	if ((send(socketNum, packet, packetSize, 0)) < 0)
+	{
+		perror("send call");
+		exit(-1);
+	}
 }
 
 void sendHandleListFinished(int socketNum)
@@ -265,7 +300,12 @@ void sendHandleListFinished(int socketNum)
 	setChatHeader((uint8_t *)packet, CHAT_HEADER_SIZE, HANDLES_END_FLAG);
 
 	// Send the packet
-	safeSend(socketNum, packet, CHAT_HEADER_SIZE, 0);
+	//safeSend(socketNum, packet, CHAT_HEADER_SIZE, 0);
+	if ((send(socketNum, packet, CHAT_HEADER_SIZE, 0)) < 0)
+	{
+		perror("send call");
+		exit(-1);
+	}
 }
 
 void exitClient(int socketNum)
@@ -276,6 +316,11 @@ void exitClient(int socketNum)
 
 	// Send the packet
 	safeSend(socketNum, packet, CHAT_HEADER_SIZE, 0);
+	if ((send(socketNum, packet, CHAT_HEADER_SIZE, 0)) < 0)
+	{
+		perror("send call");
+		exit(-1);
+	}
 	
 	removeClient(socketNum);
 }
@@ -293,7 +338,8 @@ void removeClient(int clientSocket)
 	printf("Client on socket %d terminted\n", clientSocket);
 	removeClientFromList(clientList, clientSocket);
 	removeFromPollSet(clientSocket);
-	safeClose(clientSocket);
+	//safeClose(clientSocket);
+	close(clientSocket);
 }
 
 int checkArgs(int argc, char *argv[])
