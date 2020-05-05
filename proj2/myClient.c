@@ -47,7 +47,7 @@ void receiveHandleNumbers(int socketNum);
 void allHandlesReceived(int socketNum);
 void receiveHandles(int socketNum, uint32_t numberHandles);
 void recvServer(int socketNum);
-int extractHandle(char *packet, char *handleBuff, uint8_t *handleLen);
+void extractHandle(char *packet, char *handleBuff, uint8_t *handleLen);
 void receivedBadDest(char *packet);
 void receivedMessage(char *packet, uint16_t packetLength);
 void receivedBroadcast(char *packet, uint16_t packetLength);
@@ -211,7 +211,7 @@ void parsePacket(char *packet, uint16_t packetLength, uint8_t flag)
 	}
 }
 
-int extractHandle(char *packet, char *handleBuff, uint8_t *handleLen)
+void extractHandle(char *packet, char *handleBuff, uint8_t *handleLen)
 {
 	*handleLen = packet[0];
 
@@ -277,7 +277,7 @@ int parseInput(char *inputBuf, uint16_t *sendLen, uint8_t *packet, struct Client
 	// MESSAGE
 	if (strcmp(command, "%M") == 0 || strcmp(command, "%m") == 0) {
 		buildMessage(inputBuf + CHAT_HEADER_SIZE, sendLen, packet + CHAT_HEADER_SIZE, client);
-		return MESSAGE_FLAG;                                                                                              )
+		return MESSAGE_FLAG;
 	}
 	
 	// BROADCAST
