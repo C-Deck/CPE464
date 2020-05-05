@@ -48,7 +48,6 @@ struct ClientList *clientList;
 int main(int argc, char *argv[])
 {
 	int serverSocket = 0;   //socket descriptor for the server socket
-	int clientSocket = 0;   //socket descriptor for the client socket
 	int portNumber = 0;
 	
 	portNumber = checkArgs(argc, argv);
@@ -190,7 +189,7 @@ void attemptSendMessage(uint8_t handleLength, char *handle, char *packet, int se
 
 void setHandle(int socketNum, char *packet)
 {
-	uint8_t sendPacket[3];
+	uint8_t sendPacket[CHAT_HEADER_SIZE];
 	char handleBuf[MAX_HANDLE_LENGTH];
 	uint8_t handleSize = packet[0];
 	
@@ -250,7 +249,7 @@ void sendHandlePacket(int socketNum, char *handle, uint8_t handleLength, uint8_t
 
 	memset(packet, 0, MAX_HANDLE_LENGTH + CHAT_HEADER_SIZE + 1);
 
-	setChatHeader(packet, packetSize, flag);
+	setChatHeader((uint8_t *) packet, packetSize, flag);
 	packet[CHAT_HEADER_SIZE] = handleLength;
 
 	memcpy(packet + CHAT_HEADER_SIZE + 1, handle, handleLength);
@@ -263,7 +262,7 @@ void sendHandleListFinished(int socketNum)
 {
 	char packet[CHAT_HEADER_SIZE];
 
-	setChatHeader(packet, CHAT_HEADER_SIZE, HANDLES_END_FLAG);
+	setChatHeader((uint8_t *)packet, CHAT_HEADER_SIZE, HANDLES_END_FLAG);
 
 	// Send the packet
 	safeSend(socketNum, packet, CHAT_HEADER_SIZE, 0);
@@ -271,9 +270,9 @@ void sendHandleListFinished(int socketNum)
 
 void exitClient(int socketNum)
 {
-	char packet[3];
+	char packet[CHAT_HEADER_SIZE];
 
-	setChatHeader(packet, 3, ACK_EXIT_FLAG);
+	setChatHeader((uint8_t *) packet, CHAT_HEADER_SIZE, ACK_EXIT_FLAG);
 
 	// Send the packet
 	safeSend(socketNum, packet, CHAT_HEADER_SIZE, 0);

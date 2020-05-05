@@ -15,7 +15,7 @@ int safeSocket() {
 
 void safeConnect(int sockfd, struct sockaddr *serv_addr, int addrlen) {
 
-    if (connect(sockfd, &serv_addr, addrlen) < 0)
+    if (connect(sockfd, serv_addr, addrlen) < 0)
     { 
         perror("connect call");
 		exit(-1);
