@@ -8,10 +8,10 @@ LIBS =
 
 all:   myClient myServer
 
-myClient: myClient.c list.c pollLib.c error.c safeSystemUtil.c networks.o gethostbyname6.o
+myClient: myClient.c list.c pollLib.c error.c safeSystemUtil.c networks.o gethostbyname6.o *.h
 	$(CC) $(CFLAGS) -o myClient myClient.c list.c pollLib.c error.c safeSystemUtil.c networks.o gethostbyname6.o $(LIBS)
 
-myServer: myServer.c list.c pollLib.c error.c safeSystemUtil.c networks.o gethostbyname6.o
+myServer: myServer.c list.c pollLib.c error.c safeSystemUtil.c networks.o gethostbyname6.o *.h
 	$(CC) $(CFLAGS) -o myServer myServer.c list.c pollLib.c error.c safeSystemUtil.c networks.o gethostbyname6.o $(LIBS)
 
 .c.o:
