@@ -39,7 +39,7 @@ int tcpServerSetup(int portNumber)
 	server.sin6_port= htons(portNumber);         
 
 	// bind the name to the socket  (name the socket)
-	safeBind(server_socket, (struct sockaddr *) &server, sizeof(server);
+	safeBind(server_socket, (struct sockaddr *) &server, sizeof(server));
 	
 	//get the port number and print it out
 	if (getsockname(server_socket, (struct sockaddr*)&server, &len) < 0)
@@ -145,6 +145,6 @@ int selectCall(int socketNumber, int seconds, int microseconds, int timeIsNotNul
 
 void setChatHeader(char *packet, uint16_t packetLength, uint8_t flag)
 {
-	((uint16_t *) packet)[0] = htons(packetSize);
+	((uint16_t *) packet)[0] = htons(packetLength);
 	packet[2] = NUM_HANDLES_FLAG;
 }
