@@ -24,12 +24,16 @@
 #include "pollLib.h"
 
 #define DEBUG_FLAG 1
+#define NORMAL_MODE 1
+#define DEBUG_MODE 2
 
 struct ClientInfo {
 	int socket;
 	char handle[MAX_HANDLE_LENGTH];
 	uint8_t handleLength;
 };
+
+static int currentMode = DEBUG_MODE;
 
 void sendToServer(int socketNum, struct ClientInfo *client);
 void checkArgs(int argc, char * argv[]);
@@ -64,6 +68,10 @@ int main(int argc, char * argv[])
 	/* set up the TCP Client socket  */
 	socketNum = tcpClientSetup(argv[2], argv[3], DEBUG_FLAG);
 
+	if (currentMode == DEBUG_MODE) {
+		printf("\nTCP set up - Doing packet send");
+	}
+
 	if (initClient(&client, socketNum, argv[1]) == 0) {
 		if (initialPacketCheck(&client, socketNum) == 0) {
 			addToPollSet(socketNum);
@@ -94,6 +102,10 @@ int initClient(struct ClientInfo *client, int socketNum, char *handle)
 
 	strncpy(client->handle, handle, handleLen);
 
+	if (currentMode == DEBUG_MODE) {
+		printf("\nInitializing the client handle <%s> with handle <%s>", client->handle, handle);
+	}
+
 	return 0;
 }
 
@@ -107,7 +119,10 @@ int initialPacketCheck(struct ClientInfo *client, int socketNum)
 	setChatHeader(packet, packetSize, CONNECT_FLAG);
 	setSender(packet + CHAT_HEADER_SIZE, client);
 
-	//TODO Receive from the server the ACK
+	if (currentMode == DEBUG_MODE) {
+		printf("\nSending connection flag to server");
+	}
+
 	//safeSend(client->socket, packet, packetSize, 0);
 	if ((send(socketNum, packet, packetSize, 0)) < 0)
 	{
@@ -156,6 +171,10 @@ void sendToServer(int socketNum, struct ClientInfo *client)
 		if (pollCall(POLL_WAIT_FOREVER) != -1)
 		{
 			recvServer(socketNum);
+		}
+
+		if (currentMode == DEBUG_MODE) {
+			printf("\nNothing found on poll call");
 		}
 
 		memset(inputBuf, 0, MAXBUF);
@@ -213,6 +232,10 @@ void recvServer(int socketNum)
 		exit(-1);
 	}
 
+	if (currentMode == DEBUG_MODE) {
+		printf("\nReceived packet with %d with flag %d from server", packetLength, flag);
+	}
+
 	parsePacket(packet, packetLength, flag);
 }
 
@@ -243,6 +266,10 @@ void extractHandle(char *packet, char *handleBuff, uint8_t *handleLen)
 
 	memcpy(handleBuff, packet + 1, *handleLen);
 	handleBuff[*handleLen] = '\0';
+
+	if (currentMode == DEBUG_MODE) {
+		printf("\nGot handle %s from packet with handleSize %d", handleBuff, *handleLen);
+	}
 }
 
 void receivedBadDest(char *packet)
@@ -300,6 +327,10 @@ int parseInput(char *inputBuf, uint16_t *sendLen, uint8_t *packet, struct Client
 	memcpy(command, inputBuf, 2);
 	command[2] = '\0';
 
+	if (currentMode == DEBUG_MODE) {
+		printf("\nCommand received: %s", command);
+	}
+
 	// MESSAGE
 	if (strcmp(command, "%M") == 0 || strcmp(command, "%m") == 0) {
 		buildMessage(inputBuf + CHAT_HEADER_SIZE, sendLen, packet + CHAT_HEADER_SIZE, client);
@@ -333,6 +364,10 @@ void buildBroadcast(char *inputBuf, uint16_t *sendLen, uint8_t *packet, struct C
 	// Handle size byte and handle size
 	int packetOffset = client->handleLength + 1;
 
+	if (currentMode == DEBUG_MODE) {
+		printf("\nBuilding broadcast packet");
+	}
+
 	// Set the sender
 	setSender(packet, client);
 
@@ -351,6 +386,11 @@ void buildMessage(char *inputBuf, uint16_t *sendLen, uint8_t *packet, struct Cli
 
 	// Set the sender
 	setSender(packet, client);
+
+	if (currentMode == DEBUG_MODE) {
+		printf("\nSetting sender of <%s> with number of outgoing handles %d", client->handle, numHandles);
+	}
+
 	// Increment the packet by senderLength + 1 and set the number of handles
 	*(packet + handleLength) = numHandles;
 	
@@ -370,6 +410,10 @@ void addHandles(char *inputBuf, uint16_t *sendLen, uint8_t *packet, uint8_t numH
 	uint8_t handleLen = 0;
 	int inputIndex = 0, packetIndex = 0;
 
+	if (currentMode == DEBUG_MODE) {
+		printf("\nAdding each handle to the packet");
+	}
+
 	while (idx < numHandles) {
 		memset(inputBuf, '\0', MAX_HANDLE_LENGTH);
 
@@ -387,11 +431,19 @@ void addHandles(char *inputBuf, uint16_t *sendLen, uint8_t *packet, uint8_t numH
 		// Increment the total size by 1 byte for handleLength and the handleLength
 		*sendLen = *sendLen + 1 + handleLen;
 
+		if (currentMode == DEBUG_MODE) {
+			printf("\nAdding handle <%s> with length of %d to packet", handleBuf, handleLen);
+		}
+
 		// Increment for the space between the handles
 		inputIndex++;
 		handleLen = 0;
 
 		idx++;
+	}
+
+	if (currentMode == DEBUG_MODE) {
+		printf("\nTotal packet offset after adding handles: %d bytes", packetIndex);
 	}
 
 	// Add the message to the packet - Increase the index by one to consider the space
@@ -402,10 +454,17 @@ void addMessage(char *inputBuf, uint16_t *sendLen, uint8_t *packet)
 {
 	char currentChar = 0;
 	int messageLen = 0;
+	char message[MAXBUF];
 
 	while ((currentChar = inputBuf[messageLen]) != '\n') {
 		packet[messageLen] = currentChar;
+		message[messageLen] = currentChar;
 		messageLen++;
+	}
+
+	message[messageLen] = '\0';
+	if (currentMode == DEBUG_MODE) {
+		printf("\nAdded message: %s", message);
 	}
 
 	// Increment the total size by the message Length
@@ -433,6 +492,10 @@ void receiveHandleNumbers(int socketNum)
 	}
 	flag = packet[2];
 	numberHandles = ntohl(*((uint32_t *) &(packet[3])));
+
+	if (currentMode == DEBUG_MODE) {
+		printf("\nNumber of handles going to receive: %d", numberHandles);
+	}
 
 	if (flag == NUM_HANDLES_FLAG) {
 		printf("\nHandle List:");

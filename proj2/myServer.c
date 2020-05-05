@@ -24,6 +24,8 @@
 #include "list.h"
 
 #define DEBUG_FLAG 1
+#define NORMAL_MODE 1
+#define DEBUG_MODE 2
 
 void recvFromClient(int clientSocket);
 int checkArgs(int argc, char *argv[]);
@@ -44,6 +46,7 @@ void sendHandleListFinished(int socketNum);
 void exitClient(int socketNum);
 
 struct ClientList *clientList;
+static int currentMode = DEBUG_MODE;
 
 int main(int argc, char *argv[])
 {
@@ -67,6 +70,10 @@ int main(int argc, char *argv[])
 
 void initClientList()
 {
+	if (currentMode == DEBUG_MODE) {
+		printf("\nInitialized the client list");
+	}
+
 	clientList = (struct ClientList *) safeMalloc(sizeof(struct ClientList));
 	clientList->head = NULL;
 	clientList->tail = NULL;
@@ -114,6 +121,11 @@ void recvFromClient(int clientSocket)
 		exit(-1);
 	}
 
+	if (currentMode == DEBUG_MODE) {
+		struct Client *client = getClient(clientList, clientSocket);
+		printf("\nReceived %d byte from socket %s", messageLen, client->handle);
+	}
+
 	if (messageLen == 0) {
 		// recv() 0 bytes so client is gone
 		removeClient(clientSocket);
@@ -126,6 +138,10 @@ void parseHeader(int clientSocket, char *packet)
 {
 	uint16_t packetSize = ntohs(*((uint16_t *) packet));
 	uint8_t flag = packet[2];
+
+	if (currentMode == DEBUG_MODE) {
+		printf("\nParsed the header\nPacketSize: %d - Flag: %d", packetSize, flag);
+	}
 
 	doCommand(clientSocket, packet, packetSize, flag);
 }
@@ -165,6 +181,10 @@ void sendMessage(char *packet, int senderSocket, uint16_t packetSize)
 	numClients = *(packet + offset);
 	offset++;
 
+	if (currentMode == DEBUG_MODE) {
+		printf("\nMessage being sent to %d clients", numClients);
+	}
+
 	while (idx < numClients) {
 		memset(handle, '\0', MAX_HANDLE_LENGTH);
 
@@ -185,6 +205,10 @@ void attemptSendMessage(uint8_t handleLength, char *handle, char *packet, int se
 	struct Client *client = getClient(clientList, handle);
 
 	if (client != NULL) {
+		if (currentMode == DEBUG_MODE) {
+			printf("\nClient <%s> found and sending packet size: %d", handle, packetSize);
+		}
+
 		// Send the packet
 		//safeSend(client->socket, packet, packetSize, 0);
 		if ((send(client->socket, packet, packetSize, 0)) < 0)
@@ -211,6 +235,9 @@ void setHandle(int socketNum, char *packet)
 
 		// Send the packet
 		//safeSend(socketNum, packet, CHAT_HEADER_SIZE, 0);
+		if (currentMode == DEBUG_MODE) {
+			printf("\nSending Successful connection");
+		}
 		if ((send(socketNum, packet, CHAT_HEADER_SIZE, 0)) < 0)
 		{
 			perror("send call");
@@ -218,6 +245,10 @@ void setHandle(int socketNum, char *packet)
 		}
 	} else {
 		setChatHeader(sendPacket, CHAT_HEADER_SIZE, ACK_BAD_FLAG);
+
+		if (currentMode == DEBUG_MODE) {
+			printf("\nConnection by socket failed");
+		}
 
 		// Send the packet
 		//safeSend(socketNum, packet, CHAT_HEADER_SIZE, 0);
@@ -231,6 +262,13 @@ void setHandle(int socketNum, char *packet)
 
 void broadcastToClient(int socketNum, char *packet, uint16_t packetSize) // Can be replaced with just a send
 {
+	if (currentMode == DEBUG_MODE) {
+		uint8_t handleSize = packet[3];
+
+		printf("\nBroadcasting message to socket %d", socketNum);
+		printf("\nMessage: %s", packet + 4 + handleSize);
+	}
+
 	// Send the packet
 	//safeSend(socketNum, packet, packetSize, 0);
 	if ((send(socketNum, packet, packetSize, 0)) < 0)
@@ -251,6 +289,10 @@ void sendAllHandles(int socketNum)
 	setChatHeader((uint8_t *) packet, packetLength, NUM_HANDLES_FLAG);
 	numHandles = clientList->numClients;
 	*((uint32_t *) (packet + CHAT_HEADER_SIZE)) = htonl(numHandles);
+
+	if (currentMode == DEBUG_MODE) {
+		printf("\nNumber of handles: %d", numHandles);
+	}
 
 	// Send the packet
 	//safeSend(socketNum, packet, CHAT_HEADER_SIZE + 4, 0);
@@ -284,6 +326,10 @@ void sendHandlePacket(int socketNum, char *handle, uint8_t handleLength, uint8_t
 
 	memcpy(packet + CHAT_HEADER_SIZE + 1, handle, handleLength);
 
+	if (currentMode == DEBUG_MODE) {
+		printf("\nSending handle <%s> to socket: %d - flag %d", handle, socketNum, flag);
+	}
+
 	// Send the packet
 	//safeSend(socketNum, packet, packetSize, 0);
 	if ((send(socketNum, packet, packetSize, 0)) < 0)
@@ -299,6 +345,10 @@ void sendHandleListFinished(int socketNum)
 
 	setChatHeader((uint8_t *)packet, CHAT_HEADER_SIZE, HANDLES_END_FLAG);
 
+	if (currentMode == DEBUG_MODE) {
+		printf("\nSending flag 13");
+	}
+
 	// Send the packet
 	//safeSend(socketNum, packet, CHAT_HEADER_SIZE, 0);
 	if ((send(socketNum, packet, CHAT_HEADER_SIZE, 0)) < 0)
@@ -313,6 +363,10 @@ void exitClient(int socketNum)
 	char packet[CHAT_HEADER_SIZE];
 
 	setChatHeader((uint8_t *) packet, CHAT_HEADER_SIZE, ACK_EXIT_FLAG);
+
+	if (currentMode == DEBUG_MODE) {
+		printf("\nSending exit acknowledge flag");
+	}
 
 	// Send the packet
 	safeSend(socketNum, packet, CHAT_HEADER_SIZE, 0);
