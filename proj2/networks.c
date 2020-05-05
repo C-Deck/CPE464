@@ -35,9 +35,9 @@ int tcpServerSetup(int portNumber)
 	server_socket = safeSocket(AF_INET6, SOCK_STREAM, 0);
 
 	// setup the information to name the socket
-	server.sin6_family= AF_INET;         		
+	server.sin6_family= AF_INET6;
 	server.sin6_addr = in6addr_any;   //wild card machine address
-	server.sin6_port= htons(portNumber);         
+	server.sin6_port= htons(portNumber);
 
 	// bind the name to the socket  (name the socket)
 	safeBind(server_socket, (struct sockaddr *) &server, sizeof(server));
