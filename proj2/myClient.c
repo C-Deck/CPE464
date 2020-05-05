@@ -33,27 +33,35 @@ struct ClientInfo {
 void sendToServer(int socketNum);
 void checkArgs(int argc, char * argv[]);
 int getFromStdin(char * sendBuf, char * prompt);
-int initClient(ClientInfo *client, int socketNum, char *handle);
-int initialPacketCheck(ClientInfo *client, int socketNum);
-int getInitPacketResponse(ClientInfo *client, int socketNum);
-int parseInput(char *inputBuf, uint16_t *sendLen, uint8_t *packet, ClientInfo *client);
-void parseBroadcast(char *inputBuf, uint16_t *sendLen, uint8_t *packet, ClientInfo *client);
-void parseNumHandles(char *inputBuf, uint16_t *sendLen, uint8_t *packet, ClientInfo *client);
+int initClient(struct ClientInfo *client, int socketNum, char *handle);
+int initialPacketCheck(struct ClientInfo *client, int socketNum);
+int getInitPacketResponse(struct ClientInfo *client, int socketNum);
+int parseInput(char *inputBuf, uint16_t *sendLen, uint8_t *packet, struct ClientInfo *client);
+void parseBroadcast(char *inputBuf, uint16_t *sendLen, uint8_t *packet, struct ClientInfo *client);
+void parseNumHandles(char *inputBuf, uint16_t *sendLen, uint8_t *packet, struct ClientInfo *client);
 void parseHandles(char *inputBuf, uint16_t *sendLen, uint8_t *packet, uint8_t numHandles);
-void setSender(uint8_t *packet, ClientInfo *client);
+void setSender(uint8_t *packet, struct ClientInfo *client);
 void addMessage(char *inputBuf, uint16_t *sendLen, uint8_t *packet);
+void receiveHandleNumbers(int socketNum);
+void allHandlesReceived(int socketNum);
+void receiveHandles(int socketNum, uint32_t numberHandles);
+void recvServer(int socketNum);
+int extractHandle(char *packet, char *handleBuff, uint8_t *handleLen);
+void receivedBadDest(char *packet);
+void receivedMessage(char *packet, uint16_t packetLength);
+void receivedBroadcast(char *packet, uint16_t packetLength);
 
 // TODO CHECK INCREMENTING ON PACKET AND INPUT - Break messages into multiple packets
 int main(int argc, char * argv[])
 {
-	int socketNum = 0;         //socket descriptor
-	ClientInfo client;
+	int socketNum = 0, clientInit = -1, connected = -1;         //socket descriptor
+	struct ClientInfo client;
 	
 	checkArgs(argc, argv);
 
 	/* set up the TCP Client socket  */
 	socketNum = tcpClientSetup(argv[1], argv[2], DEBUG_FLAG);
-	
+
 	if (initClient(&client, socketNum, argv[2]) == 0) {
 		if (initialPacketCheck(&client, socketNum) == 0) {
 			sendToServer(socketNum);
@@ -65,7 +73,7 @@ int main(int argc, char * argv[])
 	return 0;
 }
 
-int initClient(ClientInfo *client, int socketNum, char *handle)
+int initClient(struct ClientInfo *client, int socketNum, char *handle)
 {
 	uint8_t handleLen = 0;
 
@@ -85,7 +93,7 @@ int initClient(ClientInfo *client, int socketNum, char *handle)
 	return 0;
 }
 
-int initialPacketCheck(ClientInfo *client, int socketNum)
+int initialPacketCheck(struct ClientInfo *client, int socketNum)
 {
 	int sent = 0;            //actual amount of data sent/* get the data and send it   */
 	uint8_t packet[MAXBUF];
@@ -102,7 +110,7 @@ int initialPacketCheck(ClientInfo *client, int socketNum)
 	return getInitPacketResponse(socketNum);
 }
 
-int getInitPacketResponse(ClientInfo *client, int socketNum)
+int getInitPacketResponse(struct ClientInfo *client, int socketNum)
 {
 	char buf[CHAT_HEADER_SIZE];
 
@@ -121,67 +129,165 @@ int getInitPacketResponse(ClientInfo *client, int socketNum)
 	return -1;
 }
 
-void sendToServer(int socketNum, ClientInfo *client)
+void sendToServer(int socketNum, struct ClientInfo *client)
 {
 	char inputBuf[MAXBUF];	//
 	uint8_t packet[MAXBUF];  // Sending buffer
-	int command = 0;
+	int flag = 0;
 	uint16_t sendLen = 3,;        //amount of data to send - start as 3 for header
 	int sent = 0;            //actual amount of data sent/* get the data and send it   */
-	
+
 	while (1)
 	{
+		if ((socketToProcess = pollCall(POLL_WAIT_FOREVER)) != -1)
+		{
+			recvServer(socketToProcess);
+		}
+
 		memset(inputBuf, 0, MAXBUF);
 		memset(packet, 0, MAXBUF); 
 
 		sendLen = getFromStdin(inputBuf, "$:");
-		command = parseInput(inputBuf, &sendLen, packet, client);
+		flag = parseInput(inputBuf, &sendLen, packet, client);
 
-		if (command != -1) {
+		if (flag != -1) {
 			printf("read: %s string len: %d (including null)\n", inputBuf, sendLen);
 		
-			((uint16_t *) packet)[0] = htons(sendLen);
-			sent =  safeSend(socketNum, packet, sendLen, 0);
+			setChatHeader(packet, sendLen, flag);
+			sent = safeSend(socketNum, packet, sendLen, 0);
+
+			if (flag == GET_HANDLES_FLAG) {
+				receiveHandleNumbers(socketNum);
+			}
 
 			printf("Amount of data sent is: %d\n", sent);
 
 			// End the input loop
-			if (command == EXIT_FLAG) {
+			if (flag == EXIT_FLAG) {
 				break;
 			}
 		}
 	}
 }
 
-int parseInput(char *inputBuf, uint16_t *sendLen, uint8_t *packet, ClientInfo *client)
+void recvServer(int socketNum)
 {
-	char command[3];
+	char header[CHAT_HEADER_SIZE];
+	char packet[MAXBUF];
+	uint16_t packetLength = 0;
+	uint8_t flag = 0;
+
+	safeRecv(socketNum, header, CHAT_HEADER_SIZE, 0);
+
+	packetLength = ntohs(*((uint16_t *) header));
+	flag = header[2];
+
+	safeRecv(socketNum, header, packetLength - CHAT_HEADER_SIZE, 0);
+
+	parsePacket(packet, packetLength, flag);
+}
+
+void parsePacket(char *packet, uint16_t packetLength, uint8_t flag)
+{
+	switch (flag) {
+		case BAD_DEST_FLAG:
+			receivedBadDest(packet);
+			break;
+
+		case MESSAGE_FLAG:
+			receivedMessage(packet, packetLength);
+			break;
+
+		case BROADCAST_FLAG:
+			receivedBroadcast(packet, packetLength);
+			break;
+
+		default:
+			printf("\nInvalid flag on packet received");
+			break;
+	}
+}
+
+int extractHandle(char *packet, char *handleBuff, uint8_t *handleLen)
+{
+	*handleLen = packet[0];
+
+	memcpy(handleBuff, packet + 1, handleLen);
+	handleBuff[handleLen] = '\0';
+}
+
+void receivedBadDest(char *packet)
+{
+	char handle[MAX_HANDLE_LENGHTH];
+	uint8_t handleLen = 0;
+
+	extractHandle(packet, handle, &handleLen);
+	handleNotFound(handle);
+}
+
+void receivedMessage(char *packet, uint16_t packetLength)
+{
+	char senderHandle[MAX_HANDLE_LENGHTH];
+	char messageBuff[MAX_MESSAGE_LENGTH];
+	uint8_t handleLen = 0, numberHandles = 0, counter = 0;
+	int packetOffset = 0;
+
+	extractHandle(packet, senderHandle, &handleLen);
+	packetOffset = handleLen + 1;
+
+	numberHandles = packet[packetOffset];
+	packetOffset++;
+
+	while(counter < numberHandles) {
+		handleLen = packet[packetOffset];
+		packetOffset = packetOffset + handleLen + 1;
+		counter++;
+	}
+
+	memcpy(messageBuff, packet + packetOffset, packetLength - packetOffset);
+	printf("\n%s: %s", senderHandle, messageBuff);
+}
+
+void receivedBroadcast(char *packet, uint16_t packetLength)
+{
+	char senderHandle[MAX_HANDLE_LENGHTH];
+	char messageBuff[MAX_MESSAGE_LENGTH];
+	int packetOffset = 0;
+	uint8_t handleLen = 0;
+
+	extractHandle(packet, senderHandle, &handleLen);
+
+	packetOffset = handleLen + 1;
+
+	memcpy(messageBuff, packet + packetOffset, packetLength - packetOffset);
+
+	printf("\n%s: %s", senderHandle, messageBuff);
+}
+
+int parseInput(char *inputBuf, uint16_t *sendLen, uint8_t *packet, struct ClientInfo *client)
+{
+	char command[CHAT_HEADER_SIZE];
 
 	memcpy(command, inputBuf, 2);
 	command[2] = '\0'
 
 	// MESSAGE
 	if (strcmp(command, "%M") == 0 || strcmp(command, "%m") == 0) {
-		packet[2] = MESSAGE_FLAG;
 		parseNumHandles(inputBuf + CHAT_HEADER_SIZE, sendLen, packet + CHAT_HEADER_SIZE, client);                                                                                                    )
 	}
 	
 	// BROADCAST
 	else if (strcmp(command, "%B") == 0 || strcmp(command, "%b") == 0) {
-		packet[2] = BROADCAST_FLAG;
 		parseBroadcast(inputBuf + CHAT_HEADER_SIZE, sendLen, packet + CHAT_HEADER_SIZE, client);
 	}
 
 	// LIST HANDLES
 	else if (strcmp(command, "%L") == 0 || strcmp(command, "%l") == 0) {
-		// LIST HANDLES
-		packet[2] = GET_HANDLES_FLAG;
 		return GET_HANDLES_FLAG;
 	}
 
 	// EXIT
 	else if (strcmp(command, "%E") == 0 || strcmp(command, "%e") == 0) {
-		packet[2] = GET_HANDLES_FLAG;
 		return EXIT_FLAG;
 	}
 
@@ -193,7 +299,7 @@ int parseInput(char *inputBuf, uint16_t *sendLen, uint8_t *packet, ClientInfo *c
 	return 0;
 }
 
-void parseBroadcast(char *inputBuf, uint16_t *sendLen, uint8_t *packet, ClientInfo *client)
+void parseBroadcast(char *inputBuf, uint16_t *sendLen, uint8_t *packet, struct ClientInfo *client)
 {
 	// Handle size byte and handle size
 	int packetOffset = client->handleLength + 1;
@@ -208,7 +314,7 @@ void parseBroadcast(char *inputBuf, uint16_t *sendLen, uint8_t *packet, ClientIn
 	addMessage(inputBuf + 1, sendLen, packet + packetOffset);
 }
 
-void parseNumHandles(char *inputBuf, uint16_t *sendLen, uint8_t *packet, ClientInfo *client)
+void parseNumHandles(char *inputBuf, uint16_t *sendLen, uint8_t *packet, struct ClientInfo *client)
 {
 	int handleLength = client->handleLength;
 	uint8_t numHandles = atoi(inputBuf[0]);
@@ -276,20 +382,25 @@ void addMessage(char *inputBuf, uint16_t *sendLen, uint8_t *packet)
 	*sendLen = *sendLen + messageLen;
 }
 
-void setSender(uint8_t *packet, ClientInfo *client)
+void setSender(uint8_t *packet, struct ClientInfo *client)
 {
 	packet[0] = client->handleLength;
 
 	memcpy(packet + 1, client->handle, client->handleLength);
 }
 
-void receiveHandleNumbers(uint8_t *packet, int socketNum)
+void receiveHandleNumbers(int socketNum)
 {
+	char packet[CHAT_HEADER_SIZE + 4];
 	uint32_t numberHandles = 0;
-	uint8_t flag = packet[2];
+	uint8_t flag = 0;
 
+	safeRecv(socketNum, packet, CHAT_HEADER_SIZE + 4, 0);
+	flag = packet[2];
 	numberHandles = ntohl(*((uint32_t *) &(packet[3])));
+
 	if (flag == NUM_HANDLES_FLAG) {
+		printf("\nHandle List:");
 		receiveHandles(socketNum);
 	} else {
 		printf("Did not receive the number of handles flag\n");
@@ -299,18 +410,39 @@ void receiveHandleNumbers(uint8_t *packet, int socketNum)
 void receiveHandles(int socketNum, uint32_t numberHandles)
 {
 	int handleCount = 0;
-	uint8_t handleLength = 0;
-	uint8_t flag = 0;
+	uint8_t handleLength = 0, flag = 0;
 	char header[CHAT_HEADER_SIZE + 1];
 	char handle[MAX_HANDLE_LENGHTH];
 
 	while (handleCount < numberHandles) {
 		safeRecv(socketNum, header, CHAT_HEADER_SIZE + 1, 0);
-
+		flag = header[2];
+		handleLength = header[3];
 		
+		if (flag != HANDLE_FLAG) {
+			printf("Invalid Flag for handle packet");
+		}
+
 		safeRecv(socketNum, handle, handleLength, 0);
+		printf("\n\t%d: %s", handleCount, handle);
+
+		handleCount++;
 	}
-	safeRecv(socketNum, buf, receiveSize, 0);
+}
+
+void allHandlesReceived(int socketNum)
+{
+	uint8_t flag = 0;
+	char header[CHAT_HEADER_SIZE];
+
+	safeRecv(socketNum, header, CHAT_HEADER_SIZE, 0);
+	flag = header[2];
+
+	if (flag != HANDLES_END_FLAG) {
+		printf("Invalid Flag for handles end");
+	} else {
+		printf("\nEnd of handle list");
+	}
 }
 
 int getFromStdin(char * sendBuf, char * prompt)

@@ -106,14 +106,9 @@ void recvFromClient(int clientSocket)
 	char buf[MAXBUF];
 	int messageLen = 0;
 	
-	// Use a time value of 1 second (so time is not null)
-	while (selectCall(clientSocket, 1, 0, TIME_IS_NOT_NULL) == 0)
-	{
-		printf("Select timed out waiting for client to send data\n");
-	}
-	
 	//now get the data from the client_socket (message includes null)
 	messageLen = safeRecv(clientSocket, buf, MAXBUF, 0);
+
 	if (message == 0) {
 		// recv() 0 bytes so client is gone
 		removeClient(clientSocket);
@@ -282,7 +277,6 @@ void exitClient(int socketNum)
 	removeClient(socketNum);
 }
 
-// TODO CHECK IF HANDLE IS BAD AND REMOVE THE CONNECTION???
 void addNewClient(int mainServerSocket)
 {
 	int newClientSocket = tcpAccept(mainServerSocket, DEBUG_FLAG);
