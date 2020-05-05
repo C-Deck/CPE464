@@ -20,6 +20,7 @@
 
 #include "networks.h"
 #include "safeSystemUtil.h"
+#include "pollLib.h"
 #include "list.h"
 
 #define DEBUG_FLAG 1
@@ -42,7 +43,7 @@ void sendHandlePacket(int socketNum, char *handle, uint8_t handleLength, uint8_t
 void sendHandleListFinished(int socketNum);
 void exitClient(int socketNum);
 
-ClientList *clientList;
+struct ClientList *clientList;
 
 int main(int argc, char *argv[])
 {
@@ -67,7 +68,7 @@ int main(int argc, char *argv[])
 
 void initClientList()
 {
-	clientList = (ClientList *) safeMalloc(sizeof(ClientList));
+	clientList = (struct ClientList *) safeMalloc(sizeof(struct ClientList));
 	clientList->head = NULL;
 	clientList->tail = NULL;
 	clientList->numClients = 0;
@@ -109,7 +110,7 @@ void recvFromClient(int clientSocket)
 	//now get the data from the client_socket (message includes null)
 	messageLen = safeRecv(clientSocket, buf, MAXBUF, 0);
 
-	if (message == 0) {
+	if (messageLen == 0) {
 		// recv() 0 bytes so client is gone
 		removeClient(clientSocket);
 	}
@@ -122,7 +123,7 @@ void parseHeader(int clientSocket, char *packet)
 	uint16_t packetSize = ntohs(*((uint16_t *) packet));
 	uint8_t flag = packet[2];
 
-	doCommand(packet, packetSize, flag);
+	doCommand(clientSocket, packet, packetSize, flag);
 }
 
 void doCommand(int socketNum, char *packet, uint16_t packetSize, uint8_t flag)
@@ -161,7 +162,7 @@ void sendMessage(char *packet, int senderSocket, uint16_t packetSize)
 	offset++;
 
 	while (idx < numClients) {
-		memset(inputBuf, '\0', MAX_HANDLE_LENGTH);
+		memset(handle, '\0', MAX_HANDLE_LENGTH);
 
 		currentHandleLength = *(packet + offset);
 		offset++;
@@ -183,7 +184,7 @@ void attemptSendMessage(uint8_t handleLength, char *handle, char *packet, int se
 		// Send the packet
 		safeSend(client->socket, packet, packetSize, 0);
 	} else {
-		sendHandlePacket(senderSocket, handleLength, handle, BAD_DEST_FLAG);
+		sendHandlePacket(senderSocket, handle, handleLength, BAD_DEST_FLAG);
 	}
 }
 
@@ -223,7 +224,7 @@ void sendAllHandles(int socketNum)
 
 	memset(packet, 0, CHAT_HEADER_SIZE + 4);
 
-	setChatHeader(packet, packetLength, NUM_HANDLES_FLAG);
+	setChatHeader((uint8_t *) packet, packetLength, NUM_HANDLES_FLAG);
 	numHandles = clientList->numClients;
 	*((uint32_t *) (packet + CHAT_HEADER_SIZE)) = htonl(numHandles);
 
@@ -260,9 +261,9 @@ void sendHandlePacket(int socketNum, char *handle, uint8_t handleLength, uint8_t
 
 void sendHandleListFinished(int socketNum)
 {
-	char packet[3];
+	char packet[CHAT_HEADER_SIZE];
 
-	setChatHeader(packet, 3, HANDLES_END_FLAG);
+	setChatHeader(packet, CHAT_HEADER_SIZE, HANDLES_END_FLAG);
 
 	// Send the packet
 	safeSend(socketNum, packet, CHAT_HEADER_SIZE, 0);
