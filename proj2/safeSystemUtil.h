@@ -1,6 +1,16 @@
 #ifndef SAFE_CALLS_H
 #define SAFE_CALLS_H
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <unistd.h>
+#include <fcntl.h>
+
 int safeSocket();
 void safeConnect(int sockfd, struct sockaddr *serv_addr, int addrlen);
 int safeAccept(int sockfd, struct sockaddr *cliaddr, socklen_t *addrlen);

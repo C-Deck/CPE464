@@ -1,12 +1,4 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/time.h>
-#include <unistd.h>
-#include <fcntl.h>
+#include <safeSystemUtil.h>
 
 int safeSocket() {
     int server_fd = 0;
@@ -23,7 +15,7 @@ int safeSocket() {
 
 void safeConnect(int sockfd, struct sockaddr *serv_addr, int addrlen) {
 
-    if (connect(sock, &serv_addr, addrlen) < 0)
+    if (connect(sockfd, &serv_addr, addrlen) < 0)
     { 
         perror("connect call");
 		exit(-1);
@@ -71,22 +63,10 @@ int safeRecv(int sockfd, void *buf, int len, unsigned int flags) {
     return messageLen;
 }
 
-int safeSelect(int nfds, fd_set  *readfds, fd_set  *writefds, fd_set *errorfds, struct timeval *timeout) {
-    int numReady = 0;
-
-    if ((numReady = select(nfds, readfds, writefds, errorfds, timeout)) < 0)
-	{
-		perror("select");
-		exit(-1);
-    }
-
-    return numReady;
-}
-
 int safeSend(int sockfd, const void *msg, int len, int flags) {
 	int sentSize = 0;
 
-	if ((sentSize = send(socketNum, sendBuf, sendLen, flags)) < 0)
+	if ((sentSize = send(sockfd, msg, len, flags)) < 0)
 	{
 		perror("send call");
 		exit(-1);
