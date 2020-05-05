@@ -102,7 +102,7 @@ int tcpClientSetup(char * serverName, char * port, int debugFlag)
 	}
 
 	printf("server ip address: %s\n", getIPAddressString(ipAddress));
-	safeConnect(socket_num, (struct sockaddr*)&server, sizeof(server);
+	safeConnect(socket_num, (struct sockaddr*)&server, sizeof(server));
 
 	if (debugFlag)
 	{
