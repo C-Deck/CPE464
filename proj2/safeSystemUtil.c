@@ -83,12 +83,16 @@ int safeSelect(int nfds, fd_set  *readfds, fd_set  *writefds, fd_set *errorfds, 
     return numReady;
 }
 
-void safeSend(int sockfd, const void *msg, int len, int flags) {
-	if (send(socketNum, sendBuf, sendLen, flags) < 0)
+int safeSend(int sockfd, const void *msg, int len, int flags) {
+	int sentSize = 0;
+
+	if ((sentSize = send(socketNum, sendBuf, sendLen, flags)) < 0)
 	{
 		perror("send call");
 		exit(-1);
 	}
+
+	return sentSize;
 }
 
 void safeClose(int sockfd) {

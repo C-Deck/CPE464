@@ -39,6 +39,6 @@ int tcpAccept(int server_socket, int debugFlag);
 
 // for the client side
 int tcpClientSetup(char * serverName, char * port, int debugFlag);
-void setChatHeader(char *packet, uint16_t packetLength, uint8_t flag);
+void setChatHeader(uint8_t *packet, uint16_t packetLength, uint8_t flag);
 
 #endif

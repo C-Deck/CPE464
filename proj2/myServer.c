@@ -189,7 +189,7 @@ void attemptSendMessage(uint8_t handleLength, char *handle, char *packet, int se
 
 void setHandle(int socketNum, char *packet)
 {
-	char sendPacket[3];
+	uint8_t sendPacket[3];
 	char handleBuf[MAX_HANDLE_LENGTH];
 	uint8_t handleSize = packet[0];
 	

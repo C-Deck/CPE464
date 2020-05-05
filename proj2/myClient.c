@@ -21,6 +21,7 @@
 #include "networks.h"
 #include "error.h"
 #include "safeSystemUtil.h"
+#include "pollLib.h"
 
 #define DEBUG_FLAG 1
 
@@ -30,7 +31,7 @@ struct ClientInfo {
 	uint8_t handleLength;
 };
 
-void sendToServer(int socketNum);
+void sendToServer(int socketNum, struct ClientInfo *client);
 void checkArgs(int argc, char * argv[]);
 int getFromStdin(char * sendBuf, char * prompt);
 int initClient(struct ClientInfo *client, int socketNum, char *handle);
@@ -50,11 +51,12 @@ int extractHandle(char *packet, char *handleBuff, uint8_t *handleLen);
 void receivedBadDest(char *packet);
 void receivedMessage(char *packet, uint16_t packetLength);
 void receivedBroadcast(char *packet, uint16_t packetLength);
+void parsePacket(char *packet, uint16_t packetLength, uint8_t flag);
 
-// TODO CHECK INCREMENTING ON PACKET AND INPUT - Break messages into multiple packets
+// TODO Break messages into multiple packets
 int main(int argc, char * argv[])
 {
-	int socketNum = 0, clientInit = -1, connected = -1;         //socket descriptor
+	int socketNum = 0; //socket descriptor
 	struct ClientInfo client;
 	
 	checkArgs(argc, argv);
@@ -65,7 +67,7 @@ int main(int argc, char * argv[])
 	if (initClient(&client, socketNum, argv[2]) == 0) {
 		if (initialPacketCheck(&client, socketNum) == 0) {
 			addToPollSet(socketNum);
-			sendToServer(socketNum);
+			sendToServer(socketNum, &client);
 		}
 	}
 	
@@ -96,7 +98,6 @@ int initClient(struct ClientInfo *client, int socketNum, char *handle)
 
 int initialPacketCheck(struct ClientInfo *client, int socketNum)
 {
-	int sent = 0;            //actual amount of data sent/* get the data and send it   */
 	uint8_t packet[MAXBUF];
 	uint16_t packetSize = 3;
 
@@ -108,7 +109,7 @@ int initialPacketCheck(struct ClientInfo *client, int socketNum)
 	//TODO Receive from the server the ACK
 	safeSend(client->socket, packet, packetSize, 0);
 
-	return getInitPacketResponse(socketNum);
+	return getInitPacketResponse(client, socketNum);
 }
 
 int getInitPacketResponse(struct ClientInfo *client, int socketNum)
@@ -135,7 +136,7 @@ void sendToServer(int socketNum, struct ClientInfo *client)
 	char inputBuf[MAXBUF];	//
 	uint8_t packet[MAXBUF];  // Sending buffer
 	int flag = 0;
-	uint16_t sendLen = 3,;        //amount of data to send - start as 3 for header
+	uint16_t sendLen = 3;        //amount of data to send - start as 3 for header
 	int sent = 0;            //actual amount of data sent/* get the data and send it   */
 
 	while (1)
@@ -214,8 +215,8 @@ int extractHandle(char *packet, char *handleBuff, uint8_t *handleLen)
 {
 	*handleLen = packet[0];
 
-	memcpy(handleBuff, packet + 1, handleLen);
-	handleBuff[handleLen] = '\0';
+	memcpy(handleBuff, packet + 1, *handleLen);
+	handleBuff[*handleLen] = '\0';
 }
 
 void receivedBadDest(char *packet)
@@ -271,7 +272,7 @@ int parseInput(char *inputBuf, uint16_t *sendLen, uint8_t *packet, struct Client
 	char command[3];
 
 	memcpy(command, inputBuf, 2);
-	command[2] = '\0'
+	command[2] = '\0';
 
 	// MESSAGE
 	if (strcmp(command, "%M") == 0 || strcmp(command, "%m") == 0) {
@@ -319,7 +320,8 @@ void buildBroadcast(char *inputBuf, uint16_t *sendLen, uint8_t *packet, struct C
 void buildMessage(char *inputBuf, uint16_t *sendLen, uint8_t *packet, struct ClientInfo *client)
 {
 	int handleLength = client->handleLength;
-	uint8_t numHandles = atoi(inputBuf[0]);
+	char num[2] = {inputBuf[0], '\0'};
+	uint8_t numHandles = atoi(num);
 
 	// Set the sender
 	setSender(packet, client);
@@ -331,7 +333,7 @@ void buildMessage(char *inputBuf, uint16_t *sendLen, uint8_t *packet, struct Cli
 
 	// Increment the input by two for the number and the space 
 	// Increment the packet by the sender handleLength, + 2 bytes for numHandles and handleLength
-	addHandles(inputBuf + 2, sendLen, packet + handleLength + 2);
+	addHandles(inputBuf + 2, sendLen, packet + handleLength + 2, numHandles);
 }
 
 void addHandles(char *inputBuf, uint16_t *sendLen, uint8_t *packet, uint8_t numHandles)
@@ -403,7 +405,7 @@ void receiveHandleNumbers(int socketNum)
 
 	if (flag == NUM_HANDLES_FLAG) {
 		printf("\nHandle List:");
-		receiveHandles(socketNum);
+		receiveHandles(socketNum, numberHandles);
 	} else {
 		printf("Did not receive the number of handles flag\n");
 	}

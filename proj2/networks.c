@@ -112,7 +112,7 @@ int tcpClientSetup(char * serverName, char * port, int debugFlag)
 	return socket_num;
 }
 
-void setChatHeader(char *packet, uint16_t packetLength, uint8_t flag)
+void setChatHeader(uint8_t *packet, uint16_t packetLength, uint8_t flag)
 {
 	((uint16_t *) packet)[0] = htons(packetLength);
 	packet[2] = NUM_HANDLES_FLAG;
