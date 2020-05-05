@@ -112,37 +112,6 @@ int tcpClientSetup(char * serverName, char * port, int debugFlag)
 	return socket_num;
 }
 
-int selectCall(int socketNumber, int seconds, int microseconds, int timeIsNotNull)
-{
-	// Returns 1 if socket is ready, 0 if socket is not ready  
-	// set timeIsNotNull = TIME_IS_NOT_NULL when providing a time value
-	int numReady = 0;
-	fd_set fileDescriptorSet;  // the file descriptor set 
-	struct timeval timeout;
-	struct timeval * timeoutPtr;   // needed for the time = NULL case
-	
-	
-	// setup fileDescriptorSet (socket to select on)
-	  FD_ZERO(&fileDescriptorSet);
-	  FD_SET(socketNumber, &fileDescriptorSet);
-	
-	// Time can be NULL, 0 or a seconds/microseconds 
-	if (timeIsNotNull == TIME_IS_NOT_NULL)
-	{
-		timeout.tv_sec = seconds;  
-		timeout.tv_usec = microseconds; 
-		timeoutPtr = &timeout;
-    } else
-    {
-		timeoutPtr = NULL;  /* block forever - until input */
-    }
-
-	numReady = safeSelect(socketNumber + 1, &fileDescriptorSet, NULL, NULL, timeoutPtr);
-  
-	// Will be either 0 (socket not ready) or 1 (socket is ready for read)
-    return numReady;
-}
-
 void setChatHeader(char *packet, uint16_t packetLength, uint8_t flag)
 {
 	((uint16_t *) packet)[0] = htons(packetLength);
