@@ -10,10 +10,10 @@
 #include <stdint.h>
 
 #define BACKLOG 10
-#define MAXBUF 1024
+#define MAXBUF 1400
 #define TIME_IS_NULL 1
 #define TIME_IS_NOT_NULL 2
-#define MAX_HANDLE_LENGHTH 100
+#define MAX_HANDLE_LENGTH 100
 #define MAX_MESSAGE_LENGTH 201
 #define CHAT_HEADER_SIZE 3
 
