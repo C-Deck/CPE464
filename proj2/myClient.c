@@ -189,7 +189,7 @@ void processSockets(int socketNum, struct ClientInfo *client)
 	}
 }
 
-void sendServer(int socketnNum, struct ClientInfo *client)
+void sendServer(int socketNum, struct ClientInfo *client)
 {
 	char inputBuf[MAXBUF];	//
 	uint8_t packet[MAXBUF];  // Sending buffer
@@ -233,7 +233,7 @@ void sendServer(int socketnNum, struct ClientInfo *client)
 	}
 }
 
-void recvServer(int socketNum)
+void recvServer(int socketNum, client)
 {
 	char header[CHAT_HEADER_SIZE];
 	char packet[MAXBUF];
