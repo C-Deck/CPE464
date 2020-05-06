@@ -233,7 +233,7 @@ void sendServer(int socketNum, struct ClientInfo *client)
 	}
 }
 
-void recvServer(int socketNum, client)
+void recvServer(int socketNum)
 {
 	char header[CHAT_HEADER_SIZE];
 	char packet[MAXBUF];
