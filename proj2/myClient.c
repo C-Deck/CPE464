@@ -145,17 +145,18 @@ int getInitPacketResponse(struct ClientInfo *client, int socketNum)
 	}
 
 	if (currentMode == DEBUG_MODE) {
-		printf("\nFlag receive %d", (uint8_t) buf[2]);
+		printf("\nPacket length received %d", *((uint16_t *) buf));
+		printf("\nFlag received %d", *((uint8_t *) (buf + 2)));
 	}
 
 	if (buf[2] == ACK_GOOD_FLAG) {
-		printf("Confirmation packet recieved\n");
+		printf("\nConfirmation packet recieved");
 		return 0;
 	} else if (buf[2] == ACK_BAD_FLAG) {
 		handleInUse(client->handle);
 		return -1;
 	} else {
-		printf("Unknown error\n");
+		printf("\nUnknown error");
 	}
 
 	return -1;
