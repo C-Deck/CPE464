@@ -35,12 +35,13 @@ struct ClientInfo {
 
 static int currentMode = DEBUG_MODE;
 
-void sendToServer(int socketNum, struct ClientInfo *client);
+void processSockets(int socketNum, struct ClientInfo *client);
 void checkArgs(int argc, char * argv[]);
 int getFromStdin(char * sendBuf, char * prompt);
 int initClient(struct ClientInfo *client, int socketNum, char *handle);
 int initialPacketCheck(struct ClientInfo *client, int socketNum);
 int getInitPacketResponse(struct ClientInfo *client, int socketNum);
+void sendServer(int socketnNum, struct ClientInfo *client);
 int parseInput(char *inputBuf, uint16_t *sendLen, uint8_t *packet, struct ClientInfo *client);
 void buildBroadcast(char *inputBuf, uint16_t *sendLen, uint8_t *packet, struct ClientInfo *client);
 void buildMessage(char *inputBuf, uint16_t *sendLen, uint8_t *packet, struct ClientInfo *client);
@@ -76,7 +77,8 @@ int main(int argc, char * argv[])
 	if (initClient(&client, socketNum, argv[1]) == 0) {
 		if (initialPacketCheck(&client, socketNum) == 0) {
 			addToPollSet(socketNum);
-			sendToServer(socketNum, &client);
+			addToPollSet(STDIN_FILENO);
+			processSockets(socketNum, &client);
 		}
 	}
 	
@@ -165,7 +167,29 @@ int getInitPacketResponse(struct ClientInfo *client, int socketNum)
 	return -1;
 }
 
-void sendToServer(int socketNum, struct ClientInfo *client)
+void processSockets(int socketNum, struct ClientInfo *client)
+{
+	int socketToProcess = 0;
+
+	while (1)
+	{
+		printf("\n$: ");
+		if ((socketToProcess = pollCall(POLL_WAIT_FOREVER)) != -1) {
+			// Socket is not stdin
+			if (socketToProcess != 0)
+			{
+				recvServer(socketNum);
+			} else {
+				sendServer(socketNum, client);
+			}
+		} else {
+			// Just printing here to let me know what is going on
+			printf("Poll timed out waiting for client to send data\n");
+		}
+	}
+}
+
+void sendServer(int socketnNum, struct ClientInfo *client)
 {
 	char inputBuf[MAXBUF];	//
 	uint8_t packet[MAXBUF];  // Sending buffer
@@ -173,51 +197,38 @@ void sendToServer(int socketNum, struct ClientInfo *client)
 	uint16_t sendLen = 3;        //amount of data to send - start as 3 for header
 	int sent = 0;            //actual amount of data sent/* get the data and send it   */
 
-	while (1)
-	{
-		// Don't need the returned socket - only would be the server
-		/* if (pollCall(POLL_WAIT_FOREVER) > 0)
-		{
-			recvServer(socketNum);
-		} */
+	memset(inputBuf, 0, MAXBUF);
+	memset(packet, 0, MAXBUF);
 
-		if (currentMode == DEBUG_MODE) {
-			printf("\nNothing found on poll call");
-		}
+	sendLen = getFromStdin(inputBuf, "\n$:");
 
-		memset(inputBuf, 0, MAXBUF);
-		memset(packet, 0, MAXBUF);
+	if (currentMode == DEBUG_MODE) {
+		printf("\nGot input: %s", inputBuf);
+	}
 
-		sendLen = getFromStdin(inputBuf, "\n$:");
+	flag = parseInput(inputBuf, &sendLen, packet, client);
 
-		if (currentMode == DEBUG_MODE) {
-			printf("\nGot input: %s", inputBuf);
-		}
-
-		flag = parseInput(inputBuf, &sendLen, packet, client);
-
-		if (flag != -1) {
-			printf("\nread: %s string len: %d (including null)", inputBuf, sendLen);
+	if (flag != -1) {
+		printf("\nread: %s string len: %d (including null)", inputBuf, sendLen);
 		
-			setChatHeader(packet, sendLen, flag);
-			//sent = safeSend(socketNum, packet, sendLen, 0);
-			if ((sent = send(socketNum, packet, sendLen, 0)) < 0)
-			{
-				perror("send call");
-				exit(-1);
-			}
+		setChatHeader(packet, sendLen, flag);
+		//sent = safeSend(socketNum, packet, sendLen, 0);
+		if ((sent = send(socketNum, packet, sendLen, 0)) < 0)
+		{
+			perror("send call");
+			exit(-1);
+		}
 
-			if (flag == GET_HANDLES_FLAG) {
-				receiveHandleNumbers(socketNum);
-			}
+		if (flag == GET_HANDLES_FLAG) {
+			receiveHandleNumbers(socketNum);
+		}
 
-			printf("\nAmount of data sent is: %d", sent);
+		printf("\nAmount of data sent is: %d", sent);
 
-			// End the input loop
-			if (flag == EXIT_FLAG) {
-				getExitResponse(socketNum);
-				break;
-			}
+		// End the input loop
+		if (flag == EXIT_FLAG) {
+			getExitResponse(socketNum);
+			break;
 		}
 	}
 }
@@ -544,7 +555,7 @@ void receiveHandleNumbers(int socketNum)
 		printf("\nHandle List:");
 		receiveHandles(socketNum, numberHandles);
 	} else {
-		printf("Did not receive the number of handles flag\n");
+		printf("\nDid not receive the number of handles flag\n");
 	}
 }
 
@@ -566,7 +577,7 @@ void receiveHandles(int socketNum, uint32_t numberHandles)
 		handleLength = header[3];
 		
 		if (flag != HANDLE_FLAG) {
-			printf("Invalid Flag for handle packet");
+			printf("\nInvalid Flag for handle packet");
 		}
 
 		//safeRecv(socketNum, handle, handleLength, 0);
@@ -594,10 +605,14 @@ void allHandlesReceived(int socketNum)
 		perror("recv call");
 		exit(-1);
 	}
-	flag = header[2];
+	flag = (uint8_t) header[2];
+
+	if (currentMode == DEBUG_MODE) {
+		printf("\nFlag received: %d", flag);
+	}
 
 	if (flag != HANDLES_END_FLAG) {
-		printf("Invalid Flag for handles end");
+		printf("\nInvalid Flag for handles end");
 	} else {
 		printf("\nEnd of handle list");
 	}

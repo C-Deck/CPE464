@@ -334,7 +334,7 @@ void sendAllHandles(int socketNum)
 
 	forEachWithSender(clientList, sendHandleFlag, socketNum);
 
-	sendAllHandles(socketNum);
+	sendHandleListFinished(socketNum);
 }
 
 // Use sendHandlePacket with flag preset -
@@ -450,4 +450,3 @@ int checkArgs(int argc, char *argv[])
 	
 	return portNumber;
 }
-
