@@ -382,7 +382,13 @@ void exitClient(int socketNum)
 void addNewClient(int mainServerSocket)
 {
 	int newClientSocket = tcpAccept(mainServerSocket, DEBUG_FLAG);
+	if (currentMode == DEBUG_MODE) {
+		printf("\nAttempting to add the client to the list");
+	}
 	addClient(clientList, newClientSocket);
+	if (currentMode == DEBUG_MODE) {
+		printf("\nClient added to the list");
+	}
 
 	addToPollSet(newClientSocket);
 }
