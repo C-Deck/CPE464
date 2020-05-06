@@ -122,8 +122,8 @@ void recvFromClient(int clientSocket)
 	}
 
 	if (currentMode == DEBUG_MODE) {
-		struct Client *client = getClient(clientList, clientSocket);
-		printf("\nReceived %d byte from socket %s", messageLen, client->handle);
+		struct Client *client = getClientFromSocket(clientList, clientSocket);
+		printf("\nReceived %d bytes from socket %s", messageLen, client->handle);
 	}
 
 	if (messageLen == 0) {

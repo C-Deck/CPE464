@@ -18,6 +18,7 @@ struct ClientList {
 };
 
 struct Client *getClient(struct ClientList *list, char *handle);
+struct Client *getClientFromSocket(struct ClientList *list, int socket);
 void forEachWithPacket(struct ClientList *list, void (*f)(int, char *, uint16_t), char *packet, uint16_t packetSize, int senderSocket);
 void forEachWithSender(struct ClientList *list, void (*f)(int, char *, uint8_t), int senderSocketNum);
 int checkHandleExists(struct ClientList *list, char *handle);
