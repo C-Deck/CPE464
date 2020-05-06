@@ -102,7 +102,7 @@ static void growPollSet(int newSetSize)
 		exit(-1);
 	}
 	
-	printf("Increasing poll set from: %d to %d\n", currentPollSetSize, newSetSize);
+	//printf("Increasing poll set from: %d to %d\n", currentPollSetSize, newSetSize);
 	pollFileDescriptors = srealloc(pollFileDescriptors, newSetSize * sizeof(struct pollfd));	
 	
 	// zero out the new poll set elements

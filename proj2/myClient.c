@@ -147,7 +147,7 @@ int getInitPacketResponse(struct ClientInfo *client, int socketNum)
 	}
 
 	if (currentMode == DEBUG_MODE) {
-		printf("\nPacket length received %d", *((uint16_t *) buf));
+		printf("\nPacket length received %d", ntohs(*((uint16_t *) buf)));
 		printf("\nFlag received %d", *((uint8_t *) (buf + 2)));
 	}
 
@@ -175,10 +175,10 @@ void sendToServer(int socketNum, struct ClientInfo *client)
 	while (1)
 	{
 		// Don't need the returned socket - only would be the server
-		if (pollCall(POLL_WAIT_FOREVER) > 0)
+		/* if (pollCall(POLL_WAIT_FOREVER) > 0)
 		{
 			recvServer(socketNum);
-		}
+		} */
 
 		if (currentMode == DEBUG_MODE) {
 			printf("\nNothing found on poll call");
