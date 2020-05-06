@@ -157,5 +157,6 @@ void setChatHeader(uint8_t *packet, uint16_t packetLength, uint8_t flag)
 
 	if (currentMode == DEBUG_MODE) {
 		printf("\nHeader set with packetlength %d and flag %d", packetLength, (uint8_t ) packet[2]);
+		fflush(stdout);
 	}
 }

@@ -168,13 +168,14 @@ int getInitPacketResponse(struct ClientInfo *client, int socketNum)
 	return -1;
 }
 
-void processSockets(int socketNum, struct ClientInfo *client)
+void processSockets int socketNum, struct ClientInfo *client)
 {
 	int socketToProcess = 0, exit = 0;
 
 	while (1)
 	{
 		printf("\n$: ");
+		fflush(stdout);
 		if ((socketToProcess = pollCall(POLL_WAIT_FOREVER)) != -1) {
 			// Socket is not stdin
 			if (socketToProcess != 0)
@@ -473,13 +474,15 @@ void addHandles(char *inputBuf, uint16_t *sendLen, uint8_t *packet, uint8_t numH
 	while (idx < numHandles) {
 		memset(inputBuf, '\0', MAX_HANDLE_LENGTH);
 
-		while(isspace(currentChar = inputBuf[inputIndex]) == 0) {
+		while(isspace((currentChar = inputBuf[inputIndex])) == 0) {
 			handleBuf[handleLen] = currentChar;
 			handleLen++;
 			inputIndex++;
 		}
 
-		packet[packetIndex++] = handleLen;
+		packet[packetIndex] = handleLen;
+		handleBuf[handleLen] = '\0';
+		handleLen++;
 		packetIndex++;
 		memcpy(packet + packetIndex, handleBuf, handleLen);
 		packetIndex = packetIndex + handleLen;
