@@ -425,7 +425,7 @@ void addNewClient(int mainServerSocket)
 
 void removeClient(int clientSocket)
 {
-	printf("Client on socket %d terminted\n", clientSocket);
+	printf("\nClient on socket %d terminted", clientSocket);
 	removeClientFromList(clientList, clientSocket);
 	removeFromPollSet(clientSocket);
 	//safeClose(clientSocket);

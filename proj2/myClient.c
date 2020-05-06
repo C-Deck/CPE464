@@ -55,6 +55,7 @@ void extractHandle(char *packet, char *handleBuff, uint8_t *handleLen);
 void receivedBadDest(char *packet);
 void receivedMessage(char *packet, uint16_t packetLength);
 void receivedBroadcast(char *packet, uint16_t packetLength);
+void getExitResponse(int socketNum);
 void parsePacket(char *packet, uint16_t packetLength, uint8_t flag);
 
 // TODO Break messages into multiple packets
@@ -214,6 +215,7 @@ void sendToServer(int socketNum, struct ClientInfo *client)
 
 			// End the input loop
 			if (flag == EXIT_FLAG) {
+				getExitResponse(socketNum);
 				break;
 			}
 		}
@@ -368,6 +370,24 @@ int parseInput(char *inputBuf, uint16_t *sendLen, uint8_t *packet, struct Client
 	else {
 		printf("\nInvalid command");
 		return -1;
+	}
+}
+
+void getExitResponse(int socketNum)
+{
+	char buf[CHAT_HEADER_SIZE];
+
+	//safeRecv(socketNum, buf, CHAT_HEADER_SIZE, 0);
+	if (recv(socketNum, buf, CHAT_HEADER_SIZE, 0) < 0)
+	{
+		perror("recv call");
+		exit(-1);
+	}
+
+	if (buf[2] == ACK_GOOD_FLAG) {
+		printf("\nExit confirmation received");
+	} else {
+		printf("\nDid not get the exit flag");
 	}
 }
 
