@@ -195,7 +195,7 @@ void sendToServer(int socketNum, struct ClientInfo *client)
 		flag = parseInput(inputBuf, &sendLen, packet, client);
 
 		if (flag != -1) {
-			printf("read: %s string len: %d (including null)\n", inputBuf, sendLen);
+			printf("\nread: %s string len: %d (including null)", inputBuf, sendLen);
 		
 			setChatHeader(packet, sendLen, flag);
 			//sent = safeSend(socketNum, packet, sendLen, 0);
@@ -209,7 +209,7 @@ void sendToServer(int socketNum, struct ClientInfo *client)
 				receiveHandleNumbers(socketNum);
 			}
 
-			printf("Amount of data sent is: %d\n", sent);
+			printf("\nAmount of data sent is: %d", sent);
 
 			// End the input loop
 			if (flag == EXIT_FLAG) {
@@ -350,7 +350,7 @@ int parseInput(char *inputBuf, uint16_t *sendLen, uint8_t *packet, struct Client
 	
 	// BROADCAST
 	else if (strcmp(command, "%B") == 0 || strcmp(command, "%b") == 0) {
-		buildBroadcast(inputBuf + CHAT_HEADER_SIZE, sendLen, packet + CHAT_HEADER_SIZE, client);
+		buildBroadcast(inputBuf + 2, sendLen, packet + CHAT_HEADER_SIZE, client);
 		return BROADCAST_FLAG;
 	}
 
