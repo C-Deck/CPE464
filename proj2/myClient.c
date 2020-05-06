@@ -476,6 +476,9 @@ void addHandles(char *inputBuf, uint16_t *sendLen, uint8_t *packet, uint8_t numH
 
 		while(isspace((currentChar = inputBuf[inputIndex])) == 0) {
 			if (currentMode == DEBUG_MODE) {
+				if (inputIndex > 3) {
+					sleep(3);
+				}
 				printf("\nRead character: %c", currentChar);
 			}
 			handleBuf[handleLen] = currentChar;
