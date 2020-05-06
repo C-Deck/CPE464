@@ -232,12 +232,13 @@ void setHandle(int socketNum, char *packet)
 {
 	uint8_t sendPacket[CHAT_HEADER_SIZE];
 	char handleBuf[MAX_HANDLE_LENGTH];
-	uint8_t handleSize = packet[0];
+	uint8_t handleSize = (uint8_t) packet[0];
 	
 	strncpy(handleBuf, packet + 1, handleSize);
 	handleBuf[handleSize] = '\0';
 
 	if (currentMode == DEBUG_MODE) {
+		printf("\nHandle size of %d", handleSize);
 		printf("\nTrying to set up connection for %s using packet", packet + 1);
 		printf("\nTrying to set up connection for %s using handleBuf", handleBuf);
 	}
