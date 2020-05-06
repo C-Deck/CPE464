@@ -168,10 +168,10 @@ void sendToServer(int socketNum, struct ClientInfo *client)
 	while (1)
 	{
 		// Don't need the returned socket - only would be the server
-		if (pollCall(POLL_WAIT_FOREVER) != -1)
+		/* if (pollCall(POLL_WAIT_FOREVER) != -1)
 		{
 			recvServer(socketNum);
-		}
+		} */
 
 		if (currentMode == DEBUG_MODE) {
 			printf("\nNothing found on poll call");
