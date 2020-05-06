@@ -61,6 +61,8 @@ int main(int argc, char *argv[])
 
 	// Main control process (clients and accept())
 	processSockets(serverSocket);
+
+	free(clientList);
 	
 	/* close the sockets */
 	safeClose(serverSocket);
@@ -140,7 +142,7 @@ void parseHeader(int clientSocket, char *packet)
 	uint8_t flag = (uint8_t) packet[2];
 
 	if (currentMode == DEBUG_MODE) {
-		printf("\nParsed the header\nPacketSize: %d - Flag: %d", packetSize, flag);
+		printf("\nParsed the header -- PacketSize: %d - Flag: %d", packetSize, flag);
 	}
 
 	doCommand(clientSocket, packet, packetSize, flag);
@@ -156,6 +158,9 @@ void doCommand(int socketNum, char *packet, uint16_t packetSize, uint8_t flag)
 			sendMessage(packet, socketNum, packetSize);
 			break;
 		case BROADCAST_FLAG:
+			if (currentMode == DEBUG_MODE) {
+				printf("\nMessage handling broadcast flag");
+			}
 			forEachWithPacket(clientList, broadcastToClient, packet, packetSize, socketNum);
 			break;
 		case GET_HANDLES_FLAG:
@@ -271,11 +276,11 @@ void broadcastToClient(int socketNum, char *packet, uint16_t packetSize) // Can 
 
 	// Send the packet
 	//safeSend(socketNum, packet, packetSize, 0);
-	if ((send(socketNum, packet, packetSize, 0)) < 0)
+	/* if ((send(socketNum, packet, packetSize, 0)) < 0)
 	{
 		perror("send call");
 		exit(-1);
-	}
+	} */
 }
 
 void sendAllHandles(int socketNum)
