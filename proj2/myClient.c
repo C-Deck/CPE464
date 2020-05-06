@@ -168,7 +168,7 @@ int getInitPacketResponse(struct ClientInfo *client, int socketNum)
 	return -1;
 }
 
-void processSockets int socketNum, struct ClientInfo *client)
+void processSockets(int socketNum, struct ClientInfo *client)
 {
 	int socketToProcess = 0, exit = 0;
 
