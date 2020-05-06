@@ -75,7 +75,7 @@ int checkHandleExists(struct ClientList *list, char *handle)
 void setClientHandle(struct ClientList *list, int socketNum, char *handle, uint8_t handleSize)
 {
 	struct Client *client = list->head;
-	while (client != NULL) {
+	while (client != NULL || list->numClients == 0) {
 		if (client->socket == socketNum) {
 			strncpy(client->handle, handle, handleSize);
 			(client->handle)[handleSize] = '\0';

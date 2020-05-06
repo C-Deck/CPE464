@@ -38,6 +38,7 @@ void addNewClient(int mainServerSocket);
 void removeClient(int clientSocket);
 void sendMessage(char *packet, int senderSocket, uint16_t packetSize);
 void attemptSendMessage(uint8_t handleLength, char *handle, char *packet, int senderSocket, uint16_t packetSize);
+void broadcast(int socketNum, char *packet, uint16_t packetSize);
 void broadcastToClient(int socketNum, char *packet, uint16_t packetSize);
 void sendAllHandles(int socketNum);
 void sendHandleFlag(int socketNum, char *handle, uint8_t handleLength);
@@ -161,7 +162,8 @@ void doCommand(int socketNum, char *packet, uint16_t packetSize, uint8_t flag)
 			if (currentMode == DEBUG_MODE) {
 				printf("\nMessage handling broadcast flag");
 			}
-			forEachWithPacket(clientList, broadcastToClient, packet, packetSize, socketNum);
+			broadcast(socketNum, packet, packetSize);
+			//forEachWithPacket(clientList, broadcastToClient, packet, packetSize, socketNum);
 			break;
 		case GET_HANDLES_FLAG:
 			sendAllHandles(socketNum);
@@ -262,6 +264,18 @@ void setHandle(int socketNum, char *packet)
 			perror("send call");
 			exit(-1);
 		}
+	}
+}
+
+void broadcast(int socketNum, char *packet, uint16_t packetSize)
+{
+	struct Client *client = clientList->head;
+	while (client != NULL) {
+		if (client->handleSet == 1 && client->socket != socketNum) {
+			broadcastToClient(client->socket, packet, packetSize);
+		}
+
+		client = client->nextClient;
 	}
 }
 
