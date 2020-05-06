@@ -41,7 +41,7 @@ int getFromStdin(char * sendBuf, char * prompt);
 int initClient(struct ClientInfo *client, int socketNum, char *handle);
 int initialPacketCheck(struct ClientInfo *client, int socketNum);
 int getInitPacketResponse(struct ClientInfo *client, int socketNum);
-void sendServer(int socketnNum, struct ClientInfo *client);
+int sendServer(int socketnNum, struct ClientInfo *client);
 int parseInput(char *inputBuf, uint16_t *sendLen, uint8_t *packet, struct ClientInfo *client);
 void buildBroadcast(char *inputBuf, uint16_t *sendLen, uint8_t *packet, struct ClientInfo *client);
 void buildMessage(char *inputBuf, uint16_t *sendLen, uint8_t *packet, struct ClientInfo *client);
@@ -169,7 +169,7 @@ int getInitPacketResponse(struct ClientInfo *client, int socketNum)
 
 void processSockets(int socketNum, struct ClientInfo *client)
 {
-	int socketToProcess = 0;
+	int socketToProcess = 0, exit = 0;
 
 	while (1)
 	{
@@ -180,16 +180,20 @@ void processSockets(int socketNum, struct ClientInfo *client)
 			{
 				recvServer(socketNum);
 			} else {
-				sendServer(socketNum, client);
+				exit = sendServer(socketNum, client);
 			}
 		} else {
 			// Just printing here to let me know what is going on
 			printf("Poll timed out waiting for client to send data\n");
 		}
+
+		if (exit == EXIT_FLAG) {
+			break;
+		}
 	}
 }
 
-void sendServer(int socketNum, struct ClientInfo *client)
+int sendServer(int socketNum, struct ClientInfo *client)
 {
 	char inputBuf[MAXBUF];	//
 	uint8_t packet[MAXBUF];  // Sending buffer
@@ -228,9 +232,11 @@ void sendServer(int socketNum, struct ClientInfo *client)
 		// End the input loop
 		if (flag == EXIT_FLAG) {
 			getExitResponse(socketNum);
-			break;
+			return EXIT_FLAG;
 		}
 	}
+
+	return 0;
 }
 
 void recvServer(int socketNum)
