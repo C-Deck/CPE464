@@ -238,7 +238,8 @@ void setHandle(int socketNum, char *packet)
 	handleBuf[handleSize] = '\0';
 
 	if (currentMode == DEBUG_MODE) {
-		printf("\nTrying to set up connection for %s", handleBuf);
+		printf("\nTrying to set up connection for %s using packet", packet + 1);
+		printf("\nTrying to set up connection for %s using handleBuf", handleBuf);
 	}
 
 	if (checkHandleExists(clientList, handleBuf) == 0) {
