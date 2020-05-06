@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "list.h"
 #include "safeSystemUtil.h"
@@ -97,7 +98,11 @@ void printClient(struct Client *client)
 
 void *addClient(struct ClientList *list, int socketNum)
 {
-	struct Client *newClient = (struct Client *) safeCalloc(1, sizeof(struct Client));
+	struct Client *newClient = (struct Client *) calloc(1, sizeof(struct Client));
+	if (newClient == NULL) {
+		perror();
+		exit(-1);
+	}
 	newClient->socket = socketNum;
 
 	if (list->head == NULL) {
