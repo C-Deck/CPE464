@@ -18,6 +18,20 @@ struct Client *getClient(struct ClientList *list, char *handle)
 	return client;
 }
 
+struct Client *getClientFromSocket(struct ClientList *list, int socket)
+{
+	struct Client *client = list->head;
+	while (client != NULL) {
+		if (client->socket == socket) {
+			break;
+		}
+
+		client = client->nextClient;
+	}
+
+	return client;
+}
+
 void forEachWithPacket(struct ClientList *list, void (*f)(int, char *, uint16_t), char *packet, uint16_t packetSize, int senderSocket)
 {
 	struct Client *client = list->head;
