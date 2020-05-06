@@ -251,7 +251,8 @@ void setHandle(int socketNum, char *packet)
 		if (currentMode == DEBUG_MODE) {
 			printf("\nSending Successful connection");
 		}
-		if ((send(socketNum, packet, CHAT_HEADER_SIZE, 0)) < 0)
+
+		if ((send(socketNum, sendPacket, CHAT_HEADER_SIZE, 0)) < 0)
 		{
 			perror("send call");
 			exit(-1);
@@ -265,7 +266,7 @@ void setHandle(int socketNum, char *packet)
 
 		// Send the packet
 		//safeSend(socketNum, packet, CHAT_HEADER_SIZE, 0);
-		if ((send(socketNum, packet, CHAT_HEADER_SIZE, 0)) < 0)
+		if ((send(socketNum, sendPacket, CHAT_HEADER_SIZE, 0)) < 0)
 		{
 			perror("send call");
 			exit(-1);
@@ -278,6 +279,9 @@ void broadcast(int socketNum, char *packet, uint16_t packetSize)
 	struct Client *client = clientList->head;
 	while (client != NULL) {
 		if (client->handleSet == 1 && client->socket != socketNum) {
+			if (currentMode == DEBUG_MODE) {
+				printf("\nBroadcasting to handle %s", client->handle);
+			}
 			broadcastToClient(client->socket, packet, packetSize);
 		}
 
@@ -296,11 +300,11 @@ void broadcastToClient(int socketNum, char *packet, uint16_t packetSize) // Can 
 
 	// Send the packet
 	//safeSend(socketNum, packet, packetSize, 0);
-	/* if ((send(socketNum, packet, packetSize, 0)) < 0)
+	if ((send(socketNum, packet, packetSize, 0)) < 0)
 	{
 		perror("send call");
 		exit(-1);
-	} */
+	}
 }
 
 void sendAllHandles(int socketNum)
