@@ -72,7 +72,7 @@ int checkHandleExists(struct ClientList *list, char *handle)
 	return 0;
 }
 
-void setClientHandle(struct ClientList *list, int socketNum, char *handle, uint8_t handleSize)
+int setClientHandle(struct ClientList *list, int socketNum, char *handle, uint8_t handleSize)
 {
 	struct Client *client = list->head;
 	while (client != NULL || list->numClients == 0) {
@@ -81,14 +81,16 @@ void setClientHandle(struct ClientList *list, int socketNum, char *handle, uint8
 			(client->handle)[handleSize] = '\0';
 			client->handleLength = handleSize;
 			client->handleSet = 1;
-			break;
+
+			// Only increment after handle is set
+			list->numClients = list->numClients + 1;
+			return 1;
 		}
 
 		client = client->nextClient;
 	}
 
-	// Only increment after handle is set
-	list->numClients = list->numClients + 1;
+	return -1;
 }
 
 void printClient(struct Client *client)
