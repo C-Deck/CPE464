@@ -187,6 +187,11 @@ void sendToServer(int socketNum, struct ClientInfo *client)
 		memset(packet, 0, MAXBUF);
 
 		sendLen = getFromStdin(inputBuf, "\n$:");
+
+		if (currentMode == DEBUG_MODE) {
+			printf("\nGot input: %s", inputBuf);
+		}
+
 		flag = parseInput(inputBuf, &sendLen, packet, client);
 
 		if (flag != -1) {
@@ -466,7 +471,7 @@ void addMessage(char *inputBuf, uint16_t *sendLen, uint8_t *packet)
 		printf("\nGet to the add message call");
 	}
 
-	while ((currentChar = inputBuf[messageLen]) != '\n') {
+	while ((currentChar = inputBuf[messageLen]) != '\0') {
 		if (currentMode == DEBUG_MODE) {
 			printf("\nRead character: %c", currentChar);
 		}
