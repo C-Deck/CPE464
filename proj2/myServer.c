@@ -237,6 +237,10 @@ void setHandle(int socketNum, char *packet)
 	strncpy(handleBuf, packet + 1, handleSize);
 	handleBuf[handleSize] = '\0';
 
+	if (currentMode == DEBUG_MODE) {
+		printf("\nTrying to set up connection for %s", handleBuf);
+	}
+
 	if (checkHandleExists(clientList, handleBuf) == 0) {
 		setChatHeader(sendPacket, CHAT_HEADER_SIZE, ACK_GOOD_FLAG);
 

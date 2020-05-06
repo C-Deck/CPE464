@@ -61,7 +61,7 @@ int checkHandleExists(struct ClientList *list, char *handle)
 {
 	struct Client *client = list->head;
 	while (client != NULL) {
-		if (client->handle && (strcmp(handle, client->handle) == 0)) {
+		if (client->handleSet == 1 && (strcmp(handle, client->handle) == 0)) {
 			return -1;
 			break;
 		}
