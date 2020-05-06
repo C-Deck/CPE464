@@ -119,6 +119,7 @@ int initialPacketCheck(struct ClientInfo *client, int socketNum)
 
 	setChatHeader(packet, packetSize, CONNECT_FLAG);
 	setSender(packet + CHAT_HEADER_SIZE, client);
+	packetSize = packetSize + client->handleLength + 1;
 
 	if (currentMode == DEBUG_MODE) {
 		printf("\nSending connection flag to server");
