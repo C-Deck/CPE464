@@ -98,9 +98,10 @@ int initClient(struct ClientInfo *client, int socketNum, char *handle)
     	return -1;
     }
 
-	client->handleLength = handleLen;
-
 	strncpy(client->handle, handle, handleLen);
+	handleLen++;
+
+	client->handleLength = handleLen;
 
 	if (currentMode == DEBUG_MODE) {
 		printf("\nInitializing the client handle <%s> with handle <%s>", client->handle, handle);
