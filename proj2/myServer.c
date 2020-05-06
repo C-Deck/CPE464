@@ -107,7 +107,6 @@ void processSockets(int mainServerSocket)
 			// Just printing here to let me know what is going on
 			printf("Poll timed out waiting for client to send data\n");
 		}
-		
 	}
 }
 
@@ -190,6 +189,7 @@ void sendMessage(char *packet, int senderSocket, uint16_t packetSize)
 
 	if (currentMode == DEBUG_MODE) {
 		printf("\nMessage being sent to %d clients", numClients);
+		fflush(stdout);
 	}
 
 	while (idx < numClients) {
@@ -297,6 +297,7 @@ void broadcastToClient(int socketNum, char *packet, uint16_t packetSize) // Can 
 
 		printf("\nBroadcasting message to socket %d", socketNum);
 		printf("\nMessage: %s", packet + 4 + handleSize);
+		fflush(stdout);
 	}
 
 	// Send the packet
@@ -377,6 +378,7 @@ void sendHandleListFinished(int socketNum)
 
 	if (currentMode == DEBUG_MODE) {
 		printf("\nSending flag 13");
+		fflush(stdout);
 	}
 
 	// Send the packet
@@ -396,6 +398,7 @@ void exitClient(int socketNum)
 
 	if (currentMode == DEBUG_MODE) {
 		printf("\nSending exit acknowledge flag");
+		fflush(stdout);
 	}
 
 	// Send the packet

@@ -152,6 +152,7 @@ int getInitPacketResponse(struct ClientInfo *client, int socketNum)
 	if (currentMode == DEBUG_MODE) {
 		printf("\nPacket length received %d", ntohs(*((uint16_t *) buf)));
 		printf("\nFlag received %d", *((uint8_t *) (buf + 2)));
+		fflush(stdout);
 	}
 
 	if (buf[2] == ACK_GOOD_FLAG) {
@@ -228,6 +229,7 @@ int sendServer(int socketNum, struct ClientInfo *client)
 		}
 
 		printf("\nAmount of data sent is: %d", sent);
+		fflush(stdout);
 
 		// End the input loop
 		if (flag == EXIT_FLAG) {
@@ -265,6 +267,7 @@ void recvServer(int socketNum)
 
 	if (currentMode == DEBUG_MODE) {
 		printf("\nReceived packet with %d with flag %d from server", packetLength, flag);
+		fflush(stdout);
 	}
 
 	parsePacket(packet, packetLength, flag);
@@ -300,6 +303,7 @@ void extractHandle(char *packet, char *handleBuff, uint8_t *handleLen)
 
 	if (currentMode == DEBUG_MODE) {
 		printf("\nGot handle %s from packet with handleSize %d", handleBuff, *handleLen);
+		fflush(stdout);
 	}
 }
 
@@ -403,8 +407,10 @@ void getExitResponse(int socketNum)
 
 	if (buf[2] == ACK_GOOD_FLAG) {
 		printf("\nExit confirmation received");
+		fflush(stdout);
 	} else {
 		printf("\nDid not get the exit flag");
+		fflush(stdout);
 	}
 }
 
@@ -461,6 +467,7 @@ void addHandles(char *inputBuf, uint16_t *sendLen, uint8_t *packet, uint8_t numH
 
 	if (currentMode == DEBUG_MODE) {
 		printf("\nAdding each handle to the packet");
+		fflush(stdout);
 	}
 
 	while (idx < numHandles) {
@@ -482,6 +489,7 @@ void addHandles(char *inputBuf, uint16_t *sendLen, uint8_t *packet, uint8_t numH
 
 		if (currentMode == DEBUG_MODE) {
 			printf("\nAdding handle <%s> with length of %d to packet", handleBuf, handleLen);
+			fflush(stdout);
 		}
 
 		// Increment for the space between the handles
@@ -493,6 +501,7 @@ void addHandles(char *inputBuf, uint16_t *sendLen, uint8_t *packet, uint8_t numH
 
 	if (currentMode == DEBUG_MODE) {
 		printf("\nTotal packet offset after adding handles: %d bytes", packetIndex);
+		fflush(stdout);
 	}
 
 	// Add the message to the packet - Increase the index by one to consider the space
@@ -507,6 +516,7 @@ void addMessage(char *inputBuf, uint16_t *sendLen, uint8_t *packet)
 
 	if (currentMode == DEBUG_MODE) {
 		printf("\nGet to the add message call");
+		fflush(stdout);
 	}
 
 	while ((currentChar = inputBuf[messageLen]) != '\0') {
