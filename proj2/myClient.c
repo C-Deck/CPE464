@@ -474,7 +474,7 @@ void addHandles(char *inputBuf, uint16_t *sendLen, uint8_t *packet, uint8_t numH
 	while (idx < numHandles) {
 		memset(inputBuf, '\0', MAX_HANDLE_LENGTH);
 
-		while(isspace((currentChar = inputBuf[inputIndex])) == 0) {
+		while(isspace((currentChar = inputBuf[inputIndex])) != 0) {
 			if (currentMode == DEBUG_MODE) {
 				if (inputIndex > 3) {
 					sleep(3);
