@@ -98,16 +98,13 @@ void printClient(struct Client *client)
 
 void *addClient(struct ClientList *list, int socketNum)
 {
-	struct Client *newClient = (struct Client *) calloc(1, sizeof(struct Client));
-	if (newClient == NULL) {
-		perror();
-		exit(-1);
-	}
+	struct Client *newClient = (struct Client *) safeCalloc(1, sizeof(struct Client));
 	newClient->socket = socketNum;
 
 	if (list->head == NULL) {
 		list->head = newClient;
-		list->numClients = 1;
+		list->tail = newClient;
+		list->numClients = 0;
 	}
 	else {
 		list->tail->nextClient = newClient;

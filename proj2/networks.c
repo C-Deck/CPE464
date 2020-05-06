@@ -21,6 +21,11 @@
 #include "gethostbyname6.h"
 #include "safeSystemUtil.h"
 
+#define NORMAL_MODE 1
+#define DEBUG_MODE 2
+
+static int currentMode = DEBUG_MODE;
+
 // This function creates the server socket.  The function 
 // returns the server socket number and prints the port 
 // number to the screen.
@@ -149,4 +154,8 @@ void setChatHeader(uint8_t *packet, uint16_t packetLength, uint8_t flag)
 {
 	((uint16_t *) packet)[0] = htons(packetLength);
 	packet[2] = NUM_HANDLES_FLAG;
+
+	if (currentMode == DEBUG_MODE) {
+		printf("\nHeader set with packetlength %d and flag %d", packetLength, flag);
+	}
 }

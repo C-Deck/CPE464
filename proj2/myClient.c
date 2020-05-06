@@ -476,6 +476,10 @@ void setSender(uint8_t *packet, struct ClientInfo *client)
 	packet[0] = client->handleLength;
 
 	memcpy(packet + 1, client->handle, client->handleLength);
+
+	if (currentMode == DEBUG_MODE) {
+		printf("\nSetting sender handle <%s> and length %d", packet + 1, client->handleLength);
+	}
 }
 
 void receiveHandleNumbers(int socketNum)
