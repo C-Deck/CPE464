@@ -130,7 +130,8 @@ int initialPacketCheck(struct ClientInfo *client, int socketNum)
 		exit(-1);
 	}
 
-	return getInitPacketResponse(client, socketNum);
+	return 0;
+	//return getInitPacketResponse(client, socketNum);
 }
 
 int getInitPacketResponse(struct ClientInfo *client, int socketNum)
@@ -461,7 +462,14 @@ void addMessage(char *inputBuf, uint16_t *sendLen, uint8_t *packet)
 	int messageLen = 0;
 	char message[MAXBUF];
 
+	if (currentMode == DEBUG_MODE) {
+		printf("\nGet to the add message call");
+	}
+
 	while ((currentChar = inputBuf[messageLen]) != '\n') {
+		if (currentMode == DEBUG_MODE) {
+			printf("\nRead character: %c", currentChar);
+		}
 		packet[messageLen] = currentChar;
 		message[messageLen] = currentChar;
 		messageLen++;
