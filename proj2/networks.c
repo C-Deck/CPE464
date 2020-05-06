@@ -153,9 +153,9 @@ int tcpClientSetup(char * serverName, char * port, int debugFlag)
 void setChatHeader(uint8_t *packet, uint16_t packetLength, uint8_t flag)
 {
 	((uint16_t *) packet)[0] = htons(packetLength);
-	packet[2] = NUM_HANDLES_FLAG;
+	packet[2] = flag;
 
 	if (currentMode == DEBUG_MODE) {
-		printf("\nHeader set with packetlength %d and flag %d", packetLength, flag);
+		printf("\nHeader set with packetlength %d and flag %d", packetLength, (uint8_t ) packet[2]);
 	}
 }

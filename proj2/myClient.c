@@ -144,6 +144,10 @@ int getInitPacketResponse(struct ClientInfo *client, int socketNum)
 		exit(-1);
 	}
 
+	if (currentMode == DEBUG_MODE) {
+		printf("\nFlag receive %d", (uint8_t) buf[2]);
+	}
+
 	if (buf[2] == ACK_GOOD_FLAG) {
 		printf("Confirmation packet recieved\n");
 		return 0;

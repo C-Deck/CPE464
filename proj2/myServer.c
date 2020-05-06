@@ -137,7 +137,7 @@ void recvFromClient(int clientSocket)
 void parseHeader(int clientSocket, char *packet)
 {
 	uint16_t packetSize = ntohs(*((uint16_t *) packet));
-	uint8_t flag = packet[2];
+	uint8_t flag = (uint8_t) packet[2];
 
 	if (currentMode == DEBUG_MODE) {
 		printf("\nParsed the header\nPacketSize: %d - Flag: %d", packetSize, flag);
