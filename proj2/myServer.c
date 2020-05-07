@@ -192,6 +192,14 @@ void sendMessage(char *packet, int senderSocket, uint16_t packetSize)
 	if (currentMode == DEBUG_MODE) {
 		printf("\nMessage being sent to %d clients from client %s", numClients, handle);
 		fflush(stdout);
+
+      memset(handle, '\0', MAX_HANDLE_LENGTH);
+
+      currentHandleLength = *(packet + offset);
+
+		memcpy(handle, packet + offset + 1, currentHandleLength);
+      printf("\nMessage being sent to <%s> with handleLen %d", handle, currentHandleLength);
+      fflush(stdout);
 	}
 
 	while (idx < numClients) {
