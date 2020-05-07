@@ -481,11 +481,8 @@ void addHandles(char *inputBuf, uint16_t *sendLen, uint8_t *packet, uint8_t numH
 	while (idx < numHandles) {
 		memset(inputBuf, '\0', MAX_HANDLE_LENGTH);
 
-		while(isspace((currentChar = inputBuf[inputIndex])) != 0) {
+		while (isspace((currentChar = inputBuf[inputIndex])) == 0) {
 			if (currentMode == DEBUG_MODE) {
-				if (inputIndex > 3) {
-					sleep(3);
-				}
 				printf("\nRead character: %c", currentChar);
 			}
 			handleBuf[handleLen] = currentChar;
@@ -504,7 +501,7 @@ void addHandles(char *inputBuf, uint16_t *sendLen, uint8_t *packet, uint8_t numH
 		*sendLen = *sendLen + 1 + handleLen;
 
 		if (currentMode == DEBUG_MODE) {
-			printf("\nAdding handle <%s> with length of %d to packet", handleBuf, handleLen);
+			printf("\nAdding handle <%s> with length of %d to packet handleNum %d", handleBuf, handleLen, idx);
 			fflush(stdout);
 		}
 
