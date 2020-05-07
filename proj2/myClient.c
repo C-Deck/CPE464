@@ -516,7 +516,7 @@ void addHandles(char *inputBuf, uint16_t *sendLen, uint8_t *packet, uint8_t numH
 	}
 
 	// Add the message to the packet - Increase the index by one to consider the space
-	addMessage(inputBuf + inputIndex + 1, sendLen, packet + packetIndex);
+	addMessage(inputBuf + inputIndex, sendLen, packet + packetIndex);
 }
 
 void addMessage(char *inputBuf, uint16_t *sendLen, uint8_t *packet)
