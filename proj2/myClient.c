@@ -425,9 +425,9 @@ void getExitResponse(int socketNum)
 		exit(-1);
 	}
 
-   flag = ((uint8_t *) packet)[2];
+   flag = ((uint8_t *) buf)[2];
 
-	if (buf == ACK_GOOD_FLAG) {
+	if (flag == ACK_GOOD_FLAG) {
 		printf("\nExit confirmation received");
 		fflush(stdout);
 	} else {
