@@ -179,6 +179,10 @@ void sendMessage(char *packet, int senderSocket, uint16_t packetSize)
 	uint8_t numClients = 0, currentHandleLength = 0, offset = CHAT_HEADER_SIZE, idx = 0;
 	char handle[MAX_HANDLE_LENGTH];
 
+	// Increase the offset by the sender byte and sender length
+	currentHandleLength = *(packet + offset);
+	offset = offset + currentHandleLength + 1;
+
 	numClients = *((uint8_t *)(packet + offset));
 	offset++;
 
@@ -197,7 +201,7 @@ void sendMessage(char *packet, int senderSocket, uint16_t packetSize)
 		offset = offset + currentHandleLength;
 
 		if (currentMode == DEBUG_MODE) {
-			printf("\nMessage being sent to <%s>", handle);
+			printf("\nMessage being sent to <%s> with handleLen %d", handle, currentHandleLength);
 			fflush(stdout);
 		}
 
