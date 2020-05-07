@@ -51,7 +51,7 @@ void addMessage(char *inputBuf, uint16_t *sendLen, uint8_t *packet);
 void receiveHandleNumbers(int socketNum);
 void allHandlesReceived(int socketNum);
 void receiveHandles(int socketNum, uint32_t numberHandles);
-void recvServer(int socketNum);
+int recvServer(int socketNum);
 void extractHandle(char *packet, char *handleBuff, uint8_t *handleLen);
 void receivedBadDest(char *packet);
 void receivedMessage(char *packet, uint16_t packetLength);
@@ -180,7 +180,7 @@ void processSockets(int socketNum, struct ClientInfo *client)
 			// Socket is not stdin
 			if (socketToProcess != 0)
 			{
-				recvServer(socketNum);
+				exit = recvServer(socketNum);
 			} else {
 				exit = sendServer(socketNum, client);
 			}
@@ -242,18 +242,24 @@ int sendServer(int socketNum, struct ClientInfo *client)
 	return 0;
 }
 
-void recvServer(int socketNum)
+int recvServer(int socketNum)
 {
 	char header[CHAT_HEADER_SIZE];
 	char packet[MAXBUF];
 	uint16_t packetLength = 0;
 	uint8_t flag = 0;
+	int messageLen = 0;
 
 	//safeRecv(socketNum, header, CHAT_HEADER_SIZE, 0);
-	if (recv(socketNum, header, CHAT_HEADER_SIZE, 0) < 0)
+	if ((messageLen = recv(socketNum, header, CHAT_HEADER_SIZE, 0)) < 0)
 	{
 		perror("recv call");
 		exit(-1);
+	}
+
+	if (messageLen == 0) {
+		serverTerminated();
+		return EXIT_FLAG;
 	}
 
 	packetLength = ntohs(*((uint16_t *) header));
@@ -272,6 +278,7 @@ void recvServer(int socketNum)
 	}
 
 	parsePacket(packet, packetLength, flag);
+	return 0;
 }
 
 void parsePacket(char *packet, uint16_t packetLength, uint8_t flag)
