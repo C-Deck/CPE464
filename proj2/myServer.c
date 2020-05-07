@@ -46,7 +46,7 @@ void sendHandleListFinished(int socketNum);
 void exitClient(int socketNum);
 
 struct ClientList *clientList;
-static int currentMode = DEBUG_MODE;
+static int currentMode = NORMAL_MODE;
 
 int main(int argc, char *argv[])
 {

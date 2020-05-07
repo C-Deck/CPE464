@@ -33,7 +33,7 @@ struct ClientInfo {
 	uint8_t handleLength;
 };
 
-static int currentMode = DEBUG_MODE;
+static int currentMode = NORMAL_MODE;
 
 void processSockets(int socketNum, struct ClientInfo *client);
 void checkArgs(int argc, char * argv[]);
@@ -416,6 +416,7 @@ int parseInput(char *inputBuf, uint16_t *sendLen, uint8_t *packet, struct Client
 void getExitResponse(int socketNum)
 {
 	char buf[CHAT_HEADER_SIZE];
+   uint8_t flag = 0;
 
 	//safeRecv(socketNum, buf, CHAT_HEADER_SIZE, 0);
 	if (recv(socketNum, buf, CHAT_HEADER_SIZE, 0) < 0)
@@ -424,11 +425,13 @@ void getExitResponse(int socketNum)
 		exit(-1);
 	}
 
-	if (buf[2] == ACK_GOOD_FLAG) {
+   flag = ((uint8_t *) packet)[2];
+
+	if (buf == ACK_GOOD_FLAG) {
 		printf("\nExit confirmation received");
 		fflush(stdout);
 	} else {
-		printf("\nDid not get the exit flag");
+		printf("\nDid not get the exit flag - instead %d", flag);
 		fflush(stdout);
 	}
 }

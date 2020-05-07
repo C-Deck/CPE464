@@ -24,7 +24,7 @@
 #define NORMAL_MODE 1
 #define DEBUG_MODE 2
 
-static int currentMode = DEBUG_MODE;
+static int currentMode = NORMAL_MODE;
 
 // This function creates the server socket.  The function 
 // returns the server socket number and prints the port 
