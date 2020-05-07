@@ -520,7 +520,6 @@ void addHandles(char *inputBuf, uint16_t *sendLen, uint8_t *packet, uint8_t numH
 		handleLen = 0;
 
 		idx++;
-		sleep(3);
 	}
 
 	if (currentMode == DEBUG_MODE) {
