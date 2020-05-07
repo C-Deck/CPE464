@@ -492,15 +492,14 @@ void addHandles(char *inputBuf, uint16_t *sendLen, uint8_t *packet, uint8_t numH
 		handleLen++;
 		packetIndex++;
 		memcpy(packet + packetIndex, handleBuf, handleLen);
+		if (currentMode == DEBUG_MODE) {
+			printf("\nAdding handle <%s> with length of %d to packet handleNum %d", packet + packetIndex, handleLen, idx);
+			fflush(stdout);
+		}
 		packetIndex = packetIndex + handleLen;
 
 		// Increment the total size by 1 byte for handleLength and the handleLength
 		*sendLen = *sendLen + 1 + handleLen;
-
-		if (currentMode == DEBUG_MODE) {
-			printf("\nAdding handle <%s> with length of %d to packet handleNum %d", handleBuf, handleLen, idx);
-			fflush(stdout);
-		}
 
 		// Increment for the space between the handles
 		inputIndex++;

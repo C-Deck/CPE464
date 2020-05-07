@@ -184,7 +184,7 @@ void sendMessage(char *packet, int senderSocket, uint16_t packetSize)
 	currentHandleLength = *(packet + offset);
 	offset++;
 	memcpy(handle, packet + offset, currentHandleLength);
-	offset = offset + currentHandleLength + 1;
+	offset = offset + currentHandleLength;
 
 	numClients = *((uint8_t *)(packet + offset));
 	offset++;
