@@ -336,10 +336,17 @@ void receivedMessage(char *packet, uint16_t packetLength)
 	int packetOffset = 0;
 
 	extractHandle(packet, senderHandle, &handleLen);
+
 	packetOffset = handleLen + 1;
 
 	numberHandles = packet[packetOffset];
 	packetOffset++;
+
+   if (currentMode == DEBUG_MODE) {
+		printf("\nMessage being sent by <%s> with handleLen %d", senderHandle, handleLen);
+      printf("\nNumber of handles = %d", numberHandles);
+		fflush(stdout);
+	}
 
 	while(counter < numberHandles) {
 		handleLen = packet[packetOffset];
