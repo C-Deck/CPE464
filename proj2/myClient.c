@@ -427,7 +427,7 @@ void getExitResponse(int socketNum)
 
    flag = ((uint8_t *) buf)[2];
 
-	if (flag == ACK_GOOD_FLAG) {
+	if (flag == ACK_EXIT_FLAG) {
 		printf("\nExit confirmation received");
 		fflush(stdout);
 	} else {
