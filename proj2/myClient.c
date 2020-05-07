@@ -37,7 +37,7 @@ static int currentMode = NORMAL_MODE;
 
 void processSockets(int socketNum, struct ClientInfo *client);
 void checkArgs(int argc, char * argv[]);
-int getFromStdin(char * sendBuf, char * prompt);
+int getFromStdin(char * sendBuf);
 int initClient(struct ClientInfo *client, int socketNum, char *handle);
 int initialPacketCheck(struct ClientInfo *client, int socketNum);
 int getInitPacketResponse(struct ClientInfo *client, int socketNum);
@@ -206,7 +206,7 @@ int sendServer(int socketNum, struct ClientInfo *client)
 	memset(inputBuf, 0, MAXBUF);
 	memset(packet, 0, MAXBUF);
 
-	sendLen = getFromStdin(inputBuf, "\n$:");
+	sendLen = getFromStdin(inputBuf);
 
 	if (currentMode == DEBUG_MODE) {
 		printf("\nGot input: %s", inputBuf);
@@ -658,7 +658,7 @@ void allHandlesReceived(int socketNum)
 	}
 }
 
-int getFromStdin(char * sendBuf, char * prompt)
+int getFromStdin(char * sendBuf)
 {
 	// Gets input up to MAXBUF-1 (and then appends \0)
 	// Returns length of string including null
@@ -666,7 +666,6 @@ int getFromStdin(char * sendBuf, char * prompt)
 	int inputLen = 0;       
 	
 	// Important you don't input more characters than you have space 
-	printf("%s ", prompt);
 	while (inputLen < (MAXBUF - 1) && aChar != '\n')
 	{
 		aChar = getchar();
@@ -676,7 +675,6 @@ int getFromStdin(char * sendBuf, char * prompt)
 			inputLen++;
 		}
 	}
-	// TODO input length too long
 
 	sendBuf[inputLen] = '\0';
 	inputLen++;  //we are going to send the null
