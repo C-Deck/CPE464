@@ -215,8 +215,10 @@ int sendServer(int socketNum, struct ClientInfo *client)
 	flag = parseInput(inputBuf, &sendLen, packet, client);
 
 	if (flag != -1) {
-		printf("\nread: %s string len: %d (including null)", inputBuf, sendLen);
-		
+      if (currentMode == DEBUG_MODE) {
+		   printf("\nread: %s string len: %d (including null)", inputBuf, sendLen);
+      }
+
 		setChatHeader(packet, sendLen, flag);
 		//sent = safeSend(socketNum, packet, sendLen, 0);
 		if ((sent = send(socketNum, packet, sendLen, 0)) < 0)
@@ -229,8 +231,10 @@ int sendServer(int socketNum, struct ClientInfo *client)
 			receiveHandleNumbers(socketNum);
 		}
 
-		printf("\nAmount of data sent is: %d", sent);
-		fflush(stdout);
+      if (currentMode == DEBUG_MODE) {
+		   printf("\nAmount of data sent is: %d", sent);
+		   fflush(stdout);
+      }
 
 		// End the input loop
 		if (flag == EXIT_FLAG) {
