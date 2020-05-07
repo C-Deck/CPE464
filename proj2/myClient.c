@@ -493,7 +493,7 @@ void addHandles(char *inputBuf, uint16_t *sendLen, uint8_t *packet, uint8_t numH
 		packetIndex++;
 		memcpy(packet + packetIndex, handleBuf, handleLen);
 		if (currentMode == DEBUG_MODE) {
-			printf("\nAdding handle <%s> with length of %d to packet handleNum %d", packet + packetIndex, handleLen, idx);
+			printf("\nAdding handle <%s> with length of %d to packet handleNum %d", packet + packetIndex, packet + packetIndex - 1, idx);
 			fflush(stdout);
 		}
 		packetIndex = packetIndex + handleLen;
