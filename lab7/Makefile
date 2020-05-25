@@ -4,7 +4,7 @@
 CC = gcc
 CFLAGS= -g -Wall
 LIBS += libcpe464.2.20.a -lstdc++ -ldl
-SRC = networks.c  networks.h gethostbyname.c gethostbyname.h
+SRC = networks.c  networks.h gethostbyname.c gethostbyname.h  util.c util.h
 OBJS = networks.o gethostbyname.o 
 
 all:  udpClient udpServer
