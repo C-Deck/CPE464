@@ -105,7 +105,8 @@ int checkArgs(int argc, char * argv[])
 
 	if (argc != 4)
 	{
-		fprintf(stderr, "Usage %s [optional port number]\n", argv[0]);
+		fprintf(stderr, "Usage %s host-name port-number error-rate\n", argv[0]);
+      fprintf(stderr, "Received %d args", argc);
 		exit(-1);
 	}
 	
