@@ -191,9 +191,9 @@ STATE getFilename(struct UDPConnection *client, uint8_t *dataBuffer, int32_t dat
 STATE nextWindow(struct Window *window, int data_file)
 {
 	int32_t readLen = 0;
-	// printf("Loading window base: %u length: %u size: %u\n", window->base_seq_num, window->blockSize, window->window_size); // !!!
+	// printf("Loading window base: %u length: %u size: %u\n", window->base_seq_num, window->dataPacketSize, window->window_size); // !!!
 	
-	readLen = read(data_file, window->buffer, window->bufferSize);
+	readLen = read(data_file, window->windowDataBuffer, window->windowDataBufferSize);
 
 	resetWindowACK(window);
 	window->windowIndex = 0;
@@ -220,18 +220,18 @@ STATE nextDataPacket(struct UDPConnection *client, struct Window *window)
 {
 	STATE returnState = STATE_READ_ACKS;
 
-	uint32_t window_buffer_offset = window->windowIndex * window->blockSize;
-	uint32_t packetLen = window->blockSize;
+	uint32_t window_buffer_offset = window->windowIndex * window->dataPacketSize;
+	uint32_t packetLen = window->dataPacketSize;
 
 	int32_t data_left = window->dataLen - window_buffer_offset;
 
-	if (data_left <= window->blockSize) {
+	if (data_left <= window->dataPacketSize) {
 		packetLen = data_left;
 		returnState = STATE_WINDOW_CLOSE;
 	}
 
 	// printf("SEND %u\n", window->base_seq_num + window->windowIndex);
-	sendCall(window->buffer + window_buffer_offset, packetLen, client, DATA_FLAG, window->base_seq_num + window->windowIndex);
+	sendCall(window->windowDataBuffer + window_buffer_offset, packetLen, client, DATA_FLAG, window->base_seq_num + window->windowIndex);
 
 	window->windowIndex++;
 
@@ -290,17 +290,17 @@ void sendDataPacket(struct UDPConnection *client, struct Window *window, uint32_
 
 	uint32_t windowIndex = (sequenceNumber-1) % window->window_size;
 
-	uint32_t window_buffer_offset = windowIndex * window->blockSize;
+	uint32_t window_buffer_offset = windowIndex * window->dataPacketSize;
 
-	uint32_t packet_len = window->blockSize;
+	uint32_t packet_len = window->dataPacketSize;
 
-	int32_t data_left = window->bufferSize - window_buffer_offset;
+	int32_t data_left = window->windowDataBufferSize - window_buffer_offset;
 
-	if (data_left < window->blockSize) {
+	if (data_left < window->dataPacketSize) {
 		packet_len = data_left;
 	}
 
-	sendCall(window->buffer + window_buffer_offset, packet_len, client, DATA_FLAG, sequenceNumber);
+	sendCall(window->windowDataBuffer + window_buffer_offset, packet_len, client, DATA_FLAG, sequenceNumber);
 }
 
 STATE closeWindow(struct UDPConnection *client, struct Window *window, int nest_level)

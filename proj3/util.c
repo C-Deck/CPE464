@@ -218,11 +218,11 @@ Window *initWindow(uint32_t windowSize, uint32_t bufferSize)
   	Window *window = malloc(sizeof(struct Window));
   	window->initialSequenceNumber = 0;
   	window->windowSize = windowSize;
-  	window->blockSize = bufferSize;
-  	window->bufferSize = windowSize * bufferSize;
+  	window->dataPacketSize = bufferSize;
+  	window->windowDataBufferSize = windowSize * bufferSize;
   	window->ACKList = malloc(windowSize);
-  	window->buffer = malloc(windowSize * bufferSize);
-  	window->dataLen = window->blockSize * window->windowSize;
+  	window->windowDataBuffer = malloc(windowSize * bufferSize);
+  	window->dataLen = window->dataPacketSize * windowSize;
   	resetWindowACK(window);
   	return window;
 }
@@ -235,35 +235,35 @@ void resetWindowACK(struct Window *window)
 
 int isWindowFull(struct Window *window)
 {
-	int i;
-  	int32_t windowSize = (int32_t) ceil((1.0 * window->dataLen) / window->blockSize);
+	int i = 0;
+  	// int32_t windowSize = (int32_t) ceil((1.0 * window->dataLen) / window->dataPacketSize);
 
-  	for (i = 0; i < windowSize; i++) {
+  	for (i = 0; i < window->windowSize; i++) {
     	if (window->ACKList[i] == 0) {
-      		return WINDOW_NOT_FULL; // Not full: found an empty spot
+      		return WINDOW_NOT_FULL;
     	}
   	}
 
-  	return WINDOW_FULL; // Full: not empty spots filled
+  	return WINDOW_FULL;
 }
 
 uint32_t getMaxSequenceNumber(struct Window *window)
 {
 	int i = 0;
-  	uint32_t maxIndex = 0;
+  	uint32_t maxACKIndex = 0;
 
   	for (i = 0; i < window->windowSize; i++) {
     	if (window->ACKList[i] == 1) {
-      		maxIndex = i;
+      		maxACKIndex = i;
     	}
   	}
 
-  	return window->initialSequenceNumber + maxIndex;
+  	return window->initialSequenceNumber + maxACKIndex;
 }
 
 uint32_t getNextSequenceNumber(struct Window *window)
 {
-	int i;
+	int i  = 0;
 
 	for (i = 0; i < window->windowSize; i++) {
     	if (window->ACKList[i] == 0) {
@@ -277,8 +277,8 @@ uint32_t getNextSequenceNumber(struct Window *window)
 void freeWindow(struct Window *window)
 {
   	if (window != NULL) {
-    	if (window->buffer != NULL) {
-      		free(window->buffer);
+    	if (window->windowDataBuffer != NULL) {
+      		free(window->windowDataBuffer);
 		}
     	if(window->ACKList != NULL) {
       		free(window->ACKList);

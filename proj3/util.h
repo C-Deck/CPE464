@@ -55,9 +55,9 @@ typedef struct
 typedef struct
 {
 	uint8_t *ACKList;
-	uint8_t *buffer;
+	uint8_t *windowDataBuffer;
 	uint32_t windowSize;
-	uint32_t blockSize;
+	uint32_t dataPacketSize;
 	uint32_t bufferSize;
 	uint32_t dataLen;
 	uint32_t initialSequenceNumber;

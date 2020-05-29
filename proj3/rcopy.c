@@ -125,7 +125,7 @@ void runStateMachine(struct Client *client)
 				state = window_full(window, output_fd);
 				resetWindowACK(window);
 				window->initialSequenceNumber += window->windowSize;
-				window->bufferSize = 0;
+				window->windowDataBufferSize = 0;
 				break;
 
 			case STATE_EOF:
@@ -248,8 +248,8 @@ STATE recvData(Window *window)
 				// Save data if it isn't already in there
 				if (window->ACKList[windowIndex] == 0) {
 
-					offset = windowIndex * window->blockSize;
-					memcpy(&window->buffer[offset], dataBuffer, dataLen);
+					offset = windowIndex * window->dataPacketSize;
+					memcpy(&window->windowDataBuffer[offset], dataBuffer, dataLen);
 
 					// Mark the window as received
 					window->ACKList[windowIndex] = 1;
@@ -258,7 +258,7 @@ STATE recvData(Window *window)
 					maxSequenceNumber = getNextSequenceNumber(window);
 
 					if (sequenceNumber == maxSequenceNumber) {
-						window->bufferSize = offset + dataLen;
+						window->windowDataBufferSize = offset + dataLen;
 					}
 				}
 			}
@@ -300,8 +300,8 @@ STATE recvData(Window *window)
 STATE window_full(Window *window, int output_fd)
 {
 	// uint32_t window_count = nextSequenceNumber(window) - window->initialSequenceNumber;
-	// printf("Writing %d windows %u bytes\n", window_count, window->bufferSize); // !!!
-	write(output_fd, window->buffer, window->bufferSize);
+	// printf("Writing %d windows %u bytes\n", window_count, window->windowDataBufferSize); // !!!
+	write(output_fd, window->windowDataBuffer, window->windowDataBufferSize);
 	return STATE_RECV_DATA;
 }
 
