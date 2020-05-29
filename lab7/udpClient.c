@@ -65,11 +65,11 @@ void talkToServer(int socketNum, struct sockaddr_in6 * server)
 
 		printf("Sending: %s with len: %d\n", buffer, dataLen);
 
-		aPDU = createPDU(sequenceNumber, 0, buffer, dataLen);
+		aPDU = createPDU(sequenceNumber, 0, (uint8_t *) buffer, dataLen);
 		sequenceNumber++;
 		outputPDU(aPDU, dataLen + 7);
 	
-		sendtoErr(socketNum, PDU, dataLen + 7, 0, (struct sockaddr *) server, serverAddrLen);
+		sendtoErr(socketNum, aPDU, dataLen + 7, 0, (struct sockaddr *) server, serverAddrLen);
 		
 		safeRecvfrom(socketNum, buffer, MAXBUF, 0, (struct sockaddr *) server, &serverAddrLen);
 		
@@ -105,7 +105,8 @@ int checkArgs(int argc, char * argv[])
 
 	if (argc != 4)
 	{
-		fprintf(stderr, "Usage %s [optional port number]\n", argv[0]);
+		fprintf(stderr, "Usage %s host-name port-number error-rate\n", argv[0]);
+      fprintf(stderr, "Received %d args", argc);
 		exit(-1);
 	}
 	
