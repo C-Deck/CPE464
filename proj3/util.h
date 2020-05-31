@@ -46,13 +46,13 @@
 #define END_RCOPY_FLAG 0xD
 #define END_SERVER_FLAG 0xE
 
-typedef struct
+typedef struct UDPConnection
 {
   int32_t socket;
   struct sockaddr_in6 server;
 } UDPConnection;
 
-typedef struct
+typedef struct Window
 {
 	uint8_t *ACKList;
 	uint8_t *windowDataBuffer;
@@ -64,7 +64,7 @@ typedef struct
 	uint32_t windowIndex;
 } Window;
 
-typedef struct
+typedef struct Client
 {
 	char *fromFilename;
 	char *toFilename;
@@ -80,9 +80,9 @@ uint8_t * createPDU(uint32_t sequenceNumber, uint8_t flag, uint8_t *payload, int
 int startServer(int portNumber);
 int connectServer(struct UDPConnection *udp, char * hostName, int portNumber);
 int32_t selectCall(int32_t socketNumber, int32_t seconds, int32_t microseconds, int32_t timeIsNotNull);
-int32_t recvCall(uint8_t *dataBuffer, uint32_t len, int32_t socket, UDPConnection *connection, uint8_t *flag, uint32_t *sequenceNumber);
-int32_t baseRecvCall(uint8_t *dataBuffer, uint32_t len, int32_t socket, UDPConnection *connection);
-int32_t sendCall(uint8_t *buf, uint32_t dataLen, UDPConnection *connection, uint8_t flag, uint32_t sequenceNumber);
+int32_t recvCall(uint8_t *dataBuffer, uint32_t len, int32_t socket, struct UDPConnection *connection, uint8_t *flag, uint32_t *sequenceNumber);
+int32_t baseRecvCall(uint8_t *dataBuffer, uint32_t len, int32_t socket, struct UDPConnection *connection);
+int32_t sendCall(uint8_t *buf, uint32_t dataLen, struct UDPConnection *connection, uint8_t flag, uint32_t sequenceNumber);
 Window *initWindow(uint32_t windowSize, uint32_t bufferSize);
 uint32_t getMaxSequenceNumber(struct Window *window);
 uint32_t getNextSequenceNumber(struct Window *window);
