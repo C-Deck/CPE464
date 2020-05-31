@@ -75,8 +75,6 @@ int connectServer(struct UDPConnection *udp, char * hostName, int portNumber)
 	
 	udp->server.sin6_port = ntohs(portNumber);
 	udp->server.sin6_family = AF_INET6;
-
-    memcpy(&(udp->server.sin_addr), ipAddress->h_addr, ipAddress->h_length);
 	
 	inet_ntop(AF_INET6, ipAddress, ipString, sizeof(ipString));
 	printf("Server info - IP: %s Port: %d \n", ipString, portNumber);
@@ -132,15 +130,15 @@ int32_t selectCall(int32_t socketNumber, int32_t seconds, int32_t microseconds, 
     struct timeval * timeoutPtr;
 
     if (timeIsNotNull == TIME_IS_NOT_NULL) {
-        timeout->tv_sec = seconds;
-        timeout->tv_usec = microseconds;
+        timeout.tv_sec = seconds;
+        timeout.tv_usec = microseconds;
         timeoutPtr = &timeout;
     }
 
     FD_ZERO(&fileDescriptorSet);
     FD_SET(socketNumber, &fileDescriptorSet);
 
-    if ((numReady = select(socketNumber + 1, &fileDescriptorSet, (fd_set *) 0, (fd_set *) 0, timeout)) < 0) {
+    if ((numReady = select(socketNumber + 1, &fileDescriptorSet, (fd_set *) 0, (fd_set *) 0, timeoutPtr)) < 0) {
         perror("select");
         exit(-1);
     }
@@ -151,13 +149,13 @@ int32_t selectCall(int32_t socketNumber, int32_t seconds, int32_t microseconds, 
 int32_t recvCall(uint8_t *dataBuffer, uint32_t len, int32_t socket, UDPConnection *connection, uint8_t *flag, uint32_t *sequenceNumber)
 {
     int dataLen = 0;
-    uint32_t aPDU[MAX_BUFFER];
+    uint8_t aPDU[MAX_BUFFER];
     uint32_t clientAddrLen = sizeof(struct sockaddr_in6);
     uint16_t checksum = 0;
 
-    dataLen = recvfrom(socket, aPDU, len, 0, (struct sockaddr *) &(connection->server), &clientAddrLen)
+    dataLen = recvfrom(socket, aPDU, len, 0, (struct sockaddr *) &(connection->server), &clientAddrLen);
 
-    if (MODE = DEBUG_MODE) {
+    if (MODE == DEBUG_MODE) {
         outputPDU(aPDU, dataLen);
     }
 
@@ -171,7 +169,7 @@ int32_t recvCall(uint8_t *dataBuffer, uint32_t len, int32_t socket, UDPConnectio
 
     memcpy(&checksum, &(aPDU[4]), 2);
 
-    if (MODE = DEBUG_MODE) {
+    if (MODE == DEBUG_MODE) {
         outputPDU(aPDU, dataLen);
     }
 
@@ -179,7 +177,7 @@ int32_t recvCall(uint8_t *dataBuffer, uint32_t len, int32_t socket, UDPConnectio
         return RECV_ERROR;
     }
 
-    return (dataLen - 8);
+    return (dataLen - 7);
 }
 
 
@@ -194,17 +192,16 @@ int32_t baseRecvCall(uint8_t *dataBuffer, uint32_t len, int32_t socket, UDPConne
 
 int32_t sendCall(uint8_t *dataBuffer, uint32_t dataLen, UDPConnection *connection, uint8_t flag, uint32_t sequenceNumber)
 {
-    uint16_t checksum = 0;
     uint32_t clientAddrLen = sizeof(struct sockaddr_in6);
     uint8_t * aPDU = NULL;
 
-    aPDU = createPDU(sequenceNumber, dataBuffer, buf, dataLen);
+    aPDU = createPDU(sequenceNumber, flag, dataBuffer, dataLen);
 
     if (MODE = DEBUG_MODE) {
         outputPDU(aPDU, dataLen);
     }
 
-    if (sendtoErr(connection->socket, aPDU, dataLen + 8, 0, (struct sockaddr *)&(connection->server), clientAddrLen) < 0) {
+    if (sendtoErr(connection->socket, aPDU, dataLen + 7, 0, (struct sockaddr *)&(connection->server), clientAddrLen) < 0) {
         perror("sendCall");
         exit(1);
     }
