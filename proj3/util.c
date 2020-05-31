@@ -197,7 +197,7 @@ int32_t sendCall(uint8_t *dataBuffer, uint32_t dataLen, UDPConnection *connectio
 
     aPDU = createPDU(sequenceNumber, flag, dataBuffer, dataLen);
 
-    if (MODE = DEBUG_MODE) {
+    if (MODE == DEBUG_MODE) {
         outputPDU(aPDU, dataLen);
     }
 
@@ -216,7 +216,7 @@ Window *initWindow(uint32_t windowSize, uint32_t bufferSize)
   	window->initialSequenceNumber = 0;
   	window->windowSize = windowSize;
   	window->dataPacketSize = bufferSize;
-  	window->windowDataBufferSize = windowSize * bufferSize;
+  	window->bufferSize = windowSize * bufferSize;
   	window->ACKList = malloc(windowSize);
   	window->windowDataBuffer = malloc(windowSize * bufferSize);
   	window->dataLen = window->dataPacketSize * windowSize;
