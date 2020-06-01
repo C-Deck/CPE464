@@ -13,6 +13,7 @@
 
 #include "gethostbyname.h"
 #include "util.h"
+#include "cpe464.h"
 
 typedef enum
 {
@@ -27,9 +28,8 @@ typedef enum
 	STATE_READ_EOF_ACK
 } STATE;
 
-void processClient(int socketNum);
 int checkArgs(int argc, char *argv[]);
-void receiveClients();
+void receiveClients(int portNumber);
 void processClient(uint8_t *dataBuffer, int32_t dataLen, struct UDPConnection *client, int nest_level);
 STATE closeWindow(struct UDPConnection *client, struct Window *window, int nest_level);
 STATE getFilename(struct UDPConnection *client, uint8_t *dataBuffer, int32_t dataLen, int32_t *data_file, struct Window **window);
@@ -192,9 +192,9 @@ STATE getFilename(struct UDPConnection *client, uint8_t *dataBuffer, int32_t dat
 STATE nextWindow(struct Window *window, int data_file)
 {
 	int32_t readLen = 0;
-	// printf("Loading window base: %u length: %u size: %u\n", window->base_seq_num, window->dataPacketSize, window->window_size); // !!!
+	// printf("Loading window base: %u length: %u size: %u\n", window->initialSequenceNumber, window->dataPacketSize, window->windowSize); // !!!
 	
-	readLen = read(data_file, window->windowDataBuffer, window->windowDataBufferSize);
+	readLen = read(data_file, window->windowDataBuffer, window->bufferSize);
 
 	resetWindowACK(window);
 	window->windowIndex = 0;
@@ -231,8 +231,8 @@ STATE nextDataPacket(struct UDPConnection *client, struct Window *window)
 		returnState = STATE_WINDOW_CLOSE;
 	}
 
-	// printf("SEND %u\n", window->base_seq_num + window->windowIndex);
-	sendCall(window->windowDataBuffer + window_buffer_offset, packetLen, client, DATA_FLAG, window->base_seq_num + window->windowIndex);
+	// printf("SEND %u\n", window->initialSequenceNumber + window->windowIndex);
+	sendCall(window->windowDataBuffer + window_buffer_offset, packetLen, client, DATA_FLAG, window->initialSequenceNumber + window->windowIndex);
 
 	window->windowIndex++;
 
@@ -255,8 +255,8 @@ STATE readAck(struct UDPConnection *client, struct Window *window, int nest_leve
 			return STATE_SEND_DATA;
 		}
 
-		if ((sequenceNumber >= window->initialSequenceNumber) && (sequenceNumber < (window->initialSequenceNumber + window->window_size))) {
-			windowIndex = (sequenceNumber-1) % window->window_size;
+		if ((sequenceNumber >= window->initialSequenceNumber) && (sequenceNumber < (window->initialSequenceNumber + window->windowSize))) {
+			windowIndex = (sequenceNumber-1) % window->windowSize;
 			switch (flag) {
 				case FILENAME_FLAG:
 					processClient(dataBuffer, recvLen, client, nest_level + 1);
@@ -289,13 +289,13 @@ void sendDataPacket(struct UDPConnection *client, struct Window *window, uint32_
 {
 	// printf("RESEND %u\n", sequenceNumber); // !!!
 
-	uint32_t windowIndex = (sequenceNumber-1) % window->window_size;
+	uint32_t windowIndex = (sequenceNumber-1) % window->windowSize;
 
 	uint32_t window_buffer_offset = windowIndex * window->dataPacketSize;
 
 	uint32_t packet_len = window->dataPacketSize;
 
-	int32_t data_left = window->windowDataBufferSize - window_buffer_offset;
+	int32_t data_left = window->bufferSize - window_buffer_offset;
 
 	if (data_left < window->dataPacketSize) {
 		packet_len = data_left;
@@ -315,7 +315,7 @@ STATE closeWindow(struct UDPConnection *client, struct Window *window, int nest_
 
 		if (isWindowFull(window)) {
 			// printf("!!! Window Full next_base: %u\n", nextSequenceNumber(window));
-			window->base_seq_num = nextSequenceNumber(window);
+			window->initialSequenceNumber = nextSequenceNumber(window);
 			return STATE_WINDOW_NEXT;
 		}
 
@@ -326,9 +326,9 @@ STATE closeWindow(struct UDPConnection *client, struct Window *window, int nest_
 				continue;
 			}
 
-			if ((sequenceNumber >= window->base_seq_num) && (sequenceNumber < (window->base_seq_num + window->window_size))) {
+			if ((sequenceNumber >= window->initialSequenceNumber) && (sequenceNumber < (window->initialSequenceNumber + window->windowSize))) {
 
-				windowIndex = (sequenceNumber-1) % window->window_size;
+				windowIndex = (sequenceNumber-1) % window->windowSize;
 
 				switch (flag) {
 					case RR_FLAG:
@@ -358,7 +358,7 @@ STATE closeWindow(struct UDPConnection *client, struct Window *window, int nest_
 				exit(1);
 			}
 			// printf("Timeout!\n"); // !!!
-			sendDataPacket(client, window, window->base_seq_num);
+			sendDataPacket(client, window, window->initialSequenceNumber);
 		}
 	}
 
@@ -374,9 +374,9 @@ STATE sendEOF(struct UDPConnection *client, Window *window)
 	int selectCounter = 0;
 
 	while (1) {
-		// printf("Send EOF: base: %u ACKList: %u\n", window->base_seq_num, window->ACKList[0]);
-		//TODO Come back - why base_seq_num
-		sendCall(NULL, 0, client, DATA_EOF_FLAG, window->base_seq_num);
+		// printf("Send EOF: base: %u ACKList: %u\n", window->initialSequenceNumber, window->ACKList[0]);
+		//TODO Come back - why initialSequenceNumber
+		sendCall(NULL, 0, client, DATA_EOF_FLAG, window->initialSequenceNumber);
 
 		selectCounter++;
 
@@ -391,7 +391,7 @@ STATE sendEOF(struct UDPConnection *client, Window *window)
 				//TODO Come back to this
 				case SREJ_FLAG:
 				case ACK_EOF_FLAG:
-					if (sequenceNumber == window->base_seq_num) {
+					if (sequenceNumber == window->initialSequenceNumber) {
 						return STATE_DONE;
 					}
 					break;
