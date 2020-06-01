@@ -212,8 +212,6 @@ STATE recvData(struct Window *window)
 	uint32_t offset;
 	uint32_t maxSequenceNumber;
 
-	static uint32_t expected_seq_number = 0;
-
 	if (selectCall(server.socket, 10, 0, TIME_IS_NOT_NULL) == 0) {
 		fprintf(stderr, "Shutting down: No response from server for 10 seconds.\n");
 		exit(1);
@@ -279,8 +277,6 @@ STATE recvData(struct Window *window)
 			else {
 				sendAck(maxSequenceNumber - 1);
 			}
-
-			expected_seq_number = maxSequenceNumber;
 
 			if (isWindowFull(window)) {
 				// printf("Window Full\n");
