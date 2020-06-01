@@ -171,7 +171,7 @@ STATE getFilename(struct UDPConnection *client, uint8_t *dataBuffer, int32_t dat
 		return STATE_DONE;
 	}
 
-	memcpy(fname, &dataBuffer[8], dataLen - 8);
+	memcpy(fname, &(dataBuffer[7]), dataLen - 7);
 
 	if (((*data_file) = open(fname, O_RDONLY)) < 0) {
 		sendCall(NULL, 0, client, FILENAME_BAD_FLAG, 0);
@@ -287,7 +287,7 @@ STATE readAck(struct UDPConnection *client, struct Window *window, int nest_leve
 
 void sendDataPacket(struct UDPConnection *client, struct Window *window, uint32_t sequenceNumber)
 {
-	// printf("RESEND %u\n", sequenceNumber); // !!!
+	// printf("RESEND %u\n", sequenceNumber);
 
 	uint32_t windowIndex = (sequenceNumber-1) % window->windowSize;
 
@@ -357,7 +357,7 @@ STATE closeWindow(struct UDPConnection *client, struct Window *window, int nest_
 				fprintf(stderr, "ERROR: No Response from client in 10 seconds");
 				exit(1);
 			}
-			// printf("Timeout!\n"); // !!!
+			// printf("Timeout!\n");
 			sendDataPacket(client, window, window->initialSequenceNumber);
 		}
 	}

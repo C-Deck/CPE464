@@ -40,11 +40,11 @@
 #define SREJ_FLAG 0x6
 #define FILENAME_FLAG 0x7
 #define FILENAME_GOOD_FLAG 0x8
-#define FILENAME_BAD_FLAG 0xA
-#define DATA_EOF_FLAG 0xB
-#define ACK_EOF_FLAG 0xC
-#define END_RCOPY_FLAG 0xD
-#define END_SERVER_FLAG 0xE
+#define FILENAME_BAD_FLAG 0x9
+#define DATA_EOF_FLAG 0xA
+#define ACK_EOF_FLAG 0xB
+#define END_RCOPY_FLAG 0xC
+#define END_SERVER_FLAG 0xD
 
 typedef struct UDPConnection
 {
