@@ -173,6 +173,8 @@ STATE getFilename(struct UDPConnection *client, uint8_t *dataBuffer, int32_t dat
 
 	memcpy(fname, &(dataBuffer[7]), dataLen - 7);
 
+   printf("Filename: %s\n", fname);
+
 	if (((*data_file) = open(fname, O_RDONLY)) < 0) {
 		sendCall(NULL, 0, client, FILENAME_BAD_FLAG, 0);
 		free(*window);
@@ -428,5 +430,3 @@ int checkArgs(int argc, char *argv[])
 	
 	return portNumber;
 }
-
-
