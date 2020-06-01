@@ -286,7 +286,7 @@ STATE recvData(struct Window *window)
 			break;
 
 		case DATA_EOF_FLAG:
-			// printf("GOT EOF: sequenceNumber: %u\n", sequenceNumber);// !!!
+			// printf("GOT EOF: sequenceNumber: %u\n", sequenceNumber);
 			return STATE_EOF;
 			break;
 
@@ -301,7 +301,7 @@ STATE recvData(struct Window *window)
 STATE windowFull(struct Window *window, int output_fd)
 {
 	// uint32_t window_count = nextSequenceNumber(window) - window->initialSequenceNumber;
-	// printf("Writing %d windows %u bytes\n", window_count, window->windowDataBufferSize); // !!!
+	// printf("Writing %d windows %u bytes\n", window_count, window->windowDataBufferSize);
 	write(output_fd, window->windowDataBuffer, window->bufferSize);
 	return STATE_RECV_DATA;
 }

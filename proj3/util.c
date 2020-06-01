@@ -70,6 +70,7 @@ int connectServer(struct UDPConnection *udp, char * hostName, int portNumber)
   	 	
 	if ((ipAddress = gethostbyname6(hostName, &(udp->server))) == NULL)
 	{
+      perror("gethostbyname6() call error");
 		exit(-1);
 	}
 	
