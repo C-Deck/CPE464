@@ -9,6 +9,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <sys/wait.h>
 
 #include "gethostbyname.h"
 #include "util.h"
@@ -47,7 +48,7 @@ int main (int argc, char *argv[])
 	int portNumber = 0;
 
 	portNumber = checkArgs(argc, argv);
-	errorRate = atof(argv[3]);
+	errorRate = atof(argv[1]);
 	sendtoErr_init(errorRate, DROP_ON, FLIP_ON, DEBUG_ON, RSEED_OFF);
 
 	receiveClients(portNumber);
@@ -248,13 +249,13 @@ STATE readAck(struct UDPConnection *client, struct Window *window, int nest_leve
 	int i = 0;
 
 	while(selectCall(client->socket, 0, 0, TIME_IS_NOT_NULL)) {
-		recvLen = recvCall(dataBuffer, MAX_BUFFER, client->socket_num, client, &flag, &sequenceNumber);
+		recvLen = recvCall(dataBuffer, MAX_BUFFER, client->socket, client, &flag, &sequenceNumber);
 
 		if (recvLen == RECV_ERROR) {
 			return STATE_SEND_DATA;
 		}
 
-		if ((sequenceNumber >= window->base_seq_num) && (sequenceNumber < (window->base_seq_num + window->window_size))) {
+		if ((sequenceNumber >= window->initialSequenceNumber) && (sequenceNumber < (window->initialSequenceNumber + window->window_size))) {
 			windowIndex = (sequenceNumber-1) % window->window_size;
 			switch (flag) {
 				case FILENAME_FLAG:
@@ -414,15 +415,15 @@ int checkArgs(int argc, char *argv[])
 	// Checks args and returns port number
 	int portNumber = 0;
 
-	if (argc > 2)
+	if (argc > 3)
 	{
-		fprintf(stderr, "Usage %s [optional port number]\n", argv[0]);
+		fprintf(stderr, "Usage %s error-rate [optional port number]\n", argv[0]);
 		exit(-1);
 	}
 	
-	if (argc == 2)
+	if (argc == 3)
 	{
-		portNumber = atoi(argv[1]);
+		portNumber = atoi(argv[2]);
 	}
 	
 	return portNumber;

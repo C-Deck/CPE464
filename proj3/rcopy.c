@@ -131,7 +131,7 @@ void runStateMachine(struct Client *client)
 				state = windowFull(window, output_fd);
 				resetWindowACK(window);
 				window->initialSequenceNumber += window->windowSize;
-				window->windowDataBufferSize = 0;
+				window->bufferSize = 0;
 				break;
 
 			case STATE_EOF:
@@ -155,7 +155,7 @@ void runStateMachine(struct Client *client)
 	}
 
 	if (window != NULL) {
-		destroyWindow(window);
+		freeWindow(window);
 		window = NULL;
 	}
 
@@ -178,8 +178,8 @@ STATE filename(char *fname, int32_t buf_size, int32_t windowSize)
 
 	sendCall(buf, fname_len + 8, &server, FILENAME_FLAG, 0);
 
-	if (selectCall(server.socket_num, 1, 0, TIME_IS_NOT_NULL) == 1) {
-		recvLen = recvCall(buf, MAX_BUFFER, server.socket_num, &server, &flag, &sequenceNumber);
+	if (selectCall(server.socket, 1, 0, TIME_IS_NOT_NULL) == 1) {
+		recvLen = recvCall(buf, MAX_BUFFER, server.socket, &server, &flag, &sequenceNumber);
 
 		if (recvLen == RECV_ERROR) {
 			return STATE_FILENAME;
@@ -211,16 +211,15 @@ STATE recvData(struct Window *window)
 	uint32_t windowIndex;
 	uint32_t offset;
 	uint32_t maxSequenceNumber;
-	uint32_t maxSequenceNumber;
 
 	static uint32_t expected_seq_number = 0;
 
-	if (selectCall(server.socket_num, 10, 0, TIME_IS_NOT_NULL) == 0) {
+	if (selectCall(server.socket, 10, 0, TIME_IS_NOT_NULL) == 0) {
 		fprintf(stderr, "Shutting down: No response from server for 10 seconds.\n");
 		exit(1);
 	}
 
-	dataLen = recvCall(dataBuffer, MAX_BUFFER, server.socket_num, &server, &flag, &sequenceNumber);
+	dataLen = recvCall(dataBuffer, MAX_BUFFER, server.socket, &server, &flag, &sequenceNumber);
 
 	if (dataLen == RECV_ERROR) {
 		return STATE_RECV_DATA;
@@ -228,8 +227,8 @@ STATE recvData(struct Window *window)
 
 	switch (flag) {
 		case DATA_FLAG:
-			maxSequenceNumber = maxSequenceNumber(window);
-			maxSequenceNumber = nextSequenceNumber(window);
+			maxSequenceNumber = getMaxSequenceNumber(window);
+			maxSequenceNumber = getNextSequenceNumber(window);
 
 			// printf("PACKET: sequenceNumber: %u max: %u next: %u exp: %u\n", sequenceNumber, maxSequenceNumber, maxSequenceNumber, expected_seq_number);
 
@@ -264,7 +263,7 @@ STATE recvData(struct Window *window)
 					maxSequenceNumber = getNextSequenceNumber(window);
 
 					if (sequenceNumber == maxSequenceNumber) {
-						window->windowDataBufferSize = offset + dataLen;
+						window->bufferSize = offset + dataLen;
 					}
 				}
 			}
@@ -274,11 +273,11 @@ STATE recvData(struct Window *window)
 				// the previous sequence number
 				windowIndex = ((sequenceNumber-1) % window->windowSize);
 				if (window->ACKList[windowIndex-1] == 0) {
-					sendSREJ(window->initialSequenceNumber+windowIndex-1);
+					sendSREJ(window->initialSequenceNumber + windowIndex - 1);
 				}
 			}
 			else {
-				sendAck(maxSequenceNumber-1);
+				sendAck(maxSequenceNumber - 1);
 			}
 
 			expected_seq_number = maxSequenceNumber;
@@ -307,21 +306,20 @@ STATE windowFull(struct Window *window, int output_fd)
 {
 	// uint32_t window_count = nextSequenceNumber(window) - window->initialSequenceNumber;
 	// printf("Writing %d windows %u bytes\n", window_count, window->windowDataBufferSize); // !!!
-	write(output_fd, window->windowDataBuffer, window->windowDataBufferSize);
+	write(output_fd, window->windowDataBuffer, window->bufferSize);
 	return STATE_RECV_DATA;
 }
 
 STATE recvEOF(struct Window *window, int output_fd)
 {
 	uint8_t flag = 0;
-	int32_t dataLen = 0;
 	uint8_t dataBuffer[MAX_BUFFER];
 	uint32_t sequenceNumber = getNextSequenceNumber(window);
 
 	sendAck(sequenceNumber);
 	// Drain the packet queue
-	while (selectCall(server.socket_num, 1, 0, TIME_IS_NOT_NULL) == 1) {
-		dataLen = recvCall(dataBuffer, MAX_BUFFER, server.socket_num, &server, &flag, &sequenceNumber);
+	while (selectCall(server.socket, 1, 0, TIME_IS_NOT_NULL) == 1) {
+		recvCall(dataBuffer, MAX_BUFFER, server.socket, &server, &flag, &sequenceNumber);
 		return STATE_EOF;
 	}
 
@@ -338,5 +336,5 @@ void sendAck(int sequenceNumber)
 void sendSREJ(int sequenceNumber)
 {
 	// printf("SEND SREJ: %u\n", sequenceNumber);
-	sendCall(NULL, 0, &server, FLAG_SREJ, sequenceNumber);
+	sendCall(NULL, 0, &server, SREJ_FLAG, sequenceNumber);
 }
