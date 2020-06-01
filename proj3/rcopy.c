@@ -41,7 +41,7 @@ void runStateMachine(struct Client *client);
 STATE windowFull(struct Window *window, int output_fd);
 STATE recvData(struct Window *window);
 STATE recvEOF(struct Window *window, int output_fd);
-STATE filename(char *fname, int32_t buf_size, int32_t windowSize);
+STATE filename(char *fname, int32_t bufferSize, int32_t windowSize);
 void sendSREJ(int sequenceNumber);
 void sendAck(int sequenceNumber);
 
@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 void initClient(int argc, char *argv[], struct Client *client)
 {
 	if (argc != 8) {
-       fprintf(stderr, "usage: %s <remote_file_name> <local_file_name> <buf_size> <error_rate> <windowSize> <remote-machine> <remote-port>\n" , argv[0]);
+       fprintf(stderr, "usage: %s <remote_file_name> <local_file_name> <bufferSize> <error_rate> <windowSize> <remote-machine> <remote-port>\n" , argv[0]);
        exit(-2);
     }
 
@@ -159,24 +159,23 @@ void runStateMachine(struct Client *client)
 	close(output_fd);
 }
 
-STATE filename(char *fname, int32_t buf_size, int32_t windowSize)
+STATE filename(char *fname, int32_t bufferSize, int32_t windowSize)
 {
-	uint8_t buf[MAX_BUFFER];
+	uint8_t dataBuffer[MAX_BUFFER];
 	uint8_t flag = 0;
 	uint32_t sequenceNumber = 0;
-	int32_t fname_len = strlen(fname) + 1;
+	int32_t filenameLength = strlen(fname) + 1;
 	int32_t recvLen = 0;
 
-	buf_size = htonl(buf_size);
-	memcpy(buf, &buf_size, 4);
-	windowSize = htonl(windowSize);
-	memcpy(&buf[4], &windowSize, 4);
-	memcpy(&buf[8], fname, fname_len);
+	bufferSize = htonl(bufferSize);
+   *((uint32_t *) dataBuffer) = htonl(bufferSize);
+   *((uint32_t *) &(dataBuffer[4])) = htonl(windowSize);
+	memcpy(&(dataBuffer[8]), fname, filenameLength);
 
-	sendCall(buf, fname_len + 8, &server, FILENAME_FLAG, 0);
+	sendCall(dataBuffer, filenameLength + 8, &server, FILENAME_FLAG, 0);
 
 	if (selectCall(server.socket, 1, 0, TIME_IS_NOT_NULL) == 1) {
-		recvLen = recvCall(buf, MAX_BUFFER, server.socket, &server, &flag, &sequenceNumber);
+		recvLen = recvCall(dataBuffer, MAX_BUFFER, server.socket, &server, &flag, &sequenceNumber);
 
 		if (recvLen == RECV_ERROR) {
 			return STATE_FILENAME;

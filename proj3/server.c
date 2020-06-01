@@ -171,7 +171,7 @@ STATE getFilename(struct UDPConnection *client, uint8_t *dataBuffer, int32_t dat
 		return STATE_DONE;
 	}
 
-	memcpy(fname, &(dataBuffer[7]), dataLen - 7);
+	memcpy(fname, &(dataBuffer[8]), dataLen - 8);
 
    printf("Filename: %s\n", fname);
 
