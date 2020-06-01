@@ -98,10 +98,7 @@ void runStateMachine(struct Client *client)
 		switch (state) {
 
 			case STATE_FILENAME:
-				if (connectServer(&server, client->serverHost, client->portNumber)) {
-					perror("ERROR: unable to connect to host");
-					exit(1);
-				}
+			   connectServer(&server, client->serverHost, client->portNumber);
 				state = filename(client->fromFilename, client->bufferSize, client->windowSize);
 				if (state == STATE_FILENAME) {
 					close(server.socket);
