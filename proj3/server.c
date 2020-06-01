@@ -147,7 +147,7 @@ void processClient(uint8_t *dataBuffer, int32_t dataLen, struct UDPConnection *c
 	}
 
 	if (window != NULL) {
-		destroyWindow(window);
+		freeWindow(window);
 		window = NULL;
 	}
 }
@@ -315,7 +315,7 @@ STATE closeWindow(struct UDPConnection *client, struct Window *window, int nest_
 
 		if (isWindowFull(window)) {
 			// printf("!!! Window Full next_base: %u\n", nextSequenceNumber(window));
-			window->initialSequenceNumber = nextSequenceNumber(window);
+			window->initialSequenceNumber = getNextSequenceNumber(window);
 			return STATE_WINDOW_NEXT;
 		}
 
