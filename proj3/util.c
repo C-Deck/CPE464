@@ -116,6 +116,7 @@ void outputPDU(uint8_t * aPDU, int pduLength)
     printf("Sequence Number: %d\n", sequenceNumber);
     printf("Checksum: %d\n", checksum);
     printf("Flag: %d\n", flag);
+	printf("PDU Length: %d\n", pduLength);
 	printf("---------------------------------------\n");
     //printf("Payload: %.*s\n", pduLength - 7, aPDU + 7);
 }
@@ -204,7 +205,7 @@ int32_t sendCall(uint8_t *dataBuffer, uint32_t dataLen, UDPConnection *connectio
     aPDU = createPDU(sequenceNumber, flag, dataBuffer, dataLen);
 
     if (UTIL_MODE == DEBUG_MODE) {
-        outputPDU(aPDU, dataLen);
+        outputPDU(aPDU, dataLen + 7);
     }
 
     if (sendtoErr(connection->socket, aPDU, dataLen + 7, 0, (struct sockaddr *)&(connection->server), clientAddrLen) < 0) {
