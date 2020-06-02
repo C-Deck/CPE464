@@ -97,7 +97,7 @@ uint8_t * createPDU(uint32_t sequenceNumber, uint8_t flag, uint8_t *payload, int
 	}
     
     // Do checksum on pdu after payload has been copied
-	((uint16_t *) pduBuffer)[2] = in_cksum((unsigned short *)pduBuffer, dataLen + 7);
+	((uint16_t *) pduBuffer)[2] = in_cksum((unsigned short *) pduBuffer, dataLen + 7);
 
 	return pduBuffer;
 }
@@ -160,6 +160,7 @@ int32_t recvCall(uint8_t *dataBuffer, uint32_t len, int32_t socket, UDPConnectio
     uint8_t aPDU[MAX_BUFFER];
     uint32_t clientAddrLen = sizeof(struct sockaddr_in6);
     uint16_t checksum = 0;
+	unsigned short checksumResult = 0;
 
     dataLen = recvfrom(socket, aPDU, len, 0, (struct sockaddr *) &(connection->server), &clientAddrLen);
 
@@ -172,12 +173,13 @@ int32_t recvCall(uint8_t *dataBuffer, uint32_t len, int32_t socket, UDPConnectio
 
     // Check if more than just the header
     if (dataLen > 7) {
-        memcpy(dataBuffer, &(aPDU[7]), dataLen - 8);
+        memcpy(dataBuffer, &(aPDU[6]), dataLen - 8);
     }
 
     memcpy(&checksum, &(aPDU[4]), 2);
 
-    if (in_cksum((unsigned short *) aPDU, dataLen) != 0) {
+    if ((checksumResult = in_cksum((unsigned short *) aPDU, dataLen)) != 0) {
+		printf("Bad checksum: %d\n", checksumResult);
         return RECV_ERROR;
     }
 
