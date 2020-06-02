@@ -309,7 +309,7 @@ STATE windowFull(struct Window *window, int output_fd)
 {
 	if (MODE == DEBUG_MODE) {
 		uint32_t window_count = getNextSequenceNumber(window) - window->initialSequenceNumber;
-		printf("Writing %d windows %u bytes\n", window_count, window->windowDataBufferSize);
+		printf("Writing %d windows %u bytes\n", window_count, window->bufferSize);
 	}
 
 	write(output_fd, window->windowDataBuffer, window->bufferSize);

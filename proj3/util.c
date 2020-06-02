@@ -5,7 +5,7 @@
 
 #define MAXPDU 88
 
-int MODE = DEBUG_MODE;
+int UTIL_MODE = DEBUG_MODE;
 
 // SERVER FUNCTIONS
 
@@ -146,7 +146,7 @@ int32_t selectCall(int32_t socketNumber, int32_t seconds, int32_t microseconds, 
         exit(-1);
     }
 
-	if (MODE == DEBUG_MODE) {
+	if (UTIL_MODE == DEBUG_MODE) {
 		//printf("Select call returned: %d\n", numReady);
 	}
 
@@ -163,7 +163,7 @@ int32_t recvCall(uint8_t *dataBuffer, uint32_t len, int32_t socket, UDPConnectio
 
     dataLen = recvfrom(socket, aPDU, len, 0, (struct sockaddr *) &(connection->server), &clientAddrLen);
 
-    if (MODE == DEBUG_MODE) {
+    if (UTIL_MODE == DEBUG_MODE) {
         outputPDU(aPDU, dataLen);
     }
 
@@ -176,10 +176,6 @@ int32_t recvCall(uint8_t *dataBuffer, uint32_t len, int32_t socket, UDPConnectio
     }
 
     memcpy(&checksum, &(aPDU[4]), 2);
-
-    if (MODE == DEBUG_MODE) {
-        outputPDU(aPDU, dataLen);
-    }
 
     if (in_cksum((unsigned short *) aPDU, dataLen) != 0) {
         return RECV_ERROR;
@@ -205,7 +201,7 @@ int32_t sendCall(uint8_t *dataBuffer, uint32_t dataLen, UDPConnection *connectio
 
     aPDU = createPDU(sequenceNumber, flag, dataBuffer, dataLen);
 
-    if (MODE == DEBUG_MODE) {
+    if (UTIL_MODE == DEBUG_MODE) {
         outputPDU(aPDU, dataLen);
     }
 
