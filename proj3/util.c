@@ -209,7 +209,7 @@ int32_t sendCall(uint8_t *dataBuffer, uint32_t dataLen, UDPConnection *connectio
     uint8_t * aPDU = NULL;
 
 	if (UTIL_MODE == DEBUG_MODE) {
-        printf("Got to send call\n");
+        printf("Got to send call - Length: %d\n", dataLen);
     }
 
     aPDU = createPDU(sequenceNumber, flag, dataBuffer, dataLen);

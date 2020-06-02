@@ -407,7 +407,7 @@ STATE sendEOF(struct UDPConnection *client, Window *window)
 		if (MODE == DEBUG_MODE) {
 			printf("Send EOF: base: %u ACKList: %u\n", window->initialSequenceNumber, window->ACKList[0]);
 		}
-		//TODO Come back - why initialSequenceNumber
+
 		sendCall(NULL, 0, client, DATA_EOF_FLAG, window->initialSequenceNumber);
 
 		selectCounter++;
