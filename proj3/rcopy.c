@@ -172,6 +172,8 @@ STATE filename(char *fname, int32_t bufferSize, int32_t windowSize)
    *((uint32_t *) &(dataBuffer[4])) = htonl(windowSize);
 	memcpy(&(dataBuffer[8]), fname, filenameLength);
 
+   printf("Sending file %s\n", (char *) &(dataBuffer[8]));
+
 	sendCall(dataBuffer, filenameLength + 8, &server, FILENAME_FLAG, 0);
 
 	if (selectCall(server.socket, 1, 0, TIME_IS_NOT_NULL) == 1) {

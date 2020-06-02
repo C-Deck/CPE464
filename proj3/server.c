@@ -174,11 +174,11 @@ STATE getFilename(struct UDPConnection *client, uint8_t *dataBuffer, int32_t dat
 	}
 
 	memcpy(fname, &(dataBuffer[8]), dataLen - 8);
+   fname[dataLen - 8 - 1] = '\0';
 
-   	printf("Filename: %s\n", fname);
+   	printf("Filename: %s - Length: %d - DataLen: %d\n", fname, (int) strlen(fname), dataLen);
 
 	if ((*data_file = open(fname, O_RDONLY)) < 0) {
-		printf("Open returned: %d", *data_file);
 		sendCall(NULL, 0, client, FILENAME_BAD_FLAG, 0);
 		free(*window);
 		*window = NULL;
