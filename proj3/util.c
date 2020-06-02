@@ -5,7 +5,7 @@
 
 #define MAXPDU 88
 
-int MODE = NORMAL_MODE;
+int MODE = DEBUG_MODE;
 
 // SERVER FUNCTIONS
 
@@ -130,20 +130,25 @@ int32_t selectCall(int32_t socketNumber, int32_t seconds, int32_t microseconds, 
     struct timeval timeout;
     struct timeval * timeoutPtr;
 
+	FD_ZERO(&fileDescriptorSet);
+    FD_SET(socketNumber, &fileDescriptorSet);
+
     if (timeIsNotNull == TIME_IS_NOT_NULL) {
         timeout.tv_sec = seconds;
         timeout.tv_usec = microseconds;
         timeoutPtr = &timeout;
     }
 
-    FD_ZERO(&fileDescriptorSet);
-    FD_SET(socketNumber, &fileDescriptorSet);
-
-    if ((numReady = select(socketNumber + 1, &fileDescriptorSet, (fd_set *) 0, (fd_set *) 0, timeoutPtr)) < 0) {
+    if ((numReady = select(socketNumber + 1, &fileDescriptorSet, NULL, NULL, timeoutPtr)) < 0) {
         perror("select");
         exit(-1);
     }
 
+	if (MODE == DEBUG_MODE) {
+		printf("Select call returned: %d\n", numReady);
+	}
+
+	// Will be either 0 (socket not ready) or 1 (socket is ready for read)
     return numReady;
 }
 

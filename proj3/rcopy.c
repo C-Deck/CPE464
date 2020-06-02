@@ -167,12 +167,11 @@ STATE filename(char *fname, int32_t bufferSize, int32_t windowSize)
 	int32_t filenameLength = strlen(fname) + 1;
 	int32_t recvLen = 0;
 
-	bufferSize = htonl(bufferSize);
    *((uint32_t *) dataBuffer) = htonl(bufferSize);
    *((uint32_t *) &(dataBuffer[4])) = htonl(windowSize);
 	memcpy(&(dataBuffer[8]), fname, filenameLength);
 
-   printf("Sending file %s\n", (char *) &(dataBuffer[8]));
+   	printf("Sending file %s\n", (char *) &(dataBuffer[8]));
 
 	sendCall(dataBuffer, filenameLength + 8, &server, FILENAME_FLAG, 0);
 
