@@ -220,6 +220,7 @@ int32_t sendCall(uint8_t *dataBuffer, uint32_t dataLen, UDPConnection *connectio
     }
 
 	printf("Got to end of send call\n");
+	fflush(stdout);
 
     return dataLen;
 }
