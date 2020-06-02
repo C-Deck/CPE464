@@ -35,6 +35,7 @@ typedef enum
 } STATE;
 
 UDPConnection server;
+int MODE = DEBUG_MODE;
 
 void initClient(int argc, char *argv[], struct Client *client);
 void runStateMachine(struct Client *client);
@@ -171,7 +172,9 @@ STATE filename(char *fname, int32_t bufferSize, int32_t windowSize)
    *((uint32_t *) &(dataBuffer[4])) = htonl(windowSize);
 	memcpy(&(dataBuffer[8]), fname, filenameLength);
 
-   	printf("Sending file %s\n", (char *) &(dataBuffer[8]));
+   	if (MODE == DEBUG_MODE) {
+		printf("Sending file %s\n", (char *) &(dataBuffer[8]));
+	}
 
 	sendCall(dataBuffer, filenameLength + 8, &server, FILENAME_FLAG, 0);
 
@@ -208,6 +211,7 @@ STATE recvData(struct Window *window)
 	uint32_t windowIndex;
 	uint32_t offset;
 	uint32_t maxSequenceNumber;
+	uint32_t nextSequenceNumber;
 
 	if (selectCall(server.socket, 10, 0, TIME_IS_NOT_NULL) == 0) {
 		fprintf(stderr, "Shutting down: No response from server for 10 seconds.\n");
@@ -223,20 +227,22 @@ STATE recvData(struct Window *window)
 	switch (flag) {
 		case DATA_FLAG:
 			maxSequenceNumber = getMaxSequenceNumber(window);
-			maxSequenceNumber = getNextSequenceNumber(window);
+			nextSequenceNumber = getNextSequenceNumber(window);
 
-			// printf("PACKET: sequenceNumber: %u max: %u next: %u exp: %u\n", sequenceNumber, maxSequenceNumber, maxSequenceNumber, expected_seq_number);
+			if (MODE == DEBUG_MODE) {
+				printf("PACKET: sequenceNumber: %u max: %u next: %u\n", sequenceNumber, maxSequenceNumber, nextSequenceNumber);
+			}
 
 			if (sequenceNumber < maxSequenceNumber) {
 				if (sequenceNumber < window->initialSequenceNumber) {
-					sendAck(window->initialSequenceNumber-1);
+					sendAck(window->initialSequenceNumber - 1);
 				}
 				else {
 					if (isWindowFull(window)) {
 						sendAck(maxSequenceNumber);
 					}
 					else {
-						sendSREJ(maxSequenceNumber);
+						sendSREJ(nextSequenceNumber);
 					}
 				}
 				break;
@@ -276,14 +282,18 @@ STATE recvData(struct Window *window)
 			}
 
 			if (isWindowFull(window)) {
-				// printf("Window Full\n");
+				if (MODE == DEBUG_MODE) {
+					printf("Window Full\n");
+				}
 				return STATE_WINDOW_FULL;
 			}
 
 			break;
 
 		case DATA_EOF_FLAG:
-			// printf("GOT EOF: sequenceNumber: %u\n", sequenceNumber);
+			if (MODE == DEBUG_MODE) {
+				printf("GOT EOF: sequenceNumber: %u\n", sequenceNumber);
+			}
 			return STATE_EOF;
 			break;
 
@@ -297,8 +307,11 @@ STATE recvData(struct Window *window)
 
 STATE windowFull(struct Window *window, int output_fd)
 {
-	// uint32_t window_count = nextSequenceNumber(window) - window->initialSequenceNumber;
-	// printf("Writing %d windows %u bytes\n", window_count, window->windowDataBufferSize);
+	if (MODE == DEBUG_MODE) {
+		uint32_t window_count = getNextSequenceNumber(window) - window->initialSequenceNumber;
+		printf("Writing %d windows %u bytes\n", window_count, window->windowDataBufferSize);
+	}
+
 	write(output_fd, window->windowDataBuffer, window->bufferSize);
 	return STATE_RECV_DATA;
 }
@@ -322,12 +335,18 @@ STATE recvEOF(struct Window *window, int output_fd)
 
 void sendAck(int sequenceNumber)
 {
-	// printf("SEND RR: %u\n", sequenceNumber);
+	if (MODE == DEBUG_MODE) {
+		printf("Sending RR: %u\n", sequenceNumber);
+	}
+
 	sendCall(NULL, 0, &server, RR_FLAG, sequenceNumber);
 }
 
 void sendSREJ(int sequenceNumber)
 {
-	// printf("SEND SREJ: %u\n", sequenceNumber);
+	if (MODE == DEBUG_MODE) {
+		printf("Sending SREJ: %u\n", sequenceNumber);
+	}
+
 	sendCall(NULL, 0, &server, SREJ_FLAG, sequenceNumber);
 }

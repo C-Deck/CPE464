@@ -112,10 +112,12 @@ void outputPDU(uint8_t * aPDU, int pduLength)
     checksum = ((uint16_t *) aPDU)[2];
     flag = aPDU[6];
 
+	printf("-----------------PDU-------------------\n");
     printf("Sequence Number: %d\n", sequenceNumber);
     printf("Checksum: %d\n", checksum);
     printf("Flag: %d\n", flag);
-    printf("Payload: %.*s\n", pduLength - 7, aPDU + 7);
+	printf("---------------------------------------\n");
+    //printf("Payload: %.*s\n", pduLength - 7, aPDU + 7);
 }
 
 // Select function we got before but with specific size for int
@@ -145,7 +147,7 @@ int32_t selectCall(int32_t socketNumber, int32_t seconds, int32_t microseconds, 
     }
 
 	if (MODE == DEBUG_MODE) {
-		printf("Select call returned: %d\n", numReady);
+		//printf("Select call returned: %d\n", numReady);
 	}
 
 	// Will be either 0 (socket not ready) or 1 (socket is ready for read)
