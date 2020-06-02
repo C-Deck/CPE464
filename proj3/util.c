@@ -208,6 +208,10 @@ int32_t sendCall(uint8_t *dataBuffer, uint32_t dataLen, UDPConnection *connectio
     uint32_t clientAddrLen = sizeof(struct sockaddr_in6);
     uint8_t * aPDU = NULL;
 
+	if (UTIL_MODE == DEBUG_MODE) {
+        printf("Got to send call\n");
+    }
+
     aPDU = createPDU(sequenceNumber, flag, dataBuffer, dataLen);
 
     if (UTIL_MODE == DEBUG_MODE) {
