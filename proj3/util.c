@@ -173,7 +173,7 @@ int32_t recvCall(uint8_t *dataBuffer, uint32_t len, int32_t socket, UDPConnectio
 
     // Check if more than just the header
     if (dataLen > 7) {
-        memcpy(dataBuffer, &(aPDU[7]), dataLen - 8);
+        memcpy(dataBuffer, &(aPDU[7]), dataLen - 7);
     }
 
     memcpy(&checksum, &(aPDU[4]), 2);
