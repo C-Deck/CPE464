@@ -162,8 +162,8 @@ STATE getFilename(struct UDPConnection *client, uint8_t *dataBuffer, int32_t dat
 	uint32_t bufferSize;
 	uint32_t windowSize;
 
-	windowSize = ntohl(((uint32_t *) dataBuffer)[0]);
-	bufferSize = ntohl(((uint32_t *) dataBuffer)[1]);
+	bufferSize = ntohl(((uint32_t *) dataBuffer)[0]);
+	windowSize = ntohl(((uint32_t *) dataBuffer)[1]);
 
 	if (MODE == DEBUG_MODE) {
    		printf("windowSize: %d - bufferSize: %d\n", windowSize, bufferSize);
@@ -236,10 +236,10 @@ STATE nextDataPacket(struct UDPConnection *client, struct Window *window)
 {
 	STATE returnState = STATE_READ_ACKS;
 
-	uint32_t window_buffer_offset = window->windowIndex * window->dataPacketSize;
+	uint32_t windowBufferOffset = window->windowIndex * window->dataPacketSize;
 	uint32_t packetLen = window->dataPacketSize;
 
-	int32_t data_left = window->dataLen - window_buffer_offset;
+	int32_t data_left = window->dataLen - windowBufferOffset;
 
 	if (data_left <= window->dataPacketSize) {
 		packetLen = data_left;
@@ -250,7 +250,7 @@ STATE nextDataPacket(struct UDPConnection *client, struct Window *window)
 		printf("SEND %u\n", window->initialSequenceNumber + window->windowIndex);
 	}
 
-	sendCall(window->windowDataBuffer + window_buffer_offset, packetLen, client, DATA_FLAG, window->initialSequenceNumber + window->windowIndex);
+	sendCall(window->windowDataBuffer + windowBufferOffset, packetLen, client, DATA_FLAG, window->initialSequenceNumber + window->windowIndex);
 
 	window->windowIndex++;
 
@@ -315,17 +315,17 @@ void sendDataPacket(struct UDPConnection *client, struct Window *window, uint32_
 
 	uint32_t windowIndex = (sequenceNumber-1) % window->windowSize;
 
-	uint32_t window_buffer_offset = windowIndex * window->dataPacketSize;
+	uint32_t windowBufferOffset = windowIndex * window->dataPacketSize;
 
 	uint32_t packet_len = window->dataPacketSize;
 
-	int32_t data_left = window->bufferSize - window_buffer_offset;
+	int32_t data_left = window->bufferSize - windowBufferOffset;
 
 	if (data_left < window->dataPacketSize) {
 		packet_len = data_left;
 	}
 
-	sendCall(window->windowDataBuffer + window_buffer_offset, packet_len, client, DATA_FLAG, sequenceNumber);
+	sendCall(window->windowDataBuffer + windowBufferOffset, packet_len, client, DATA_FLAG, sequenceNumber);
 }
 
 STATE closeWindow(struct UDPConnection *client, struct Window *window, int nest_level)
