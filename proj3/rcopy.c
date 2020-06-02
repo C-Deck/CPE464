@@ -229,6 +229,9 @@ STATE recvData(struct Window *window)
 	dataLen = recvCall(dataBuffer, MAX_BUFFER, server.socket, &server, &flag, &sequenceNumber);
 
 	if (dataLen == RECV_ERROR) {
+		if (MODE == DEBUG_MODE) {
+			printf("Bad data received - calling again\n");
+		}
 		return STATE_RECV_DATA;
 	}
 
