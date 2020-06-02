@@ -179,7 +179,7 @@ int32_t recvCall(uint8_t *dataBuffer, uint32_t len, int32_t socket, UDPConnectio
     memcpy(&checksum, &(aPDU[4]), 2);
 
     if ((checksumResult = in_cksum((unsigned short *) aPDU, dataLen)) != checksum) {
-		printf("Bad checksum: %d\n", checksumResult);
+		printf("Bad checksum: %d - Expected: %d\n", checksumResult, checksum);
         return RECV_ERROR;
     }
 
