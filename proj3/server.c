@@ -162,8 +162,8 @@ STATE getFilename(struct UDPConnection *client, uint8_t *dataBuffer, int32_t dat
 	uint32_t bufferSize;
 	uint32_t windowSize;
 
-	windowSize = ntohl(*((uint16_t *) dataBuffer));
-	bufferSize = ntohl(*((uint16_t *) &(dataBuffer[4])));
+	windowSize = ntohl(((uint32_t *) dataBuffer)[0]);
+	bufferSize = ntohl(((uint32_t *) dataBuffer)[1]);
 
 	if (MODE == DEBUG_MODE) {
    		printf("windowSize: %d - bufferSize: %d\n", windowSize, bufferSize);
