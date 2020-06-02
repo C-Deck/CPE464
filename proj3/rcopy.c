@@ -181,7 +181,7 @@ STATE filename(char *fname, int32_t bufferSize, int32_t windowSize)
 	}
 
 	if (MODE == DEBUG_MODE) {
-   		printf("windowSize: %d - bufferSize: %d\n", windowSize, bufferSize);
+   		printf("windowSize: %d - bufferSize: %d\n", ntohl(*((uint16_t *) dataBuffer)), ntohl(*((uint16_t *) &(dataBuffer[4])))));
 	}
 
 	sendCall(dataBuffer, filenameLength + 8, &server, FILENAME_FLAG, 0);
