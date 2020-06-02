@@ -36,8 +36,8 @@ int checkArgs(int argc, char *argv[]);
 void receiveClients(int portNumber);
 void processClient(uint8_t *dataBuffer, int32_t dataLen, struct UDPConnection *client, int nest_level);
 STATE closeWindow(struct UDPConnection *client, struct Window *window, int nest_level);
-STATE getFilename(struct UDPConnection *client, uint8_t *dataBuffer, int32_t dataLen, int32_t *data_file, struct Window **window);
-STATE nextWindow(struct Window *window, int data_file);
+STATE getFilename(struct UDPConnection *client, uint8_t *dataBuffer, int32_t dataLen, int32_t *dataFile, struct Window **window);
+STATE nextWindow(struct Window *window, int dataFile);
 STATE nextDataPacket(struct UDPConnection *client, struct Window *window);
 STATE readAck(struct UDPConnection *client, struct Window *window, int nest_level);
 void sendDataPacket(struct UDPConnection *client, struct Window *window, uint32_t sequenceNumber);
@@ -106,7 +106,7 @@ void processClient(uint8_t *dataBuffer, int32_t dataLen, struct UDPConnection *c
 {
 	STATE state = STATE_START;
 
-	int32_t data_file = 0;
+	int32_t dataFile = 0;
 
 	Window *window = NULL;
 
@@ -119,11 +119,11 @@ void processClient(uint8_t *dataBuffer, int32_t dataLen, struct UDPConnection *c
 					break;
 
 				case STATE_FILENAME:
-					state = getFilename(client, dataBuffer, dataLen, &data_file, &window);
+					state = getFilename(client, dataBuffer, dataLen, &dataFile, &window);
 					break;
 
 				case STATE_WINDOW_NEXT:
-					state = nextWindow(window, data_file);
+					state = nextWindow(window, dataFile);
 					break;
 
 				case STATE_WINDOW_CLOSE:
@@ -156,7 +156,7 @@ void processClient(uint8_t *dataBuffer, int32_t dataLen, struct UDPConnection *c
 	}
 }
 
-STATE getFilename(struct UDPConnection *client, uint8_t *dataBuffer, int32_t dataLen, int32_t *data_file, struct Window **window)
+STATE getFilename(struct UDPConnection *client, uint8_t *dataBuffer, int32_t dataLen, int32_t *dataFile, struct Window **window)
 {
 	char fname[MAX_FILE_LENGTH];
 	uint32_t bufferSize;
@@ -164,6 +164,10 @@ STATE getFilename(struct UDPConnection *client, uint8_t *dataBuffer, int32_t dat
 
 	windowSize = ntohl(*((uint16_t *) dataBuffer));
 	bufferSize = ntohl(*((uint16_t *) &(dataBuffer[4])));
+
+	if (MODE == DEBUG_MODE) {
+   		printf("windowSize: %d - bufferSize: %d\n", windowSize, bufferSize);
+	}
 
 	if ((client->socket = socket(AF_INET6, SOCK_DGRAM, 0)) < 0) {
 		perror("filename socket call");
@@ -182,7 +186,7 @@ STATE getFilename(struct UDPConnection *client, uint8_t *dataBuffer, int32_t dat
    		printf("Filename: %s - Length: %d - DataLen: %d\n", fname, (int) strlen(fname), dataLen);
 	}
 
-	if ((*data_file = open(fname, O_RDONLY)) < 0) {
+	if ((*dataFile = open(fname, O_RDONLY)) < 0) {
 		sendCall(NULL, 0, client, FILENAME_BAD_FLAG, 0);
 		free(*window);
 		*window = NULL;
@@ -198,14 +202,14 @@ STATE getFilename(struct UDPConnection *client, uint8_t *dataBuffer, int32_t dat
 	return STATE_WINDOW_NEXT;
 }
 
-STATE nextWindow(struct Window *window, int data_file)
+STATE nextWindow(struct Window *window, int dataFile)
 {
 	int32_t readLen = 0;
 	if (MODE == DEBUG_MODE) {
 		printf("Loading window base: %u length: %u size: %u\n", window->initialSequenceNumber, window->dataPacketSize, window->windowSize);
 	}
 	
-	readLen = read(data_file, window->windowDataBuffer, window->bufferSize);
+	readLen = read(dataFile, window->windowDataBuffer, window->bufferSize);
 
 	resetWindowACK(window);
 	window->windowIndex = 0;

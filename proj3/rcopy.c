@@ -52,6 +52,10 @@ int main(int argc, char *argv[])
 
 	initClient(argc, argv, &client);
 
+	if (MODE == DEBUG_MODE) {
+   		printf("windowSize: %d - bufferSize: %d\n", client.windowSize, client.bufferSize);
+	}
+
     sendErr_init(client.errorPercent, DROP_ON, FLIP_ON, DEBUG_OFF, RSEED_OFF);
 
     runStateMachine(&client);
