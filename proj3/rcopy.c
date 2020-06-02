@@ -172,8 +172,8 @@ STATE filename(char *fname, int32_t bufferSize, int32_t windowSize)
 	int32_t filenameLength = strlen(fname) + 1;
 	int32_t recvLen = 0;
 
-   *((uint32_t *) dataBuffer) = htonl(bufferSize);
-   *((uint32_t *) &(dataBuffer[4])) = htonl(windowSize);
+   ((uint32_t *) dataBuffer)[0] = htonl(bufferSize);
+   ((uint32_t *) dataBuffer)[1] = htonl(windowSize);
 	memcpy(&(dataBuffer[8]), fname, filenameLength);
 
    	if (MODE == DEBUG_MODE) {
@@ -181,7 +181,7 @@ STATE filename(char *fname, int32_t bufferSize, int32_t windowSize)
 	}
 
 	if (MODE == DEBUG_MODE) {
-   		printf("windowSize: %d - bufferSize: %d\n", ntohl(*((uint16_t *) dataBuffer)), ntohl(*((uint16_t *) &(dataBuffer[4])))));
+   		printf("windowSize: %d - bufferSize: %d\n", ntohl(((uint32_t *) dataBuffer)[0]), ntohl(((uint32_t *) dataBuffer)[1]));
 	}
 
 	sendCall(dataBuffer, filenameLength + 8, &server, FILENAME_FLAG, 0);
