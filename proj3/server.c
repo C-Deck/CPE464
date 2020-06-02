@@ -10,6 +10,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #include "gethostbyname.h"
 #include "util.h"
@@ -173,9 +175,10 @@ STATE getFilename(struct UDPConnection *client, uint8_t *dataBuffer, int32_t dat
 
 	memcpy(fname, &(dataBuffer[8]), dataLen - 8);
 
-   printf("Filename: %s\n", fname);
+   	printf("Filename: %s\n", fname);
 
-	if (((*data_file) = open(fname, O_RDONLY)) < 0) {
+	if ((*data_file = open(fname, O_RDONLY)) < 0) {
+		printf("Open returned: %d", *data_file);
 		sendCall(NULL, 0, client, FILENAME_BAD_FLAG, 0);
 		free(*window);
 		*window = NULL;
