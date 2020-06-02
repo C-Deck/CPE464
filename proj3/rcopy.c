@@ -103,7 +103,7 @@ void runStateMachine(struct Client *client)
 		switch (state) {
 
 			case STATE_FILENAME:
-			   connectServer(&server, client->serverHost, client->portNumber);
+			    connectServer(&server, client->serverHost, client->portNumber);
 				state = filename(client->fromFilename, client->bufferSize, client->windowSize);
 				if (state == STATE_FILENAME) {
 					close(server.socket);
@@ -178,6 +178,10 @@ STATE filename(char *fname, int32_t bufferSize, int32_t windowSize)
 
    	if (MODE == DEBUG_MODE) {
 		printf("Sending file %s\n", (char *) &(dataBuffer[8]));
+	}
+
+	if (MODE == DEBUG_MODE) {
+   		printf("windowSize: %d - bufferSize: %d\n", windowSize, bufferSize);
 	}
 
 	sendCall(dataBuffer, filenameLength + 8, &server, FILENAME_FLAG, 0);
