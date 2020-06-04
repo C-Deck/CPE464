@@ -188,6 +188,8 @@ int32_t recvCall(uint8_t *dataBuffer, uint32_t len, int32_t socket, UDPConnectio
         outputPDU(aPDU, dataLen);
     }
 
+	((uint16_t *) aPDU)[2] = 0;
+
     if ((checksumResult = in_cksum((unsigned short *) aPDU, dataLen)) != 0) {
 		if (UTIL_MODE == DEBUG_MODE) {
 			printf("Bad checksum: %d\n", checksumResult);
