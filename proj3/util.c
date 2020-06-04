@@ -207,6 +207,7 @@ int32_t sendCall(uint8_t *dataBuffer, uint32_t dataLen, UDPConnection *connectio
 {
     uint32_t clientAddrLen = sizeof(struct sockaddr_in6);
     uint8_t * aPDU = NULL;
+	int sendOutput = 0;
 
     aPDU = createPDU(sequenceNumber, flag, dataBuffer, dataLen);
 
@@ -214,13 +215,13 @@ int32_t sendCall(uint8_t *dataBuffer, uint32_t dataLen, UDPConnection *connectio
         outputPDU(aPDU, dataLen + 7);
     }
 
-    if (sendtoErr(connection->socket, aPDU, dataLen + 7, 0, (struct sockaddr *)&(connection->server), clientAddrLen) < 0) {
+    if ((sendOutput = sendtoErr(connection->socket, aPDU, dataLen + 7, 0, (struct sockaddr *)&(connection->server), clientAddrLen)) < 0) {
+		fprintf(stderr, "Send call output %d\n", sendOutput);
         perror("sendCall");
         exit(1);
     }
 
 	printf("Got to end of send call\n");
-	fflush(stdout);
 
     return dataLen;
 }
