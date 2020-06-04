@@ -332,7 +332,7 @@ STATE closeWindow(struct UDPConnection *client, struct Window *window, int selec
 	uint8_t dataBuffer[MAX_BUFFER];
 	uint8_t flag = 0;
 	uint32_t sequenceNumber = 0, windowIndex = 0, recvLen = 0, nextSequenceNumber = 0;
-	int sendCount = 0;
+	int sendCount = 0, i;
 
 	if (MODE == DEBUG_MODE) {
 		printf("Closing window\n");
@@ -363,7 +363,9 @@ STATE closeWindow(struct UDPConnection *client, struct Window *window, int selec
 				switch (flag) {
 					case RR_FLAG:
 						sendCount = 0;
-						window->ACKList[windowIndex] = 1;
+						for (i= 0; i <= windowIndex; i++) {
+							window->ACKList[i] = 1;
+						}
 						if (MODE == DEBUG_MODE) {
 							printf("Received RR %u\n", sequenceNumber);
 						}
