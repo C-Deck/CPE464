@@ -332,7 +332,7 @@ STATE closeWindow(struct UDPConnection *client, struct Window *window, int selec
 	uint8_t dataBuffer[MAX_BUFFER];
 	uint8_t flag = 0;
 	uint32_t sequenceNumber = 0, windowIndex = 0, recvLen = 0, nextSequenceNumber = 0;
-	int sendCount = 0, i;
+	int sendCount = 0;
 
 	if (MODE == DEBUG_MODE) {
 		printf("Closing window\n");
