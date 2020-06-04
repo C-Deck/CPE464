@@ -168,6 +168,7 @@ int32_t recvCall(uint8_t *dataBuffer, uint32_t len, int32_t socket, UDPConnectio
 {
     int dataLen = 0;
     uint8_t aPDU[MAX_BUFFER];
+	uint8_t pseudoHeader[MAX_BUFFER];
     uint32_t clientAddrLen = sizeof(struct sockaddr_in6);
     uint16_t checksum = 0;
 	unsigned short checksumResult = 0;
@@ -183,12 +184,14 @@ int32_t recvCall(uint8_t *dataBuffer, uint32_t len, int32_t socket, UDPConnectio
     }
 
     memcpy(&checksum, &(aPDU[4]), 2);
+	memcpy(pseudoHeader, aPDU, dataLen);
+	((uint16_t *) pduBuffer)[2] = 0;
 
 	if (UTIL_MODE == DEBUG_MODE) {
         outputPDU(aPDU, dataLen);
     }
 
-    if ((checksumResult = in_cksum((unsigned short *) aPDU, dataLen)) != 0) {
+    if ((checksumResult = in_cksum((unsigned short *) pseudoHeader, dataLen)) != 0) {
 		if (UTIL_MODE == DEBUG_MODE) {
 			printf("Bad checksum: %d\n", checksumResult);
 		}
