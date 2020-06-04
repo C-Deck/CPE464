@@ -241,7 +241,7 @@ STATE recvData(struct Window *window)
 			nextSequenceNumber = getNextSequenceNumber(window);
 
 			if (MODE == DEBUG_MODE) {
-				printf("PACKET: sequenceNumber: %u max: %u next: %u\n", sequenceNumber, maxSequenceNumber, nextSequenceNumber);
+				printf("PACKET: sequenceNumber: %u initial: %u max: %u next: %u\n", sequenceNumber, window->initialSequenceNumber, maxSequenceNumber, nextSequenceNumber);
 			}
 
 			if (sequenceNumber < maxSequenceNumber) {

@@ -99,7 +99,6 @@ uint8_t * createPDU(uint32_t sequenceNumber, uint8_t flag, uint8_t *payload, int
 	if (UTIL_MODE == DEBUG_MODE) {
         printf("Creating the PDU with payload length %d\n", dataLen);
 		printf("Payload: %s\n", (char*) &pduBuffer[7]);
-		printf("Old Checksum: %d\n", ((uint16_t *) pduBuffer)[2]);
     }
 
 	// HAVE TO CLEAR OLD CHECKSUM - FORGOT THIS FOREVER AND HATE IT
@@ -107,8 +106,6 @@ uint8_t * createPDU(uint32_t sequenceNumber, uint8_t flag, uint8_t *payload, int
     
     // Do checksum on pdu after payload has been copied
 	((uint16_t *) pduBuffer)[2] = in_cksum((unsigned short *) pduBuffer, dataLen + 7);
-
-	printf("New Checksum: %d\n", ((uint16_t *) pduBuffer)[2]);
 
 	return pduBuffer;
 }
@@ -228,8 +225,6 @@ int32_t sendCall(uint8_t *dataBuffer, uint32_t dataLen, UDPConnection *connectio
         perror("sendCall");
         exit(1);
     }
-
-	printf("Got to end of send call\n");
 
     return dataLen;
 }
