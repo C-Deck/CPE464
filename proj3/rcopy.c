@@ -333,7 +333,7 @@ STATE recvEOF(struct Window *window, int output_fd)
 	uint8_t dataBuffer[MAX_BUFFER];
 	uint32_t sequenceNumber = getNextSequenceNumber(window);
 
-	sendAck(sequenceNumber);
+	sendCall(NULL, 0, &server, ACK_EOF_FLAG, sequenceNumber);
 	// Drain the packet queue
 	while (selectCall(server.socket, 1, 0, TIME_IS_NOT_NULL) == 1) {
 		recvCall(dataBuffer, MAX_BUFFER, server.socket, &server, &flag, &sequenceNumber);

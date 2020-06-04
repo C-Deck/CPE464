@@ -34,14 +34,14 @@ int MODE = DEBUG_MODE;
 
 int checkArgs(int argc, char *argv[]);
 void receiveClients(int portNumber);
-void processClient(uint8_t *dataBuffer, int32_t dataLen, struct UDPConnection *client, int nest_level);
-STATE closeWindow(struct UDPConnection *client, struct Window *window, int nest_level);
+void processClient(uint8_t *dataBuffer, int32_t dataLen, struct UDPConnection *client, int selectFailureCount);
+STATE closeWindow(struct UDPConnection *client, struct Window *window, int selectFailureCount);
 STATE getFilename(struct UDPConnection *client, uint8_t *dataBuffer, int32_t dataLen, int32_t *dataFile, struct Window **window);
 STATE nextWindow(struct Window *window, int dataFile);
 STATE nextDataPacket(struct UDPConnection *client, struct Window *window);
-STATE readAck(struct UDPConnection *client, struct Window *window, int nest_level);
+STATE readAck(struct UDPConnection *client, struct Window *window, int selectFailureCount);
 void sendDataPacket(struct UDPConnection *client, struct Window *window, uint32_t sequenceNumber);
-STATE closeWindow(struct UDPConnection *client, struct Window *window, int nest_level);
+STATE closeWindow(struct UDPConnection *client, struct Window *window, int selectFailureCount);
 STATE sendEOF(struct UDPConnection *client, Window *window);
 
 //TODO circular queue
@@ -102,7 +102,7 @@ void receiveClients(int portNumber)
 }
 
 // State Machine
-void processClient(uint8_t *dataBuffer, int32_t dataLen, struct UDPConnection *client, int nest_level)
+void processClient(uint8_t *dataBuffer, int32_t dataLen, struct UDPConnection *client, int selectFailureCount)
 {
 	STATE state = STATE_START;
 
@@ -110,7 +110,7 @@ void processClient(uint8_t *dataBuffer, int32_t dataLen, struct UDPConnection *c
 
 	Window *window = NULL;
 
-	if (nest_level < MAX_SELECT_CALLS) {
+	if (selectFailureCount < MAX_SELECT_CALLS) {
 		while (state != STATE_DONE) {
 			switch (state) {
 
@@ -127,7 +127,7 @@ void processClient(uint8_t *dataBuffer, int32_t dataLen, struct UDPConnection *c
 					break;
 
 				case STATE_WINDOW_CLOSE:
-					state = closeWindow(client, window, nest_level);
+					state = closeWindow(client, window, selectFailureCount);
 					break;
 
 				case STATE_SEND_DATA:
@@ -139,7 +139,7 @@ void processClient(uint8_t *dataBuffer, int32_t dataLen, struct UDPConnection *c
 					break;
 
 				case STATE_READ_ACKS:
-					state = readAck(client, window, nest_level);
+					state = readAck(client, window, selectFailureCount);
 					break;
 
 				case STATE_DONE:
@@ -257,7 +257,7 @@ STATE nextDataPacket(struct UDPConnection *client, struct Window *window)
 	return returnState;
 }
 
-STATE readAck(struct UDPConnection *client, struct Window *window, int nest_level)
+STATE readAck(struct UDPConnection *client, struct Window *window, int selectFailureCount)
 {
 	uint32_t recvLen = 0;
 	uint8_t dataBuffer[MAX_BUFFER];
@@ -277,7 +277,7 @@ STATE readAck(struct UDPConnection *client, struct Window *window, int nest_leve
 			windowIndex = (sequenceNumber-1) % window->windowSize;
 			switch (flag) {
 				case FILENAME_FLAG:
-					processClient(dataBuffer, recvLen, client, nest_level + 1);
+					processClient(dataBuffer, recvLen, client, selectFailureCount + 1);
 					return STATE_DONE;
 					break;
 
@@ -328,7 +328,7 @@ void sendDataPacket(struct UDPConnection *client, struct Window *window, uint32_
 	sendCall(window->windowDataBuffer + windowBufferOffset, packet_len, client, DATA_FLAG, sequenceNumber);
 }
 
-STATE closeWindow(struct UDPConnection *client, struct Window *window, int nest_level)
+STATE closeWindow(struct UDPConnection *client, struct Window *window, int selectFailureCount)
 {
 	uint8_t dataBuffer[MAX_BUFFER];
 	uint8_t flag = 0;
@@ -427,6 +427,7 @@ STATE sendEOF(struct UDPConnection *client, Window *window)
 					}
 					break;
 				default:
+
 					fprintf(stderr, "ERROR: Bad flag (%u) in EOF_ACK\n", flag);
 					break;
 			}
