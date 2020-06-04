@@ -363,9 +363,7 @@ STATE closeWindow(struct UDPConnection *client, struct Window *window, int selec
 				switch (flag) {
 					case RR_FLAG:
 						sendCount = 0;
-						for (i= 0; i <= windowIndex; i++) {
-							window->ACKList[i] = 1;
-						}
+						window->ACKList[windowIndex] = 1;
 						if (MODE == DEBUG_MODE) {
 							printf("Received RR %u\n", sequenceNumber);
 						}
@@ -391,7 +389,7 @@ STATE closeWindow(struct UDPConnection *client, struct Window *window, int selec
 				fprintf(stderr, "ERROR: No Response from client in 10 seconds");
 				exit(1);
 			}
-			// printf("Timeout!\n");
+
 			sendDataPacket(client, window, window->initialSequenceNumber);
 		}
 	}
