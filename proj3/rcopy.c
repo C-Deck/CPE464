@@ -39,9 +39,9 @@ int MODE = DEBUG_MODE;
 
 void initClient(int argc, char *argv[], struct Client *client);
 void runStateMachine(struct Client *client);
-STATE windowFull(struct Window *window, int output_fd);
+STATE windowFull(struct Window *window, int outFile);
 STATE recvData(struct Window *window);
-STATE recvEOF(struct Window *window, int output_fd);
+STATE recvEOF(struct Window *window, int outFile);
 STATE filename(char *fname, int32_t bufferSize, int32_t windowSize);
 void sendSREJ(int sequenceNumber);
 void sendAck(int sequenceNumber);
@@ -94,8 +94,8 @@ void initClient(int argc, char *argv[], struct Client *client)
 // State Machine
 void runStateMachine(struct Client *client)
 {
-	int output_fd = -1;
-	int select_count = 0;
+	int outFile = -1;
+	int selectCounter = 0;
 	int state = STATE_FILENAME;
 	struct Window *window = NULL;
 
@@ -108,16 +108,16 @@ void runStateMachine(struct Client *client)
 				if (state == STATE_FILENAME) {
 					close(server.socket);
 				}
-				select_count++;
-				if (select_count >= MAX_SELECT_CALLS) {
+				selectCounter++;
+				if (selectCounter >= MAX_SELECT_CALLS) {
 					fprintf(stderr, "Select timeout occurred\n");
 					exit(1);
 				}
 				break;
 
 			case STATE_FILE_OK:
-				select_count = 0;
-				if ((output_fd = open(client->toFilename, O_WRONLY|O_CREAT|O_TRUNC, 0600)) < 0 ) {
+				selectCounter = 0;
+				if ((outFile = open(client->toFilename, O_WRONLY|O_CREAT|O_TRUNC, 0600)) < 0 ) {
 			    	perror("Open local_file");
 			    	exit(1);
 			    }
@@ -130,23 +130,23 @@ void runStateMachine(struct Client *client)
 				break;
 
 			case STATE_WINDOW_FULL:
-				state = windowFull(window, output_fd);
+				state = windowFull(window, outFile);
 				resetWindowACK(window);
 				window->initialSequenceNumber += window->windowSize;
 				window->bufferSize = 0;
 				break;
 
 			case STATE_EOF:
-				if (select_count == 0) {
-					windowFull(window, output_fd);
+				if (selectCounter == 0 && isWindowFull(window)) {
+					windowFull(window, outFile);
 				}
-				select_count++;
-				if (select_count >= MAX_SELECT_CALLS) {
+				selectCounter++;
+				if (selectCounter >= MAX_SELECT_CALLS) {
 					fprintf(stderr, "Ten failed EOF acks: file is ok but server doesn't know\n");
 					state = STATE_DONE;
 				}
 				else {
-					state = recvEOF(window, output_fd);
+					state = recvEOF(window, outFile);
 				}
 				break;
 
@@ -161,7 +161,7 @@ void runStateMachine(struct Client *client)
 		window = NULL;
 	}
 
-	close(output_fd);
+	close(outFile);
 }
 
 STATE filename(char *fname, int32_t bufferSize, int32_t windowSize)
@@ -316,18 +316,18 @@ STATE recvData(struct Window *window)
 	return STATE_RECV_DATA;
 }
 
-STATE windowFull(struct Window *window, int output_fd)
+STATE windowFull(struct Window *window, int outFile)
 {
 	if (MODE == DEBUG_MODE) {
 		uint32_t window_count = getNextSequenceNumber(window) - window->initialSequenceNumber;
 		printf("Writing %d windows %u bytes\n", window_count, window->bufferSize);
 	}
 
-	write(output_fd, window->windowDataBuffer, window->bufferSize);
+	write(outFile, window->windowDataBuffer, window->bufferSize);
 	return STATE_RECV_DATA;
 }
 
-STATE recvEOF(struct Window *window, int output_fd)
+STATE recvEOF(struct Window *window, int outFile)
 {
 	uint8_t flag = 0;
 	uint8_t dataBuffer[MAX_BUFFER];
