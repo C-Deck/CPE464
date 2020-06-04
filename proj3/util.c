@@ -185,7 +185,7 @@ int32_t recvCall(uint8_t *dataBuffer, uint32_t len, int32_t socket, UDPConnectio
 
     memcpy(&checksum, &(aPDU[4]), 2);
 	memcpy(pseudoHeader, aPDU, dataLen);
-	((uint16_t *) pduBuffer)[2] = 0;
+	((uint16_t *) pseudoHeader)[2] = 0;
 
 	if (UTIL_MODE == DEBUG_MODE) {
         outputPDU(aPDU, dataLen);
