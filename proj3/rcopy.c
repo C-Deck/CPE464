@@ -260,7 +260,7 @@ STATE recvData(struct Window *window)
 			}
 
 			// See if the sequenceNumber falls within this windows range
-			if ((sequenceNumber >= window->initialSequenceNumber) && (sequenceNumber < (window->initialSequenceNumber + window->windowSize))) {
+			if ((sequenceNumber >= window->initialSequenceNumber) && (sequenceNumber < (window->initialSequenceNumber + window->maxWindowIndex))) {
 				windowIndex = (sequenceNumber - 1) % window->windowSize;
 				// Save data if it isn't already in there
 				if (window->ACKList[windowIndex] == 0) {
