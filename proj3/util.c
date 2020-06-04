@@ -91,6 +91,7 @@ uint8_t * createPDU(uint32_t sequenceNumber, uint8_t flag, uint8_t *payload, int
 
 	if (UTIL_MODE == DEBUG_MODE) {
         printf("Creating the PDU with payload length %d\n", dataLen);
+		printf("Payload: %s\n" (char*) payload);
     }
 
 	// Build the PDU
