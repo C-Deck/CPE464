@@ -174,10 +174,6 @@ int32_t recvCall(uint8_t *dataBuffer, uint32_t len, int32_t socket, UDPConnectio
 
     dataLen = recvfrom(socket, aPDU, len, 0, (struct sockaddr *) &(connection->server), &clientAddrLen);
 
-    if (UTIL_MODE == DEBUG_MODE) {
-        outputPDU(aPDU, dataLen);
-    }
-
     *sequenceNumber = ntohl(*((uint32_t *) aPDU));
     *flag = aPDU[6];
 
@@ -187,6 +183,10 @@ int32_t recvCall(uint8_t *dataBuffer, uint32_t len, int32_t socket, UDPConnectio
     }
 
     memcpy(&checksum, &(aPDU[4]), 2);
+
+	if (UTIL_MODE == DEBUG_MODE) {
+        outputPDU(aPDU, dataLen);
+    }
 
     if ((checksumResult = in_cksum((unsigned short *) aPDU, dataLen)) != 0) {
 		if (UTIL_MODE == DEBUG_MODE) {
