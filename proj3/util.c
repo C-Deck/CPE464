@@ -240,6 +240,7 @@ Window *initWindow(uint32_t windowSize, uint32_t bufferSize)
   	window->ACKList = malloc(windowSize);
   	window->windowDataBuffer = malloc(windowSize * bufferSize);
   	window->dataLen = window->dataPacketSize * windowSize;
+	window->maxWindowIndex = windowSize;
   	resetWindowACK(window);
   	return window;
 }
@@ -253,9 +254,8 @@ void resetWindowACK(struct Window *window)
 int isWindowFull(struct Window *window)
 {
 	int i = 0;
-  	int32_t windowSize = (int32_t) ceil((1.0 * window->dataLen) / window->dataPacketSize);
 
-  	for (i = 0; i < windowSize; i++) {
+  	for (i = 0; i < window->maxWindowIndex; i++) {
     	if (window->ACKList[i] == 0) {
       		return WINDOW_NOT_FULL;
     	}

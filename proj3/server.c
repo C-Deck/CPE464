@@ -226,6 +226,7 @@ STATE nextWindow(struct Window *window, int dataFile)
 			printf("Read %u bytes\n", readLen);
 		}
 		window->dataLen = readLen;
+		window->maxWindowIndex = (readLen + window->dataPacketSize - 1) / window->dataPacketSize;
 		return STATE_SEND_DATA;
 	}
 }

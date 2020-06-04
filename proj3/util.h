@@ -61,7 +61,8 @@ typedef struct Window
 	uint32_t windowByteSize;
 	uint32_t dataLen;
 	uint32_t initialSequenceNumber;
-	uint32_t windowIndex;
+	int windowIndex;
+	int maxWindowIndex;
 } Window;
 
 typedef struct Client
