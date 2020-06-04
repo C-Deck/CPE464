@@ -253,9 +253,9 @@ void resetWindowACK(struct Window *window)
 int isWindowFull(struct Window *window)
 {
 	int i = 0;
-  	// int32_t windowSize = (int32_t) ceil((1.0 * window->dataLen) / window->dataPacketSize);
+  	int32_t windowSize = (int32_t) ceil((1.0 * window->dataLen) / window->dataPacketSize);
 
-  	for (i = 0; i < window->windowSize; i++) {
+  	for (i = 0; i < windowSize; i++) {
     	if (window->ACKList[i] == 0) {
       		return WINDOW_NOT_FULL;
     	}
