@@ -293,6 +293,7 @@ STATE recvData(struct Window *window)
 				}
 			}
 			else {
+				printf("RR: Doing next seq - 1\n");
 				sendAck(nextSequenceNumber - 1);
 			}
 
