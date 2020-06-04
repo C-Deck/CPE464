@@ -255,6 +255,10 @@ int isWindowFull(struct Window *window)
 {
 	int i = 0;
 
+	if (UTIL_MODE == DEBUG_MODE) {
+        printf("Checking up to index: %d in window", window->maxWindowIndex);
+    }
+
   	for (i = 0; i < window->maxWindowIndex; i++) {
     	if (window->ACKList[i] == 0) {
       		return WINDOW_NOT_FULL;
