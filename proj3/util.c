@@ -89,11 +89,6 @@ uint8_t * createPDU(uint32_t sequenceNumber, uint8_t flag, uint8_t *payload, int
 {
 	static uint8_t pduBuffer[MAXPDU];
 
-	if (UTIL_MODE == DEBUG_MODE) {
-        printf("Creating the PDU with payload length %d\n", dataLen);
-		printf("Payload: %s\n", (char*) payload);
-    }
-
 	// Build the PDU
 	((uint32_t *) pduBuffer)[0] = htonl(sequenceNumber);
 	pduBuffer[6] = flag;
@@ -101,7 +96,11 @@ uint8_t * createPDU(uint32_t sequenceNumber, uint8_t flag, uint8_t *payload, int
 		memcpy(&pduBuffer[7], payload, dataLen);
 	}
 
-	printf("Old Checksum: %d\n", ((uint16_t *) pduBuffer)[2]);
+	if (UTIL_MODE == DEBUG_MODE) {
+        printf("Creating the PDU with payload length %d\n", dataLen);
+		printf("Payload: %s\n", (char*) &pduBuffer[7]);
+		printf("Old Checksum: %d\n", ((uint16_t *) pduBuffer)[2]);
+    }
     
     // Do checksum on pdu after payload has been copied
 	((uint16_t *) pduBuffer)[2] = in_cksum((unsigned short *) pduBuffer, dataLen + 7);
@@ -127,6 +126,7 @@ void outputPDU(uint8_t * aPDU, int pduLength)
     printf("Flag: %d\n", flag);
 	printf("PDU Length: %d\n", pduLength);
 	printf("Payload: %.*s\n", pduLength - 7, &(aPDU[7]));
+	printEveryByte(aPDU, pduLength);
 	printf("---------------------------------------\n");
 }
 
@@ -304,4 +304,15 @@ void freeWindow(struct Window *window)
 	  	}
 	}
     free(window);
+}
+
+void printEveryByte(uint8_t *pdu, int pduLength)
+{
+	int idx;
+
+	printf("Byte by byte output of PDU: ");
+	for (idx = 0; idx < pduLength, idx++) {
+		printf("%x", pdu[idx]);
+	}
+	printf("\n");
 }

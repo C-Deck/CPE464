@@ -89,5 +89,6 @@ uint32_t getNextSequenceNumber(struct Window *window);
 int isWindowFull(struct Window *window);
 void resetWindowACK(struct Window *window);
 void freeWindow(struct Window *window);
+void printEveryByte(uint8_t *pdu, int pduLength);
 
 #endif
