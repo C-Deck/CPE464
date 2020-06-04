@@ -256,7 +256,7 @@ int isWindowFull(struct Window *window)
 	int i = 0;
 
 	if (UTIL_MODE == DEBUG_MODE) {
-        printf("Checking up to index: %d in window", window->maxWindowIndex);
+        printf("Checking up to index: %d in window\n", window->maxWindowIndex);
     }
 
   	for (i = 0; i < window->maxWindowIndex; i++) {

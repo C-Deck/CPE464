@@ -250,6 +250,7 @@ STATE recvData(struct Window *window)
 				}
 				else {
 					if (isWindowFull(window)) {
+						printf("Window is full - RR max seq\n")
 						sendAck(maxSequenceNumber);
 					}
 					else {
