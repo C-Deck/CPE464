@@ -421,6 +421,10 @@ STATE sendEOF(struct UDPConnection *client, Window *window)
 
 			switch (flag) {
 				case SREJ_FLAG:
+					if (MODE == DEBUG_MODE) {
+						printf("Received SREJ %u\n", sequenceNumber);
+					}
+					sendDataPacket(client, window, sequenceNumber)
 				case ACK_EOF_FLAG:
 					if (sequenceNumber == window->initialSequenceNumber) {
 						return STATE_DONE;
