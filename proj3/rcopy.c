@@ -244,7 +244,7 @@ STATE recvData(struct Window *window)
 				printf("PACKET: sequenceNumber: %u initial: %u max: %u next: %u\n", sequenceNumber, window->initialSequenceNumber, maxSequenceNumber, nextSequenceNumber);
 			}
 
-			if (sequenceNumber < maxSequenceNumber) {
+			if (sequenceNumber < nextSequenceNumber) {
 				if (sequenceNumber < window->initialSequenceNumber) {
 					sendAck(window->initialSequenceNumber - 1);
 				}
