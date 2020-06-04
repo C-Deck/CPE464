@@ -298,16 +298,13 @@ STATE recvData(struct Window *window)
 				}
 				return STATE_WINDOW_FULL;
 			}
-
 			break;
-
 		case DATA_EOF_FLAG:
 			if (MODE == DEBUG_MODE) {
 				printf("GOT EOF: sequenceNumber: %u\n", sequenceNumber);
 			}
 			return STATE_EOF;
 			break;
-
 		default:
 			break;
 
