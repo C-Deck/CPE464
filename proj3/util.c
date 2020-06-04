@@ -311,7 +311,7 @@ void printEveryByte(uint8_t *pdu, int pduLength)
 	int idx;
 
 	printf("Byte by byte output of PDU: ");
-	for (idx = 0; idx < pduLength, idx++) {
+	for (idx = 0; idx < pduLength; idx++) {
 		printf("%x", pdu[idx]);
 	}
 	printf("\n");
