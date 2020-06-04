@@ -213,7 +213,7 @@ STATE recvData(struct Window *window)
 {
 	uint32_t sequenceNumber = 0;
 	uint8_t flag = 0;
-	int32_t dataLen = 0;
+	int dataLen = 0, i;
 	uint8_t dataBuffer[MAX_BUFFER];
 
 	uint32_t windowIndex;
@@ -282,10 +282,13 @@ STATE recvData(struct Window *window)
 
 
 			if (sequenceNumber > nextSequenceNumber) {
-				// the previous sequence number
-				windowIndex = ((sequenceNumber-1) % window->windowSize);
-				if (window->ACKList[windowIndex-1] == 0) {
-					sendSREJ(window->initialSequenceNumber + windowIndex - 1);
+				// Check the numbers bellow it
+				for (i = nextSequenceNumber - 1; i < sequenceNumber; i++) {
+					windowIndex = i % window->windowSize);
+					if (window->ACKList[windowIndex-1] == 0) {
+						sendSREJ(window->initialSequenceNumber + windowIndex - 1);
+						break;
+					}
 				}
 			}
 			else {
