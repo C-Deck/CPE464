@@ -284,7 +284,7 @@ STATE recvData(struct Window *window)
 			if (sequenceNumber > nextSequenceNumber) {
 				// Check the numbers bellow it
 				for (i = nextSequenceNumber - 1; i < sequenceNumber; i++) {
-					windowIndex = i % window->windowSize);
+					windowIndex = i % window->windowSize;
 					if (window->ACKList[windowIndex-1] == 0) {
 						sendSREJ(window->initialSequenceNumber + windowIndex - 1);
 						break;
