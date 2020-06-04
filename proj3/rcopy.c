@@ -272,7 +272,7 @@ STATE recvData(struct Window *window)
 					window->ACKList[windowIndex] = 1;
 
 					maxSequenceNumber = getMaxSequenceNumber(window);
-					maxSequenceNumber = getNextSequenceNumber(window);
+					nextSequenceNumber = getNextSequenceNumber(window);
 
 					if (sequenceNumber == maxSequenceNumber) {
 						window->bufferSize = offset + dataLen;
@@ -281,7 +281,7 @@ STATE recvData(struct Window *window)
 			}
 
 
-			if (sequenceNumber > maxSequenceNumber) {
+			if (sequenceNumber > nextSequenceNumber) {
 				// the previous sequence number
 				windowIndex = ((sequenceNumber-1) % window->windowSize);
 				if (window->ACKList[windowIndex-1] == 0) {
@@ -289,7 +289,7 @@ STATE recvData(struct Window *window)
 				}
 			}
 			else {
-				sendAck(maxSequenceNumber - 1);
+				sendAck(nextSequenceNumber - 1);
 			}
 
 			if (isWindowFull(window)) {

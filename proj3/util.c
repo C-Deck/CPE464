@@ -233,7 +233,7 @@ int32_t sendCall(uint8_t *dataBuffer, uint32_t dataLen, UDPConnection *connectio
 Window *initWindow(uint32_t windowSize, uint32_t bufferSize)
 {
   	Window *window = malloc(sizeof(struct Window));
-  	window->initialSequenceNumber = 0;
+  	window->initialSequenceNumber = 1;
   	window->windowSize = windowSize;
   	window->dataPacketSize = bufferSize;
   	window->bufferSize = windowSize * bufferSize;
