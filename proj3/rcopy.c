@@ -279,7 +279,12 @@ STATE recvData(struct Window *window)
 						window->windowByteSize = offset + dataLen;
 					}
 				}
+
+				if (MODE == DEBUG_MODE) {
+					printf("PACKET CHANGED: sequenceNumber: %u initial: %u max: %u next: %u\n", sequenceNumber, window->initialSequenceNumber, maxSequenceNumber, nextSequenceNumber);
+				}
 			}
+			
 
 
 			if (sequenceNumber > nextSequenceNumber) {
