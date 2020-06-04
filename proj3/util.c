@@ -101,6 +101,9 @@ uint8_t * createPDU(uint32_t sequenceNumber, uint8_t flag, uint8_t *payload, int
 		printf("Payload: %s\n", (char*) &pduBuffer[7]);
 		printf("Old Checksum: %d\n", ((uint16_t *) pduBuffer)[2]);
     }
+
+	// HAVE TO CLEAR OLD CHECKSUM - FORGOT THIS FOREVER AND HATE IT
+	((uint16_t *) pduBuffer)[2] = 0;
     
     // Do checksum on pdu after payload has been copied
 	((uint16_t *) pduBuffer)[2] = in_cksum((unsigned short *) pduBuffer, dataLen + 7);
@@ -187,8 +190,6 @@ int32_t recvCall(uint8_t *dataBuffer, uint32_t len, int32_t socket, UDPConnectio
 	if (UTIL_MODE == DEBUG_MODE) {
         outputPDU(aPDU, dataLen);
     }
-
-	((uint16_t *) aPDU)[2] = 0;
 
     if ((checksumResult = in_cksum((unsigned short *) aPDU, dataLen)) != 0) {
 		if (UTIL_MODE == DEBUG_MODE) {
