@@ -131,7 +131,7 @@ void runStateMachine(struct Client *client)
 				state = windowFull(window, output_fd);
 				resetWindowACK(window);
 				window->initialSequenceNumber += window->windowSize;
-				window->bufferSize = 0;
+				window->windowByteSize = 0;
 				break;
 
 			case STATE_EOF:
@@ -261,7 +261,7 @@ STATE recvData(struct Window *window)
 					maxSequenceNumber = getNextSequenceNumber(window);
 
 					if (sequenceNumber == maxSequenceNumber) {
-						window->bufferSize = offset + dataLen;
+						window->windowByteSize = offset + dataLen;
 					}
 				}
 			}
@@ -302,7 +302,7 @@ STATE windowFull(struct Window *window, int output_fd)
 {
 	// uint32_t window_count = nextSequenceNumber(window) - window->initialSequenceNumber;
 	// printf("Writing %d windows %u bytes\n", window_count, window->windowDataBufferSize); // !!!
-	write(output_fd, window->windowDataBuffer, window->bufferSize);
+	write(output_fd, window->windowDataBuffer, window->windowByteSize);
 	return STATE_RECV_DATA;
 }
 

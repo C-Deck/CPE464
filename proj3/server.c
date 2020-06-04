@@ -204,32 +204,30 @@ STATE getFilename(struct UDPConnection *client, uint8_t *dataBuffer, int32_t dat
 
 STATE nextWindow(struct Window *window, int dataFile)
 {
-	int32_t readLen = 0;
+	int readLen = 0;
+
 	if (MODE == DEBUG_MODE) {
-		printf("Loading window base: %u length: %u size: %u\n", window->initialSequenceNumber, window->dataPacketSize, window->windowSize);
+		printf("New Window - Initial: %u - Length: %u - Size: %u\n", window->initialSequenceNumber, window->dataPacketSize, window->windowSize);
 	}
-	
-	readLen = read(dataFile, window->windowDataBuffer, window->bufferSize);
 
 	resetWindowACK(window);
-	window->windowIndex = 0;
+	
+	if ((readLen = read(dataFile, window->windowDataBuffer, window->windowByteSize)) == -1) {
+		perror("Read error ");
+		exit(1);
+	} 
 
-	switch (readLen) {
-		case -1:
-			perror("sendDataPacket: read");
-			exit(1);
-			break;
+	else if (readLen == 0) {
+		return STATE_SEND_EOF;
+	} 
 
-		case 0:
-			return STATE_SEND_EOF;
-			break;
-
-		default:
-			window->dataLen = readLen;
-			break;
+	else {
+		if (MODE == DEBUG_MODE) {
+			printf("Read %u bytes\n", readLen);
+		}
+		window->dataLen = readLen;
+		return STATE_SEND_DATA;
 	}
-
-	return STATE_SEND_DATA;
 }
 
 STATE nextDataPacket(struct UDPConnection *client, struct Window *window)
@@ -313,13 +311,13 @@ void sendDataPacket(struct UDPConnection *client, struct Window *window, uint32_
 		printf("RESEND %u\n", sequenceNumber);
 	}
 
-	uint32_t windowIndex = (sequenceNumber-1) % window->windowSize;
+	uint32_t windowIndex = (sequenceNumber - 1) % window->windowSize;
 
 	uint32_t windowBufferOffset = windowIndex * window->dataPacketSize;
 
 	uint32_t packet_len = window->dataPacketSize;
 
-	int32_t data_left = window->bufferSize - windowBufferOffset;
+	int32_t data_left = window->windowByteSize - windowBufferOffset;
 
 	if (data_left < window->dataPacketSize) {
 		packet_len = data_left;
@@ -332,20 +330,25 @@ STATE closeWindow(struct UDPConnection *client, struct Window *window, int selec
 {
 	uint8_t dataBuffer[MAX_BUFFER];
 	uint8_t flag = 0;
-	uint32_t sequenceNumber = 0, windowIndex = 0, recvLen = 0;
+	uint32_t sequenceNumber = 0, windowIndex = 0, recvLen = 0, nextSequenceNumber = 0;
 	int sendCount = 0, i;
+
+	if (MODE == DEBUG_MODE) {
+		printf("Closing window\n");
+	}
 
 	while (1) {
 
 		if (isWindowFull(window)) {
+			nextSequenceNumber = getNextSequenceNumber(window);
 			if (MODE == DEBUG_MODE) {
-				printf("Window Full next: %u\n", getNextSequenceNumber(window));
+				printf("Window Full next: %u\n", nextSequenceNumber);
 			}
-			window->initialSequenceNumber = getNextSequenceNumber(window);
+			window->initialSequenceNumber = nextSequenceNumber;
 			return STATE_WINDOW_NEXT;
 		}
 
-		if(selectCall(client->socket, 1, 0, TIME_IS_NOT_NULL)) {
+		if (selectCall(client->socket, 1, 0, TIME_IS_NOT_NULL)) {
 			recvLen = recvCall(dataBuffer, MAX_BUFFER, client->socket, client, &flag, &sequenceNumber);
 
 			if (recvLen == RECV_ERROR) {

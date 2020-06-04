@@ -236,7 +236,7 @@ Window *initWindow(uint32_t windowSize, uint32_t bufferSize)
   	window->initialSequenceNumber = 1;
   	window->windowSize = windowSize;
   	window->dataPacketSize = bufferSize;
-  	window->bufferSize = windowSize * bufferSize;
+  	window->windowByteSize = windowSize * bufferSize;
   	window->ACKList = malloc(windowSize);
   	window->windowDataBuffer = malloc(windowSize * bufferSize);
   	window->dataLen = window->dataPacketSize * windowSize;

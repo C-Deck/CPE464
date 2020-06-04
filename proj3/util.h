@@ -58,7 +58,7 @@ typedef struct Window
 	uint8_t *windowDataBuffer;
 	uint32_t windowSize;
 	uint32_t dataPacketSize;
-	uint32_t bufferSize;
+	uint32_t windowByteSize;
 	uint32_t dataLen;
 	uint32_t initialSequenceNumber;
 	uint32_t windowIndex;
