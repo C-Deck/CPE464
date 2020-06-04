@@ -121,8 +121,8 @@ void outputPDU(uint8_t * aPDU, int pduLength)
     printf("Checksum: %d\n", checksum);
     printf("Flag: %d\n", flag);
 	printf("PDU Length: %d\n", pduLength);
+	printf("Payload: %.*s\n", pduLength - 7, &(aPDU[7]));
 	printf("---------------------------------------\n");
-    //printf("Payload: %.*s\n", pduLength - 7, aPDU + 7);
 }
 
 // Select function we got before but with specific size for int
