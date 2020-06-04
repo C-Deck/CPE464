@@ -100,9 +100,13 @@ uint8_t * createPDU(uint32_t sequenceNumber, uint8_t flag, uint8_t *payload, int
 	if (dataLen != 0) {
 		memcpy(&pduBuffer[7], payload, dataLen);
 	}
+
+	printf("Old Checksum: %s\n", ((uint16_t *) pduBuffer)[2]);
     
     // Do checksum on pdu after payload has been copied
 	((uint16_t *) pduBuffer)[2] = in_cksum((unsigned short *) pduBuffer, dataLen + 7);
+
+	printf("New Checksum: %s\n", ((uint16_t *) pduBuffer)[2]);
 
 	return pduBuffer;
 }
