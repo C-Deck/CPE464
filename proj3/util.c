@@ -336,7 +336,7 @@ void printACKList(struct Window *window)
 {
 	int i;
 
-	printf("\tACKList:\n")
+	printf("\tACKList:\n");
 	for (i = 0; i < window->windowSize; i++) {
     	printf("\t\tIndex %u: %u\n", i, window->ACKList[i]);
 	}
