@@ -132,18 +132,16 @@ void runStateMachine(struct Client *client)
 				break;
 			case STATE_WINDOW_FULL:
 				state = writeWindow(window, outFile);
-				resetWindowACK(window);
 				window->initialSequenceNumber += window->windowSize;
 				window->windowByteSize = 0;
+				resetWindowACK(window);
 				break;
 			case STATE_EOF:
 				if (selectCounter == 0) {
 					writeWindow(window, outFile);
 				}
 				selectCounter++;
-				else {
-					state = recvEOF(window, outFile);
-				}
+				state = recvEOF(window, outFile);
 				break;
 			case STATE_DONE:
 			default:
@@ -204,13 +202,13 @@ STATE filename(char *fname, int32_t bufferSize, int32_t windowSize)
 
 STATE recvData(struct Window *window, int *selectCounter)
 {
-	uint32_t sequenceNumber = 0, offset, maxSequenceNumber, nextSequenceNumber;
+	uint32_t sequenceNumber = 0, maxSequenceNumber, nextSequenceNumber;
 	uint8_t flag = 0;
 	int dataLen = 0;
 	uint8_t dataBuffer[MAX_BUFFER];
 
 	if (selectCall(server.socket, 1, 0, TIME_IS_NOT_NULL) == 0) {
-		*selectCounter++;
+		*selectCounter += 1;
 		return STATE_RECV_DATA;
 	}
 
