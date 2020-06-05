@@ -326,7 +326,6 @@ void printWindow(struct Window *window)
   	printf("\twindowSize: %u\n", window->windowSize);
   	printf("\tdataPacketSize: %u\n", window->dataPacketSize);
   	printf("\twindowByteSize: %u\n", window->windowByteSize);
-  	printf("\tACKList: %u\n", window->ACKList);
   	printf("\tdataLen: %u\n", window->dataLen);
 	printf("\tmaxWindowIndex: %u\n", window->maxWindowIndex);
 	printACKList(window);
