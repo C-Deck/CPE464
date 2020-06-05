@@ -30,7 +30,7 @@ typedef enum
 	STATE_READ_EOF_ACK
 } STATE;
 
-int MODE = DEBUG_MODE;
+int MODE = NORMAL_MODE;
 
 int checkArgs(int argc, char *argv[]);
 void receiveClients(int portNumber);

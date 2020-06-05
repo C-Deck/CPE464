@@ -19,7 +19,6 @@
 #include"cpe464.h"
 #include "util.h"
 
-#define MAXBUF 80
 #define xstr(a) str(a)
 #define str(a) #a
 
@@ -35,7 +34,7 @@ typedef enum
 } STATE;
 
 UDPConnection server;
-int MODE = DEBUG_MODE;
+int MODE = NORMAL_MODE;
 
 void initClient(int argc, char *argv[], struct Client *client);
 void runStateMachine(struct Client *client);
