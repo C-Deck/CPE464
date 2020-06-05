@@ -9,6 +9,17 @@ int UTIL_MODE = DEBUG_MODE;
 
 // SERVER FUNCTIONS
 
+void * safeMalloc(size_t size)
+{
+	void * returnValue = NULL;
+	if ((returnValue = malloc(size)) == NULL)
+	{
+		perror("malloc");
+		exit(-1);
+	}
+	return returnValue;
+}
+
 int safeRecvfrom(int socketNum, void * buf, int len, int flags, struct sockaddr *srcAddr, int * addrLen)
 {
 	int returnValue = 0;
@@ -156,10 +167,6 @@ int32_t selectCall(int32_t socketNumber, int32_t seconds, int32_t microseconds, 
         exit(-1);
     }
 
-	if (UTIL_MODE == DEBUG_MODE) {
-		//printf("Select call returned: %d\n", numReady);
-	}
-
 	// Will be either 0 (socket not ready) or 1 (socket is ready for read)
     return numReady;
 }
@@ -185,7 +192,7 @@ int32_t recvCall(uint8_t *dataBuffer, uint32_t len, int32_t socket, UDPConnectio
     memcpy(&checksum, &(aPDU[4]), 2);
 
 	if (UTIL_MODE == DEBUG_MODE) {
-        //outputPDU(aPDU, dataLen);
+        outputPDU(aPDU, dataLen);
     }
 
     if ((checksumResult = in_cksum((unsigned short *) aPDU, dataLen)) != 0) {
@@ -232,22 +239,24 @@ int32_t sendCall(uint8_t *dataBuffer, uint32_t dataLen, UDPConnection *connectio
 // WINDOW FUNCTIONS
 Window *initWindow(uint32_t windowSize, uint32_t bufferSize)
 {
-  	Window *window = malloc(sizeof(struct Window));
+  	Window *window = safeMalloc(sizeof(struct Window));
+	window->ACKList = safeMalloc(windowSize);
+  	window->windowDataBuffer = safeMalloc(windowSize * bufferSize);
+
   	window->initialSequenceNumber = 1;
   	window->windowSize = windowSize;
   	window->dataPacketSize = bufferSize;
   	window->windowByteSize = windowSize * bufferSize;
-  	window->ACKList = malloc(windowSize);
-  	window->windowDataBuffer = malloc(windowSize * bufferSize);
   	window->dataLen = window->dataPacketSize * windowSize;
 	window->maxWindowIndex = windowSize;
+
   	resetWindowACK(window);
   	return window;
 }
 
 void resetWindowACK(struct Window *window)
 {
-  	window->windowIndex = 0;
+  	window->currentIndex = 0;
   	memset(window->ACKList, 0, window->windowSize);
 }
 
@@ -293,6 +302,37 @@ uint32_t getNextSequenceNumber(struct Window *window)
   	}
 
   	return window->initialSequenceNumber + i;
+}
+
+uint32_t getWindowIndex(struct Window *window, uint32_t sequenceNumber)
+{
+	uint32_t windowIndex = (sequenceNumber - 1) % window->windowSize;
+
+	return windowIndex;
+}
+
+int isSequenceNumberACKd(struct Window *window, uint32_t sequenceNumber)
+{
+	uint32_t windowIndex = (sequenceNumber - 1) % window->windowSize;
+
+	return window->ACKList[windowIndex];
+}
+
+void ACKSequenceNumber(struct Window *window, uint32_t sequenceNumber)
+{
+	uint32_t windowIndex = (sequenceNumber - 1) % window->windowSize;
+
+	window->ACKList[windowIndex] = 1;
+}
+
+void RRSequenceNumber(struct Window *window, uint32_t sequenceNumber)
+{
+	int i;
+	uint32_t windowIndex = (sequenceNumber - 1) % window->windowSize;
+
+	for (i= 0; i <= windowIndex; i++) {
+		window->ACKList[i] = 1;
+	}
 }
 
 void freeWindow(struct Window *window)

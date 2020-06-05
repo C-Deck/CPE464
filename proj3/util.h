@@ -61,7 +61,7 @@ typedef struct Window
 	uint32_t windowByteSize;
 	uint32_t dataLen;
 	uint32_t initialSequenceNumber;
-	uint8_t windowIndex;
+	uint8_t currentIndex;
 	uint8_t maxWindowIndex;
 } Window;
 
@@ -93,5 +93,9 @@ void freeWindow(struct Window *window);
 void printEveryByte(uint8_t *pdu, int pduLength);
 void printWindow(struct Window *window);
 void printACKList(struct Window *window);
+void RRSequenceNumber(struct Window *window, uint32_t sequenceNumber);
+void ACKSequenceNumber(struct Window *window, uint32_t sequenceNumber);
+int isSequenceNumberACKd(struct Window *window, uint32_t sequenceNumber);
+uint32_t getWindowIndex(struct Window *window, uint32_t sequenceNumber);
 
 #endif

@@ -43,6 +43,7 @@ STATE readAck(struct UDPConnection *client, struct Window *window, int selectFai
 void sendDataPacket(struct UDPConnection *client, struct Window *window, uint32_t sequenceNumber);
 STATE closeWindow(struct UDPConnection *client, struct Window *window, int selectFailureCount);
 STATE sendEOF(struct UDPConnection *client, Window *window);
+void handleFlag(struct UDPConnection *client, Window *window, uint8_t flag, uint32_t sequenceNumber, int *sendCount);
 
 //TODO circular queue
 
@@ -235,35 +236,31 @@ STATE nextDataPacket(struct UDPConnection *client, struct Window *window)
 {
 	STATE returnState = STATE_READ_ACKS;
 
-	uint32_t windowBufferOffset = window->windowIndex * window->dataPacketSize;
+	uint32_t windowBufferOffset = window->currentIndex * window->dataPacketSize;
 	uint32_t packetLen = window->dataPacketSize;
+	uint32_t dataLeft = window->dataLen - windowBufferOffset;
 
-	int32_t data_left = window->dataLen - windowBufferOffset;
-
-	if (data_left <= window->dataPacketSize) {
-		packetLen = data_left;
+	if (dataLeft <= window->dataPacketSize) {
+		packetLen = dataLeft;
 		returnState = STATE_WINDOW_CLOSE;
 	}
 
 	if (MODE == DEBUG_MODE) {
-		printf("SEND %u\n", window->initialSequenceNumber + window->windowIndex);
+		printf("SEND %u\n", window->initialSequenceNumber + window->currentIndex);
 	}
 
-	sendCall(window->windowDataBuffer + windowBufferOffset, packetLen, client, DATA_FLAG, window->initialSequenceNumber + window->windowIndex);
+	sendCall(window->windowDataBuffer + windowBufferOffset, packetLen, client, DATA_FLAG, window->initialSequenceNumber + window->currentIndex);
 
-	window->windowIndex++;
+	window->currentIndex++;
 
 	return returnState;
 }
 
 STATE readAck(struct UDPConnection *client, struct Window *window, int selectFailureCount)
 {
-	uint32_t recvLen = 0;
+	uint32_t recvLen = 0, sequenceNumber = 0;
 	uint8_t dataBuffer[MAX_BUFFER];
 	uint8_t flag = 0;
-	uint32_t sequenceNumber = 0;
-	uint32_t windowIndex;
-	int i = 0;
 
 	while(selectCall(client->socket, 0, 0, TIME_IS_NOT_NULL)) {
 		recvLen = recvCall(dataBuffer, MAX_BUFFER, client->socket, client, &flag, &sequenceNumber);
@@ -273,34 +270,35 @@ STATE readAck(struct UDPConnection *client, struct Window *window, int selectFai
 		}
 
 		if ((sequenceNumber >= window->initialSequenceNumber) && (sequenceNumber < (window->initialSequenceNumber + window->windowSize))) {
-			windowIndex = (sequenceNumber-1) % window->windowSize;
-			switch (flag) {
-				case FILENAME_FLAG:
-					processClient(dataBuffer, recvLen, client, selectFailureCount + 1);
-					return STATE_DONE;
-					break;
-
-				case RR_FLAG:
-					if (MODE == DEBUG_MODE) {
-						printf("RR Received: %u\n", sequenceNumber);
-					}
-					for (i=0; i < windowIndex; i++) {
-						window->ACKList[i] = 1;
-					}
-					break;
-
-				case SREJ_FLAG:
-					if (MODE == DEBUG_MODE) {
-						printf("SREJ Recevied %u\n", sequenceNumber);
-					}
-					sendDataPacket(client, window, sequenceNumber);
-					break;
-
-				default:
-					fprintf(stderr, "ERROR: Bad flag (%u) in readACK\n", flag);
-					break;
-			}
+			handleACKFlag(client, window, selectFailureCount, flag, recvLen, sequenceNumber, dataBuffer);
 		}
+	}
+
+	return STATE_SEND_DATA;
+}
+
+STATE handleACKFlag(struct UDPConnection *client, struct Window *window, int selectFailureCount, uint8_t flag, uint32_t recvLen, uint32_t sequenceNumber, uint8_t *dataBuffer)
+{
+	switch (flag) {
+		case FILENAME_FLAG:
+			processClient(dataBuffer, recvLen, client, selectFailureCount + 1);
+			return STATE_DONE;
+			break;
+		case RR_FLAG:
+			if (MODE == DEBUG_MODE) {
+				printf("RR Received: %u\n", sequenceNumber);
+			}
+			RRSequenceNumber(window, sequenceNumber);
+			break;
+		case SREJ_FLAG:
+			if (MODE == DEBUG_MODE) {
+				printf("SREJ Recevied %u\n", sequenceNumber);
+			}
+			sendDataPacket(client, window, sequenceNumber);
+			break;
+		default:
+			fprintf(stderr, "ERROR: Bad flag (%u) in readACK\n", flag);
+			break;
 	}
 
 	return STATE_SEND_DATA;
@@ -312,34 +310,29 @@ void sendDataPacket(struct UDPConnection *client, struct Window *window, uint32_
 		printf("RESEND %u\n", sequenceNumber);
 	}
 
-	uint32_t windowIndex = (sequenceNumber - 1) % window->windowSize;
+	uint32_t windowIndex = getWindowIndex(window, sequenceNumber);
 
 	uint32_t windowBufferOffset = windowIndex * window->dataPacketSize;
 
-	uint32_t packet_len = window->dataPacketSize;
+	uint32_t packetLength = window->dataPacketSize;
 
-	int32_t data_left = window->windowByteSize - windowBufferOffset;
+	int32_t dataLeft = window->windowByteSize - windowBufferOffset;
 
-	if (data_left < window->dataPacketSize) {
-		packet_len = data_left;
+	if (dataLeft < window->dataPacketSize) {
+		packetLength = dataLeft;
 	}
 
-	sendCall(window->windowDataBuffer + windowBufferOffset, packet_len, client, DATA_FLAG, sequenceNumber);
+	sendCall(window->windowDataBuffer + windowBufferOffset, packetLength, client, DATA_FLAG, sequenceNumber);
 }
 
 STATE closeWindow(struct UDPConnection *client, struct Window *window, int selectFailureCount)
 {
 	uint8_t dataBuffer[MAX_BUFFER];
 	uint8_t flag = 0;
-	uint32_t sequenceNumber = 0, windowIndex = 0, recvLen = 0, nextSequenceNumber = 0;
-	int sendCount = 0, i;
-
-	if (MODE == DEBUG_MODE) {
-		printf("Closing window\n");
-	}
+	uint32_t sequenceNumber = 0, recvLen = 0, nextSequenceNumber = 0;
+	int sendCount = 0;
 
 	while (1) {
-
 		if (isWindowFull(window)) {
 			nextSequenceNumber = getNextSequenceNumber(window);
 			if (MODE == DEBUG_MODE) {
@@ -357,32 +350,7 @@ STATE closeWindow(struct UDPConnection *client, struct Window *window, int selec
 			}
 
 			if ((sequenceNumber >= window->initialSequenceNumber) && (sequenceNumber < (window->initialSequenceNumber + window->windowSize))) {
-
-				windowIndex = (sequenceNumber - 1) % window->windowSize;
-
-				switch (flag) {
-					case RR_FLAG:
-						sendCount = 0;
-						for (i= 0; i <= windowIndex; i++) {
-							window->ACKList[i] = 1;
-						}
-						if (MODE == DEBUG_MODE) {
-							printf("Received RR %u\n", sequenceNumber);
-						}
-						break;
-
-					case SREJ_FLAG:
-						sendCount = 0;
-						if (MODE == DEBUG_MODE) {
-							printf("Received SREJ %u\n", sequenceNumber);
-						}
-						sendDataPacket(client, window, sequenceNumber);
-						break;
-
-					default:
-						fprintf(stderr, "ERROR: non-ACK flag in wait_on_ack\n");
-						break;
-				}
+				handleFlag(client, window, flag, sequenceNumber, &sendCount);
 			}
 		}
 		else {
@@ -400,6 +368,31 @@ STATE closeWindow(struct UDPConnection *client, struct Window *window, int selec
 	return STATE_DONE;
 }
 
+void handleFlag(struct UDPConnection *client, Window *window, uint8_t flag, uint32_t sequenceNumber, int *sendCount)
+{
+	switch (flag) {
+		case RR_FLAG:
+			if (MODE == DEBUG_MODE) {
+				printf("Received SREJ %u\n", sequenceNumber);
+			}
+
+			*sendCount = 0;
+			RRSequenceNumber(window, sequenceNumber);
+			break;
+		case SREJ_FLAG:
+			if (MODE == DEBUG_MODE) {
+				printf("Received SREJ %u\n", sequenceNumber);
+			}
+
+			*sendCount = 0;
+			sendDataPacket(client, window, sequenceNumber);
+			break;
+		default:
+			fprintf(stderr, "ERROR: non-ACK flag in wait_on_ack\n");
+			break;
+	}
+}
+
 STATE sendEOF(struct UDPConnection *client, Window *window)
 {
 	uint32_t recvLen = 0, sequenceNumber = 0;
@@ -409,7 +402,7 @@ STATE sendEOF(struct UDPConnection *client, Window *window)
 
 	while (1) {
 		if (MODE == DEBUG_MODE) {
-			printf("Send EOF: base: %u ACKList: %u\n", window->initialSequenceNumber, window->ACKList[0]);
+			printf("Send EOF: base: %u\n", window->initialSequenceNumber);
 		}
 
 		sendCall(NULL, 0, client, DATA_EOF_FLAG, window->initialSequenceNumber);
