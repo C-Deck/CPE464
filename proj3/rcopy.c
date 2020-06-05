@@ -39,7 +39,7 @@ int MODE = DEBUG_MODE;
 
 void initClient(int argc, char *argv[], struct Client *client);
 void runStateMachine(struct Client *client);
-STATE writeWindow(struct Window *window, int outFile);
+STATE writeWindow(struct Window *window, int outFile, int clear);
 STATE recvData(struct Window *window, int *selectCounter);
 STATE recvEOF(struct Window *window, int outFile);
 STATE filename(char *fname, int32_t bufferSize, int32_t windowSize);
@@ -131,14 +131,11 @@ void runStateMachine(struct Client *client)
 				state = recvData(window, &selectCounter);
 				break;
 			case STATE_WINDOW_FULL:
-				state = writeWindow(window, outFile);
-				window->initialSequenceNumber += window->windowSize;
-				window->windowByteSize = 0;
-				resetWindowACK(window);
+				state = writeWindow(window, outFile, 1);
 				break;
 			case STATE_EOF:
 				if (selectCounter == 0) {
-					writeWindow(window, outFile);
+					writeWindow(window, outFile, 0);
 				}
 				selectCounter++;
 				state = recvEOF(window, outFile);
@@ -318,7 +315,7 @@ void checkGreaterSequence(struct Window *window, uint32_t sequenceNumber, uint32
 	}
 }
 
-STATE writeWindow(struct Window *window, int outFile)
+STATE writeWindow(struct Window *window, int outFile, int clear)
 {
 	if (MODE == DEBUG_MODE) {
 		uint32_t window_count = getNextSequenceNumber(window) - window->initialSequenceNumber;
@@ -326,6 +323,12 @@ STATE writeWindow(struct Window *window, int outFile)
 	}
 
 	write(outFile, window->windowDataBuffer, window->windowByteSize);
+	if (clear == 1) {
+		window->initialSequenceNumber += window->windowSize;
+		window->windowByteSize = 0;
+		resetWindowACK(window);
+	}
+
 	return STATE_RECV_DATA;
 }
 
