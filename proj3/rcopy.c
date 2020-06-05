@@ -137,7 +137,7 @@ void runStateMachine(struct Client *client)
 				break;
 
 			case STATE_EOF:
-				if (selectCounter == 0 && isWindowFull(window)) {
+				if (selectCounter == 0) {
 					windowFull(window, outFile);
 				}
 				selectCounter++;
