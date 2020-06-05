@@ -242,6 +242,7 @@ STATE recvData(struct Window *window)
 
 			if (MODE == DEBUG_MODE) {
 				printf("PACKET: sequenceNumber: %u initial: %u max: %u next: %u\n", sequenceNumber, window->initialSequenceNumber, maxSequenceNumber, nextSequenceNumber);
+				printWindow(window);
 			}
 
 			if (sequenceNumber < nextSequenceNumber) {
@@ -283,7 +284,7 @@ STATE recvData(struct Window *window)
 				}
 
 				if (MODE == DEBUG_MODE) {
-					printf("PACKET CHANGED: sequenceNumber: %u initial: %u max: %u next: %u\n", sequenceNumber, window->initialSequenceNumber, maxSequenceNumber, nextSequenceNumber);
+					printf("PACKET WRITEN: sequenceNumber: %u initial: %u max: %u next: %u\n", sequenceNumber, window->initialSequenceNumber, maxSequenceNumber, nextSequenceNumber);
 					printWindow(window);
 				}
 			}
