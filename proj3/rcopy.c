@@ -275,6 +275,8 @@ STATE recvData(struct Window *window)
 					maxSequenceNumber = getMaxSequenceNumber(window);
 					nextSequenceNumber = getNextSequenceNumber(window);
 
+
+
 					if (sequenceNumber == maxSequenceNumber) {
 						window->windowByteSize = offset + dataLen;
 					}
@@ -282,6 +284,7 @@ STATE recvData(struct Window *window)
 
 				if (MODE == DEBUG_MODE) {
 					printf("PACKET CHANGED: sequenceNumber: %u initial: %u max: %u next: %u\n", sequenceNumber, window->initialSequenceNumber, maxSequenceNumber, nextSequenceNumber);
+					printWindow(window);
 				}
 			}
 			

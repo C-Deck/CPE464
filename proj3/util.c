@@ -318,3 +318,26 @@ void printEveryByte(uint8_t *pdu, int pduLength)
 	}
 	printf("\n");
 }
+
+void printWindow(struct Window *window)
+{
+	printf("Window:\n");
+	printf("\tinitialSequenceNumber: %u\n", window->initialSequenceNumber);
+  	printf("\twindowSize: %u\n", window->windowSize);
+  	printf("\tdataPacketSize: %u\n", window->dataPacketSize);
+  	printf("\twindowByteSize: %u\n", window->windowByteSize);
+  	printf("\tACKList: %u\n", window->ACKList);
+  	printf("\tdataLen: %u\n", window->dataLen);
+	printf("\tmaxWindowIndex: %u\n", window->maxWindowIndex);
+	printACKList(window);
+}
+
+void printACKList(struct Window *window)
+{
+	int i;
+
+	printf("\tACKList:\n")
+	for (i = 0; i < window->windowSize; i++) {
+    	printf("\t\tIndex %u: %u\n", i, window->ACKList[i]);
+	}
+}

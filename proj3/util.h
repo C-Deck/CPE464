@@ -61,8 +61,8 @@ typedef struct Window
 	uint32_t windowByteSize;
 	uint32_t dataLen;
 	uint32_t initialSequenceNumber;
-	int windowIndex;
-	int maxWindowIndex;
+	uint8_t windowIndex;
+	uint8_t maxWindowIndex;
 } Window;
 
 typedef struct Client
@@ -91,5 +91,7 @@ int isWindowFull(struct Window *window);
 void resetWindowACK(struct Window *window);
 void freeWindow(struct Window *window);
 void printEveryByte(uint8_t *pdu, int pduLength);
+void printWindow(struct Window *window);
+void printACKList(struct Window *window);
 
 #endif
