@@ -40,7 +40,7 @@ int MODE = DEBUG_MODE;
 void initClient(int argc, char *argv[], struct Client *client);
 void runStateMachine(struct Client *client);
 STATE writeWindow(struct Window *window, int outFile);
-STATE recvData(struct Window *window);
+STATE recvData(struct Window *window, int *selectCounter);
 STATE recvEOF(struct Window *window, int outFile);
 STATE filename(char *fname, int32_t bufferSize, int32_t windowSize);
 void sendSREJ(int sequenceNumber);

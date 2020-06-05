@@ -44,6 +44,7 @@ void sendDataPacket(struct UDPConnection *client, struct Window *window, uint32_
 STATE closeWindow(struct UDPConnection *client, struct Window *window, int selectFailureCount);
 STATE sendEOF(struct UDPConnection *client, Window *window);
 void handleFlag(struct UDPConnection *client, Window *window, uint8_t flag, uint32_t sequenceNumber, int *sendCount);
+STATE handleACKFlag(struct UDPConnection *client, struct Window *window, int selectFailureCount, uint8_t flag, uint32_t recvLen, uint32_t sequenceNumber, uint8_t *dataBuffer);
 
 //TODO circular queue
 
