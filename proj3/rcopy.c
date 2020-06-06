@@ -34,7 +34,7 @@ typedef enum
 } STATE;
 
 UDPConnection server;
-int MODE = NORMAL_MODE;
+int MODE = DEBUG_MODE;
 
 void initClient(int argc, char *argv[], struct Client *client);
 void runStateMachine(struct Client *client);
