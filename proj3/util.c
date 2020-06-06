@@ -100,6 +100,11 @@ uint8_t * createPDU(uint32_t sequenceNumber, uint8_t flag, uint8_t *payload, int
 {
 	static uint8_t pduBuffer[MAXPDU];
 
+	if (UTIL_MODE == DEBUG_MODE) {
+        printf("Creating the PDU with payload length %d\n", dataLen);
+		printf("Payload: %s\n", (char*) payload);
+    }
+
 	// Build the PDU
 	((uint32_t *) pduBuffer)[0] = htonl(sequenceNumber);
 	pduBuffer[6] = flag;
@@ -107,10 +112,10 @@ uint8_t * createPDU(uint32_t sequenceNumber, uint8_t flag, uint8_t *payload, int
 		memcpy(&pduBuffer[7], payload, dataLen);
 	}
 
-	if (UTIL_MODE == DEBUG_MODE) {
+	/* if (UTIL_MODE == DEBUG_MODE) {
         printf("Creating the PDU with payload length %d\n", dataLen);
 		printf("Payload: %s\n", (char*) &pduBuffer[7]);
-    }
+    } */
 
 	// HAVE TO CLEAR OLD CHECKSUM - FORGOT THIS FOREVER AND HATE IT
 	((uint16_t *) pduBuffer)[2] = 0;
