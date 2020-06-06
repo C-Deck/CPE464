@@ -5,7 +5,7 @@
 
 #define MAXPDU 1500
 
-int UTIL_MODE = DEBUG_MODE;
+int UTIL_MODE = NORMAL_MODE;
 
 // SERVER FUNCTIONS
 
@@ -102,7 +102,7 @@ uint8_t * createPDU(uint32_t sequenceNumber, uint8_t flag, uint8_t *payload, int
 
 	if (UTIL_MODE == DEBUG_MODE) {
         printf("Creating the PDU with payload length %d\n", dataLen);
-		printf("Payload: %s\n", (char*) payload);
+		//printf("Payload: %s\n", (char*) payload);
     }
 
 	// Build the PDU
@@ -111,11 +111,6 @@ uint8_t * createPDU(uint32_t sequenceNumber, uint8_t flag, uint8_t *payload, int
 	if (dataLen != 0) {
 		memcpy(&pduBuffer[7], payload, dataLen);
 	}
-
-	/* if (UTIL_MODE == DEBUG_MODE) {
-        printf("Creating the PDU with payload length %d\n", dataLen);
-		printf("Payload: %s\n", (char*) &pduBuffer[7]);
-    } */
 
 	// HAVE TO CLEAR OLD CHECKSUM - FORGOT THIS FOREVER AND HATE IT
 	((uint16_t *) pduBuffer)[2] = 0;
