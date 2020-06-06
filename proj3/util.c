@@ -3,7 +3,7 @@
 #include "cpe464.h"
 #include "gethostbyname.h"
 
-#define MAXPDU 88
+#define MAXPDU 1500
 
 int UTIL_MODE = DEBUG_MODE;
 
