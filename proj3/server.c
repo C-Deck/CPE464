@@ -248,6 +248,9 @@ STATE nextDataPacket(struct UDPConnection *client, struct Window *window)
 
 	if (MODE == DEBUG_MODE) {
 		printf("SEND %u\n", window->initialSequenceNumber + window->currentIndex);
+		printf("=========================\n");
+		printf("BufferOffset: %u -- packetLen %u\n");
+		printf("=========================\n");
 	}
 
 	sendCall(window->windowDataBuffer + windowBufferOffset, packetLen, client, DATA_FLAG, window->initialSequenceNumber + window->currentIndex);

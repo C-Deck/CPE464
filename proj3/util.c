@@ -192,7 +192,7 @@ int32_t recvCall(uint8_t *dataBuffer, uint32_t len, int32_t socket, UDPConnectio
     memcpy(&checksum, &(aPDU[4]), 2);
 
 	if (UTIL_MODE == DEBUG_MODE) {
-        outputPDU(aPDU, dataLen);
+        //outputPDU(aPDU, dataLen);
     }
 
     if ((checksumResult = in_cksum((unsigned short *) aPDU, dataLen)) != 0) {
@@ -224,7 +224,7 @@ int32_t sendCall(uint8_t *dataBuffer, uint32_t dataLen, UDPConnection *connectio
     aPDU = createPDU(sequenceNumber, flag, dataBuffer, dataLen);
 
     if (UTIL_MODE == DEBUG_MODE) {
-        //outputPDU(aPDU, dataLen + 7);
+        outputPDU(aPDU, dataLen + 7);
     }
 
     if ((sendOutput = sendtoErr(connection->socket, aPDU, dataLen + 7, 0, (struct sockaddr *)&(connection->server), clientAddrLen)) < 0) {
